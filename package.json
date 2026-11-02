@@ -1,0 +1,22 @@
+{
+  "name": "web-an-chi",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web,cms -c blue,green,magenta \"npm run dev -w @an-chi/api\" \"npm run dev -w @an-chi/web\" \"npm run dev -w @an-chi/cms\"",
+    "build": "npm run build -w @an-chi/api && npm run build -w @an-chi/cms && npm run build -w @an-chi/web",
+    "typecheck": "npm run typecheck --workspaces",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:migrate": "npm run db:migrate -w @an-chi/api",
+    "db:seed": "npm run db:seed -w @an-chi/api"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}

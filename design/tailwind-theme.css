@@ -1,0 +1,39 @@
+/* Nối token vào Tailwind 4. Class sinh ra đọc biến CSS nên tự đổi theo theme: bg-paper, text-ink, bg-wood... */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-wood: var(--wood);
+  --color-wood-hover: var(--wood-hover);
+  --color-wood-soft: var(--wood-soft);
+  --color-on-wood: var(--on-wood);
+  --color-brass: var(--brass);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-err: var(--err);
+  --color-err-soft: var(--err-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --font-serif: var(--serif);
+  --font-sans: var(--sans);
+  --shadow-e1: var(--e-1);
+  --shadow-e2: var(--e-2);
+  --shadow-e3: var(--e-3);
+  --shadow-e4: var(--e-4);
+}
+
+/* Bốn mốc breakpoint của dự án, thay cho mặc định của Tailwind */
+@theme {
+  --breakpoint-*: initial;
+  --breakpoint-sm: 480px;
+  --breakpoint-md: 720px;
+  --breakpoint-lg: 960px;
+  --breakpoint-xl: 1180px;
+}

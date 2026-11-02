@@ -1,0 +1,196 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPING
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  COD
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+}
+
+model Category {
+  id              String    @id @default(cuid())
+  name            String
+  slug            String    @unique
+  description     String?
+  // Hướng dẫn chọn hiển thị dưới lưới sản phẩm, mỗi đoạn cách nhau một dòng trống
+  guide           String?
+  position        Int       @default(0)
+  metaTitle       String?
+  metaDescription String?
+  products        Product[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Product {
+  id                String         @id @default(cuid())
+  name              String
+  slug              String         @unique
+  // Một câu ngắn hiện cạnh giá
+  summary           String?
+  description       String?
+  usage             String?
+  // Thông số dạng [{ "label": "Kích thước hạt", "value": "12mm" }]
+  specs             Json?
+  // Giá lưu bằng số nguyên VND
+  priceVnd          Int
+  compareAtPriceVnd Int?
+  stock             Int            @default(0)
+  // Xuất xứ, ví dụ "Khánh Hòa"; để trống khi chưa xác minh được
+  origin            String?
+  featured          Boolean        @default(false)
+  // Link gian hàng của chính sản phẩm này trên sàn, để trống nếu không bán ở đó
+  shopeeUrl         String?
+  tiktokUrl         String?
+  status            PublishStatus  @default(DRAFT)
+  metaTitle         String?
+  metaDescription   String?
+  categoryId        String
+  category          Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  images            ProductImage[]
+  orderItems        OrderItem[]
+  posts             Post[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([status, createdAt])
+  @@index([categoryId])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  url       String
+  alt       String?
+  position  Int     @default(0)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, position])
+}
+
+model PostCategory {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  description     String?
+  position        Int      @default(0)
+  metaTitle       String?
+  metaDescription String?
+  posts           Post[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Post {
+  id              String        @id @default(cuid())
+  title           String
+  slug            String        @unique
+  excerpt         String?
+  // Văn bản thuần: đoạn cách nhau một dòng trống, "## " là H2, "### " là H3, "- " là gạch đầu dòng
+  content         String
+  coverUrl        String?
+  authorName      String
+  status          PublishStatus @default(DRAFT)
+  publishedAt     DateTime?
+  metaTitle       String?
+  metaDescription String?
+  categoryId      String
+  category        PostCategory  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  // Sản phẩm liên quan hiện cuối bài
+  products        Product[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([status, publishedAt])
+  @@index([categoryId])
+}
+
+model Customer {
+  id               String   @id @default(cuid())
+  name             String
+  // Khoá nhận diện khách đặt hàng không cần tài khoản
+  phone            String   @unique
+  email            String?
+  address          String?
+  // Chỉ true khi khách tự đánh dấu đồng ý nhận tin
+  marketingConsent Boolean  @default(false)
+  // null: khách chỉ đặt hàng, chưa tạo tài khoản. Dạng "scrypt$<salt>$<hash>"
+  passwordHash     String?
+  orders           Order[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Order {
+  id             String        @id @default(cuid())
+  code           String        @unique
+  // Client gửi kèm mỗi lần đặt để bấm hai lần không tạo hai đơn
+  idempotencyKey String?       @unique
+  // Thông tin giao hàng lưu theo đơn, không đổi khi khách cập nhật hồ sơ
+  customerName   String
+  customerPhone  String
+  customerEmail  String?
+  address        String
+  note           String?
+  subtotalVnd    Int
+  shippingVnd    Int
+  totalVnd       Int
+  paymentMethod  PaymentMethod
+  paymentStatus  PaymentStatus @default(UNPAID)
+  status         OrderStatus   @default(PENDING)
+  customerId     String?
+  customer       Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  items          OrderItem[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([status, createdAt])
+  @@index([customerId])
+}
+
+model OrderItem {
+  id           String   @id @default(cuid())
+  // Lưu lại tên và giá lúc đặt để đơn cũ không đổi khi sản phẩm thay đổi hoặc bị xóa
+  productName  String
+  unitPriceVnd Int
+  quantity     Int
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String?
+  product      Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+// Cấu hình cửa hàng dạng khoá - giá trị, ví dụ "store" chứa thông tin liên hệ, tài khoản ngân hàng
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}

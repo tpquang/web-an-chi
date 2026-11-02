@@ -1,0 +1,133 @@
+/* Nguồn chân lý duy nhất cho token của web và CMS. Đổi màu toàn sản phẩm chỉ sửa file này.
+   Theme: sáng ở :root, tối ở [data-theme="dark"]. Giải thích: .claude/skills/anchi-ui-ux/references/colors.md */
+
+:root {
+  color-scheme: light;
+
+  /* Thang màu gỗ gốc. Component không dùng trực tiếp, chỉ dùng token vai trò bên dưới. */
+  --wood-50: #f8f3ee;
+  --wood-100: #ede2d7;
+  --wood-200: #dcc7b3;
+  --wood-300: #c6a588;
+  --wood-400: #ae8461;
+  --wood-500: #8f6645;
+  --wood-600: #734e33;
+  --wood-700: #5a3b26;
+  --wood-800: #452d1e;
+  --wood-900: #2f1f15;
+  --wood-950: #1c120c;
+
+  /* Vai trò */
+  --paper: #fbf8f3;
+  --paper-2: #f1eae0;
+  --surface: #fffdfa;
+  --ink: #2a1c13;
+  --ink-2: #5f4d40;
+  --ink-3: #6f5d4d;
+  --line: #e0d5c6;
+  --line-strong: #8f7a66;
+  --wood: var(--wood-700);
+  --wood-hover: var(--wood-600);
+  --wood-soft: var(--wood-100);
+  --on-wood: #fbf8f3;
+  --brass: #a57c2c;
+  --scrim: rgba(42, 28, 19, 0.45);
+  --glass: rgba(255, 253, 250, 0.76);
+
+  /* Trạng thái */
+  --ok: #2f6b4a;
+  --ok-soft: #e2eee6;
+  --warn: #855f14;
+  --warn-soft: #f5ebd3;
+  --err: #a12a1e;
+  --err-soft: #f7e3df;
+  --info: #2b5573;
+  --info-soft: #e0eaf1;
+
+  /* Chữ. Web: next/font gắn --next-serif, --next-sans lên <html>. CMS: nạp theo tên font.
+     Không đặt tên biến là --font-serif: Tailwind đã dùng tên đó và trỏ ngược về --serif, sẽ thành vòng lặp */
+  --serif: var(--next-serif, "Noto Serif"), "Times New Roman", Times, serif;
+  --sans: var(--next-sans, "Be Vietnam Pro"), system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Khung trang */
+  --page-max: 1180px;
+  --page-gutter: 16px;
+  --header-h: 64px;
+
+  /* Bóng nâu ấm */
+  --e-1: 0 1px 2px rgba(47, 31, 21, 0.08);
+  --e-2: 0 1px 2px rgba(47, 31, 21, 0.06), 0 6px 16px -6px rgba(47, 31, 21, 0.18);
+  --e-3: 0 1px 2px rgba(47, 31, 21, 0.08), 0 18px 48px -12px rgba(47, 31, 21, 0.28);
+  --e-4: 0 2px 4px rgba(47, 31, 21, 0.1), 0 32px 80px -16px rgba(47, 31, 21, 0.38);
+
+  /* Chuyển động */
+  --d-fast: 120ms;
+  --d-base: 180ms;
+  --d-modal: 250ms;
+  --d-slow: 280ms;
+  --d-page: 350ms;
+  --d-sheet: 400ms;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Lớp */
+  --z-sticky: 200;
+  --z-dropdown: 210;
+  --z-overlay: 260;
+  --z-modal: 300;
+  --z-popover: 2000;
+  --z-toast: 9999;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #15100c;
+  --paper-2: #1f1812;
+  --surface: #1c1510;
+  --ink: #f0e7db;
+  --ink-2: #c4b5a3;
+  --ink-3: #a89887;
+  --line: #3a2d23;
+  --line-strong: #7d6a58;
+  --wood: #c9a27e;
+  --wood-hover: #d9b996;
+  --wood-soft: #33261b;
+  --on-wood: #1c120c;
+  --brass: #c9a45c;
+  --scrim: rgba(0, 0, 0, 0.6);
+  --glass: rgba(31, 24, 18, 0.72);
+  --ok: #7fb896;
+  --ok-soft: #1a2b21;
+  --warn: #d6ab5c;
+  --warn-soft: #2e2413;
+  --err: #ec8073;
+  --err-soft: #361612;
+  --info: #86aecb;
+  --info-soft: #16242f;
+  --e-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --e-2: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 16px -6px rgba(0, 0, 0, 0.5);
+  --e-3: 0 1px 2px rgba(0, 0, 0, 0.3), 0 18px 48px -12px rgba(0, 0, 0, 0.6);
+  --e-4: 0 2px 4px rgba(0, 0, 0, 0.35), 0 32px 80px -16px rgba(0, 0, 0, 0.7);
+}
+
+@media (min-width: 960px) {
+  :root {
+    --page-gutter: 24px;
+  }
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  font-synthesis: none;
+  font-variant-numeric: lining-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--wood);
+  outline-offset: 2px;
+}
