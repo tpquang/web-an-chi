@@ -22,13 +22,13 @@
   },
   "categories": [
     {
-      "name": "Vòng tay trầm hương",
-      "slug": "vong-tay-tram-huong",
-      "description": "Vòng đeo tay làm từ hạt gỗ trầm, nhiều cỡ hạt từ 6 đến 12mm. Mùi thơm nhẹ, rõ hơn khi vòng ấm theo nhiệt độ da.",
-      "guide": "Cỡ hạt nên chọn theo cổ tay: cổ tay nhỏ hợp hạt 6–8mm, cổ tay to hợp hạt 10–12mm. Số hạt thay đổi theo cỡ để vòng vừa tay.\n\nVòng trầm tự nhiên có vân và màu không đều giữa các hạt. Hạt đều màu tuyệt đối thường đã qua xử lý, bạn nên hỏi rõ trước khi mua.\n\nTránh để vòng tiếp xúc nước hoa, nước rửa tay và hoá chất tẩy rửa để giữ mùi lâu hơn.",
+      "name": "Nụ trầm hương",
+      "slug": "nu-tram-huong",
+      "description": "Nụ trầm hình nón, đốt trên lư xông hoặc thác khói. Mỗi nụ cháy khoảng 15–20 phút.",
+      "guide": "Nụ trầm đặt trên đĩa gốm hoặc lư xông có lót cát. Nụ dùng cho thác khói phải là loại có lỗ ở đáy.\n\nĐể nụ ở nơi khô ráo, đậy kín hộp sau khi dùng để nụ không hút ẩm.",
       "position": 1,
-      "metaTitle": "Vòng tay trầm hương",
-      "metaDescription": "Vòng tay trầm hương cỡ hạt 6–12mm, ghi rõ số hạt, kích thước và xuất xứ. Hướng dẫn chọn cỡ hạt theo cổ tay và cách bảo quản vòng."
+      "metaTitle": "Nụ trầm hương",
+      "metaDescription": "Nụ trầm hương dùng cho lư xông và thác khói, ghi rõ số viên, thời gian cháy mỗi nụ. Hướng dẫn đặt nụ đúng cách và bảo quản khỏi ẩm."
     },
     {
       "name": "Nhang trầm hương",
@@ -40,168 +40,34 @@
       "metaDescription": "Nhang trầm hương có tăm, không tăm và nhang vòng, ghi rõ thành phần, độ dài và thời gian cháy. Cách chọn loại nhang hợp bàn thờ và phòng ở."
     },
     {
-      "name": "Nụ trầm hương",
-      "slug": "nu-tram-huong",
-      "description": "Nụ trầm hình nón, đốt trên lư xông hoặc thác khói. Mỗi nụ cháy khoảng 15–20 phút.",
-      "guide": "Nụ trầm đặt trên đĩa gốm hoặc lư xông có lót cát. Nụ dùng cho thác khói phải là loại có lỗ ở đáy.\n\nĐể nụ ở nơi khô ráo, đậy kín hộp sau khi dùng để nụ không hút ẩm.",
+      "name": "Lư xông và phụ kiện",
+      "slug": "lu-xong-va-phu-kien",
+      "description": "Lư xông, thác khói, đế nhang và dụng cụ dùng kèm với nhang, nụ và trầm miếng.",
+      "guide": "Lư xông gốm chịu nhiệt tốt, hợp đốt nụ và nhang. Thác khói chỉ dùng với nụ trầm có lỗ ở đáy.\n\nVệ sinh lư bằng khăn khô khi đã nguội hẳn, không ngâm nước khi gốm còn nóng.",
       "position": 3,
-      "metaTitle": "Nụ trầm hương",
-      "metaDescription": "Nụ trầm hương dùng cho lư xông và thác khói, ghi rõ số viên, thời gian cháy mỗi nụ. Hướng dẫn đặt nụ đúng cách và bảo quản khỏi ẩm."
+      "metaTitle": "Lư xông trầm và phụ kiện",
+      "metaDescription": "Lư xông trầm, thác khói và đế nhang bằng gốm, ghi rõ kích thước và chất liệu. Hướng dẫn chọn lư hợp với nhang, nụ hoặc trầm miếng."
+    },
+    {
+      "name": "Vòng tay trầm hương",
+      "slug": "vong-tay-tram-huong",
+      "description": "Vòng đeo tay làm từ hạt gỗ trầm, nhiều cỡ hạt từ 6 đến 12mm. Mùi thơm nhẹ, rõ hơn khi vòng ấm theo nhiệt độ da.",
+      "guide": "Cỡ hạt nên chọn theo cổ tay: cổ tay nhỏ hợp hạt 6–8mm, cổ tay to hợp hạt 10–12mm. Số hạt thay đổi theo cỡ để vòng vừa tay.\n\nVòng trầm tự nhiên có vân và màu không đều giữa các hạt. Hạt đều màu tuyệt đối thường đã qua xử lý, bạn nên hỏi rõ trước khi mua.\n\nTránh để vòng tiếp xúc nước hoa, nước rửa tay và hoá chất tẩy rửa để giữ mùi lâu hơn.",
+      "position": 4,
+      "metaTitle": "Vòng tay trầm hương",
+      "metaDescription": "Vòng tay trầm hương cỡ hạt 6–12mm, ghi rõ số hạt, kích thước và xuất xứ. Hướng dẫn chọn cỡ hạt theo cổ tay và cách bảo quản vòng."
     },
     {
       "name": "Trầm miếng",
       "slug": "tram-mieng",
       "description": "Miếng gỗ trầm để xông bằng bếp điện hoặc than, cho mùi nguyên bản của gỗ.",
       "guide": "Trầm miếng không đốt trực tiếp bằng lửa. Đặt miếng trầm trên bếp xông điện ở nhiệt độ thấp để mùi toả từ từ.\n\nMột miếng nhỏ có thể xông nhiều lần, đến khi gỗ chuyển màu sẫm và không còn mùi.",
-      "position": 4,
+      "position": 5,
       "metaTitle": "Trầm miếng xông",
       "metaDescription": "Trầm miếng để xông bằng bếp điện, ghi rõ trọng lượng và xuất xứ. Hướng dẫn xông trầm miếng ở nhiệt độ thấp để giữ mùi gỗ nguyên bản."
-    },
-    {
-      "name": "Lư xông và phụ kiện",
-      "slug": "lu-xong-va-phu-kien",
-      "description": "Lư xông, thác khói, đế nhang và dụng cụ dùng kèm với nhang, nụ và trầm miếng.",
-      "guide": "Lư xông gốm chịu nhiệt tốt, hợp đốt nụ và nhang. Thác khói chỉ dùng với nụ trầm có lỗ ở đáy.\n\nVệ sinh lư bằng khăn khô khi đã nguội hẳn, không ngâm nước khi gốm còn nóng.",
-      "position": 5,
-      "metaTitle": "Lư xông trầm và phụ kiện",
-      "metaDescription": "Lư xông trầm, thác khói và đế nhang bằng gốm, ghi rõ kích thước và chất liệu. Hướng dẫn chọn lư hợp với nhang, nụ hoặc trầm miếng."
     }
   ],
   "products": [
-    {
-      "name": "Vòng tay trầm hương 8mm, 22 hạt",
-      "slug": "vong-tay-tram-huong-8mm-22-hat",
-      "category": "vong-tay-tram-huong",
-      "summary": "Hạt 8mm, hợp cổ tay nhỏ, mùi ngọt nhẹ.",
-      "description": "Vòng gồm 22 hạt trầm 8mm, xâu bằng dây chun co giãn, vừa cổ tay khoảng 14–15cm. Hạt có vân gỗ tự nhiên, màu nâu không đều giữa các hạt.\n\nMùi trầm rõ nhất trong vài tuần đầu và khi vòng ấm theo nhiệt độ da. Mùi nhạt dần theo thời gian, đây là đặc tính của gỗ.",
-      "usage": "Tháo vòng khi tắm, rửa tay hoặc dùng nước hoa. Lau bằng khăn mềm khô. Thay dây chun sau khoảng 6–12 tháng.",
-      "specs": [
-        { "label": "Cỡ hạt", "value": "8mm" },
-        { "label": "Số hạt", "value": "22" },
-        { "label": "Vừa cổ tay", "value": "14–15cm" },
-        { "label": "Dây", "value": "Chun co giãn" }
-      ],
-      "priceVnd": 1200000,
-      "stock": 14,
-      "origin": "Khánh Hòa",
-      "featured": true,
-      "shopeeUrl": "https://shopee.vn/search?keyword=v%C3%B2ng%20tay%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng%208mm",
-      "tiktokUrl": "https://www.tiktok.com/search?q=v%C3%B2ng%20tay%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng"
-    },
-    {
-      "name": "Vòng tay trầm hương 10mm, 19 hạt",
-      "slug": "vong-tay-tram-huong-10mm-19-hat",
-      "category": "vong-tay-tram-huong",
-      "summary": "Hạt 10mm, cỡ phổ biến cho cổ tay trung bình.",
-      "description": "Vòng gồm 19 hạt trầm 10mm, vừa cổ tay khoảng 15–16cm. Hạt đánh bóng nhẹ, giữ vân gỗ.\n\nCỡ 10mm cân đối, đeo hằng ngày không vướng tay áo.",
-      "usage": "Tháo vòng khi tắm và khi tiếp xúc hoá chất. Cất trong túi vải khi không đeo.",
-      "specs": [
-        { "label": "Cỡ hạt", "value": "10mm" },
-        { "label": "Số hạt", "value": "19" },
-        { "label": "Vừa cổ tay", "value": "15–16cm" },
-        { "label": "Dây", "value": "Chun co giãn" }
-      ],
-      "priceVnd": 1800000,
-      "stock": 9,
-      "origin": "Khánh Hòa",
-      "featured": true,
-      "shopeeUrl": "https://shopee.vn/search?keyword=v%C3%B2ng%20tay%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng%2010mm",
-      "tiktokUrl": "https://www.tiktok.com/search?q=v%C3%B2ng%20tay%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng"
-    },
-    {
-      "name": "Vòng tay trầm hương 12mm, 18 hạt",
-      "slug": "vong-tay-tram-huong-12mm-18-hat",
-      "category": "vong-tay-tram-huong",
-      "summary": "Hạt 12mm, hợp cổ tay to.",
-      "description": "Vòng gồm 18 hạt trầm 12mm, vừa cổ tay khoảng 16–17cm. Hạt lớn nên vân gỗ và màu sắc thấy rõ hơn.\n\nVòng 12mm, 18 hạt có mùi ngọt nhẹ khi tiếp xúc với hơi ấm của da.",
-      "usage": "Tháo vòng khi tắm và khi ngủ. Lau bằng khăn mềm khô, không dùng dầu đánh bóng.",
-      "specs": [
-        { "label": "Cỡ hạt", "value": "12mm" },
-        { "label": "Số hạt", "value": "18" },
-        { "label": "Vừa cổ tay", "value": "16–17cm" },
-        { "label": "Dây", "value": "Chun co giãn" }
-      ],
-      "priceVnd": 2500000,
-      "compareAtPriceVnd": 2800000,
-      "stock": 4,
-      "origin": "Quảng Nam",
-      "featured": true,
-      "shopeeUrl": "https://shopee.vn/search?keyword=v%C3%B2ng%20tay%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng%2012mm",
-      "tiktokUrl": "https://www.tiktok.com/search?q=v%C3%B2ng%20tay%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng"
-    },
-    {
-      "name": "Chuỗi trầm hương 108 hạt 6mm",
-      "slug": "chuoi-tram-huong-108-hat-6mm",
-      "category": "vong-tay-tram-huong",
-      "summary": "108 hạt 6mm, quấn được nhiều vòng tay hoặc đeo cổ.",
-      "description": "Chuỗi 108 hạt trầm 6mm, dài khoảng 68cm khi trải thẳng. Quấn 4 vòng trên cổ tay hoặc đeo như vòng cổ.\n\nHạt nhỏ, nhẹ, phù hợp người mới đeo trầm.",
-      "usage": "Quấn lỏng tay để dây không căng quá. Tháo khi tắm và khi vận động mạnh.",
-      "specs": [
-        { "label": "Cỡ hạt", "value": "6mm" },
-        { "label": "Số hạt", "value": "108" },
-        { "label": "Chiều dài", "value": "Khoảng 68cm" }
-      ],
-      "priceVnd": 2900000,
-      "stock": 3,
-      "origin": "Khánh Hòa",
-      "shopeeUrl": "https://shopee.vn/search?keyword=chu%E1%BB%97i%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng%20108%20h%E1%BA%A1t"
-    },
-    {
-      "name": "Nhang trầm không tăm, hộp 100g",
-      "slug": "nhang-tram-khong-tam-hop-100g",
-      "category": "nhang-tram-huong",
-      "summary": "Không tăm, ít khói, hợp phòng ở và phòng làm việc.",
-      "description": "Hộp 100g, khoảng 80 cây dài 20cm. Nhang làm từ bột trầm và bột gỗ, không có lõi tre nên cháy hết, không để lại tăm.\n\nMỗi cây cháy khoảng 35 phút.",
-      "usage": "Cắm nhang trên đế hoặc lư có cát. Đậy kín hộp sau khi dùng. Không để gần rèm và vật dễ cháy.",
-      "specs": [
-        { "label": "Trọng lượng", "value": "100g" },
-        { "label": "Số cây", "value": "Khoảng 80" },
-        { "label": "Chiều dài", "value": "20cm" },
-        { "label": "Thời gian cháy", "value": "Khoảng 35 phút" }
-      ],
-      "priceVnd": 350000,
-      "stock": 40,
-      "origin": "Khánh Hòa",
-      "featured": true,
-      "shopeeUrl": "https://shopee.vn/search?keyword=nhang%20tr%E1%BA%A7m%20kh%C3%B4ng%20t%C4%83m",
-      "tiktokUrl": "https://www.tiktok.com/search?q=nhang%20tr%E1%BA%A7m%20kh%C3%B4ng%20t%C4%83m"
-    },
-    {
-      "name": "Nhang trầm có tăm 30cm, bó 500g",
-      "slug": "nhang-tram-co-tam-30cm-bo-500g",
-      "category": "nhang-tram-huong",
-      "summary": "Có tăm tre, dài 30cm, dùng cho bàn thờ.",
-      "description": "Bó 500g, khoảng 350 cây dài 30cm. Tăm tre không nhuộm màu.\n\nMỗi cây cháy khoảng 45 phút.",
-      "usage": "Cắm nhang vào lư có cát hoặc tro. Bảo quản nơi khô ráo, tránh nắng trực tiếp.",
-      "specs": [
-        { "label": "Trọng lượng", "value": "500g" },
-        { "label": "Số cây", "value": "Khoảng 350" },
-        { "label": "Chiều dài", "value": "30cm" },
-        { "label": "Tăm", "value": "Tre, không nhuộm" }
-      ],
-      "priceVnd": 450000,
-      "stock": 25,
-      "origin": "Quảng Nam",
-      "shopeeUrl": "https://shopee.vn/search?keyword=nhang%20tr%E1%BA%A7m%20c%C3%B3%20t%C4%83m",
-      "tiktokUrl": "https://www.tiktok.com/search?q=nhang%20tr%E1%BA%A7m"
-    },
-    {
-      "name": "Nhang vòng trầm 24 giờ, hộp 24 khoanh",
-      "slug": "nhang-vong-tram-24-gio-hop-24-khoanh",
-      "category": "nhang-tram-huong",
-      "summary": "Mỗi khoanh cháy khoảng 24 giờ.",
-      "description": "Hộp 24 khoanh nhang vòng, đường kính khoảng 13cm. Mỗi khoanh cháy khoảng 24 giờ.\n\nHộp có kèm móc treo và đế lót.",
-      "usage": "Treo khoanh nhang trên móc, đặt đế chống cháy bên dưới. Không để nhang vòng cháy khi không có người ở nhà.",
-      "specs": [
-        { "label": "Số khoanh", "value": "24" },
-        { "label": "Đường kính", "value": "Khoảng 13cm" },
-        { "label": "Thời gian cháy", "value": "Khoảng 24 giờ mỗi khoanh" }
-      ],
-      "priceVnd": 320000,
-      "stock": 18,
-      "origin": "Khánh Hòa",
-      "tiktokUrl": "https://www.tiktok.com/search?q=nhang%20v%C3%B2ng%20tr%E1%BA%A7m"
-    },
     {
       "name": "Nụ trầm hương, hộp 50 viên",
       "slug": "nu-tram-huong-hop-50-vien",
@@ -210,10 +76,22 @@
       "description": "Hộp 50 viên nụ trầm hình nón, cao khoảng 2,5cm. Mỗi viên cháy khoảng 15 phút.\n\nNụ không có lỗ, dùng với lư xông và đĩa gốm.",
       "usage": "Đặt nụ trên lư có lót cát, châm lửa ở đỉnh, thổi tắt lửa để nụ cháy âm ỉ. Đậy kín hộp sau khi dùng.",
       "specs": [
-        { "label": "Số viên", "value": "50" },
-        { "label": "Chiều cao", "value": "Khoảng 2,5cm" },
-        { "label": "Thời gian cháy", "value": "Khoảng 15 phút" },
-        { "label": "Dùng với thác khói", "value": "Không" }
+        {
+          "label": "Số viên",
+          "value": "50"
+        },
+        {
+          "label": "Chiều cao",
+          "value": "Khoảng 2,5cm"
+        },
+        {
+          "label": "Thời gian cháy",
+          "value": "Khoảng 15 phút"
+        },
+        {
+          "label": "Dùng với thác khói",
+          "value": "Không"
+        }
       ],
       "priceVnd": 280000,
       "stock": 35,
@@ -230,9 +108,18 @@
       "description": "Hộp 40 viên nụ trầm có lỗ ở đáy, khói chảy xuống khi đặt trên thác khói. Mỗi viên cháy khoảng 20 phút.",
       "usage": "Đặt nụ lên miệng thác khói, châm lửa ở đỉnh. Đặt thác khói nơi kín gió để khói chảy đều.",
       "specs": [
-        { "label": "Số viên", "value": "40" },
-        { "label": "Thời gian cháy", "value": "Khoảng 20 phút" },
-        { "label": "Dùng với thác khói", "value": "Có" }
+        {
+          "label": "Số viên",
+          "value": "40"
+        },
+        {
+          "label": "Thời gian cháy",
+          "value": "Khoảng 20 phút"
+        },
+        {
+          "label": "Dùng với thác khói",
+          "value": "Có"
+        }
       ],
       "priceVnd": 260000,
       "stock": 22,
@@ -240,20 +127,174 @@
       "shopeeUrl": "https://shopee.vn/search?keyword=n%E1%BB%A5%20tr%E1%BA%A7m%20th%C3%A1c%20kh%C3%B3i"
     },
     {
-      "name": "Trầm miếng xông, gói 20g",
-      "slug": "tram-mieng-xong-goi-20g",
-      "category": "tram-mieng",
-      "summary": "Miếng nhỏ để xông bằng bếp điện.",
-      "description": "Gói 20g gồm nhiều miếng nhỏ, mỗi miếng khoảng 1–3g. Dùng để xông bằng bếp điện ở nhiệt độ thấp.\n\nMùi gỗ nguyên bản, không phối hương.",
-      "usage": "Đặt một miếng lên bếp xông điện, để nhiệt thấp. Một miếng dùng được nhiều lần đến khi gỗ sẫm màu và hết mùi.",
+      "name": "Bộ khởi đầu nụ trầm và lư gốm mini",
+      "slug": "bo-khoi-dau-nu-tram-lu-gom-mini",
+      "category": "nu-tram-huong",
+      "summary": "Hộp 30 nụ trầm kèm lư gốm mini, đủ để bắt đầu xông trầm ở bàn làm việc.",
+      "description": "Bộ gồm một hộp 30 nụ trầm hình nón và một lư gốm mini đường kính 7cm có lót sẵn tro. Mỗi nụ cháy khoảng 15–20 phút, khói mỏng, hợp phòng ngủ và góc làm việc.\n\nBộ dành cho người lần đầu dùng trầm: không cần chuẩn bị thêm dụng cụ, mở hộp là dùng được.",
+      "usage": "Đặt lư trên mặt phẳng không bắt lửa. Châm đầu nhọn của nụ, đợi lửa tắt còn đốm than rồi đặt vào lư. Mở hé cửa nếu phòng kín. Để tro nguội hẳn trước khi đổ.",
       "specs": [
-        { "label": "Trọng lượng", "value": "20g" },
-        { "label": "Cách xông", "value": "Bếp điện, nhiệt thấp" }
+        {
+          "label": "Gồm",
+          "value": "30 nụ trầm, 1 lư gốm mini"
+        },
+        {
+          "label": "Thời gian cháy mỗi nụ",
+          "value": "15–20 phút"
+        },
+        {
+          "label": "Đường kính lư",
+          "value": "7cm"
+        }
       ],
-      "priceVnd": 900000,
-      "stock": 7,
+      "priceVnd": 320000,
+      "stock": 30,
+      "origin": "Khánh Hòa",
+      "featured": true,
+      "shopeeUrl": "https://shopee.vn/search?keyword=n%E1%BB%A5%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng",
+      "tiktokUrl": "https://www.tiktok.com/search?q=n%E1%BB%A5%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng"
+    },
+    {
+      "name": "Nhang trầm không tăm, hộp 100g",
+      "slug": "nhang-tram-khong-tam-hop-100g",
+      "category": "nhang-tram-huong",
+      "summary": "Không tăm, ít khói, hợp phòng ở và phòng làm việc.",
+      "description": "Hộp 100g, khoảng 80 cây dài 20cm. Nhang làm từ bột trầm và bột gỗ, không có lõi tre nên cháy hết, không để lại tăm.\n\nMỗi cây cháy khoảng 35 phút.",
+      "usage": "Cắm nhang trên đế hoặc lư có cát. Đậy kín hộp sau khi dùng. Không để gần rèm và vật dễ cháy.",
+      "specs": [
+        {
+          "label": "Trọng lượng",
+          "value": "100g"
+        },
+        {
+          "label": "Số cây",
+          "value": "Khoảng 80"
+        },
+        {
+          "label": "Chiều dài",
+          "value": "20cm"
+        },
+        {
+          "label": "Thời gian cháy",
+          "value": "Khoảng 35 phút"
+        }
+      ],
+      "priceVnd": 350000,
+      "stock": 40,
+      "origin": "Khánh Hòa",
+      "featured": true,
+      "shopeeUrl": "https://shopee.vn/search?keyword=nhang%20tr%E1%BA%A7m%20kh%C3%B4ng%20t%C4%83m",
+      "tiktokUrl": "https://www.tiktok.com/search?q=nhang%20tr%E1%BA%A7m%20kh%C3%B4ng%20t%C4%83m"
+    },
+    {
+      "name": "Nhang trầm có tăm 30cm, bó 500g",
+      "slug": "nhang-tram-co-tam-30cm-bo-500g",
+      "category": "nhang-tram-huong",
+      "summary": "Có tăm tre, dài 30cm, dùng cho bàn thờ.",
+      "description": "Bó 500g, khoảng 350 cây dài 30cm. Tăm tre không nhuộm màu.\n\nMỗi cây cháy khoảng 45 phút.",
+      "usage": "Cắm nhang vào lư có cát hoặc tro. Bảo quản nơi khô ráo, tránh nắng trực tiếp.",
+      "specs": [
+        {
+          "label": "Trọng lượng",
+          "value": "500g"
+        },
+        {
+          "label": "Số cây",
+          "value": "Khoảng 350"
+        },
+        {
+          "label": "Chiều dài",
+          "value": "30cm"
+        },
+        {
+          "label": "Tăm",
+          "value": "Tre, không nhuộm"
+        }
+      ],
+      "priceVnd": 450000,
+      "stock": 25,
       "origin": "Quảng Nam",
-      "tiktokUrl": "https://www.tiktok.com/search?q=tr%E1%BA%A7m%20mi%E1%BA%BFng%20x%C3%B4ng"
+      "shopeeUrl": "https://shopee.vn/search?keyword=nhang%20tr%E1%BA%A7m%20c%C3%B3%20t%C4%83m",
+      "tiktokUrl": "https://www.tiktok.com/search?q=nhang%20tr%E1%BA%A7m"
+    },
+    {
+      "name": "Nhang vòng trầm 24 giờ, hộp 24 khoanh",
+      "slug": "nhang-vong-tram-24-gio-hop-24-khoanh",
+      "category": "nhang-tram-huong",
+      "summary": "Mỗi khoanh cháy khoảng 24 giờ.",
+      "description": "Hộp 24 khoanh nhang vòng, đường kính khoảng 13cm. Mỗi khoanh cháy khoảng 24 giờ.\n\nHộp có kèm móc treo và đế lót.",
+      "usage": "Treo khoanh nhang trên móc, đặt đế chống cháy bên dưới. Không để nhang vòng cháy khi không có người ở nhà.",
+      "specs": [
+        {
+          "label": "Số khoanh",
+          "value": "24"
+        },
+        {
+          "label": "Đường kính",
+          "value": "Khoảng 13cm"
+        },
+        {
+          "label": "Thời gian cháy",
+          "value": "Khoảng 24 giờ mỗi khoanh"
+        }
+      ],
+      "priceVnd": 320000,
+      "stock": 18,
+      "origin": "Khánh Hòa",
+      "tiktokUrl": "https://www.tiktok.com/search?q=nhang%20v%C3%B2ng%20tr%E1%BA%A7m"
+    },
+    {
+      "name": "Nhang trầm không tăm, hộp 50g",
+      "slug": "nhang-tram-khong-tam-hop-50g",
+      "category": "nhang-tram-huong",
+      "summary": "Hộp nhỏ để thử mùi trước khi mua hộp lớn.",
+      "description": "Khoảng 60 que nhang không tăm dài 10cm, mỗi que cháy khoảng 25 phút. Không có lõi tre nên khói ít, tàn rơi gọn.\n\nCùng loại bột với hộp 100g, phù hợp để thử mùi hoặc mang theo khi đi xa.",
+      "usage": "Cắm que vào đế nhang hoặc đặt nằm trên khay tro. Không để gần rèm, giấy.",
+      "specs": [
+        {
+          "label": "Khối lượng",
+          "value": "50g"
+        },
+        {
+          "label": "Số que",
+          "value": "Khoảng 60"
+        },
+        {
+          "label": "Thời gian cháy mỗi que",
+          "value": "Khoảng 25 phút"
+        }
+      ],
+      "priceVnd": 180000,
+      "stock": 50,
+      "origin": "Khánh Hòa",
+      "tiktokUrl": "https://www.tiktok.com/search?q=nhang%20tr%E1%BA%A7m%20kh%C3%B4ng%20t%C4%83m"
+    },
+    {
+      "name": "Bột trầm xông nhà, hũ 50g",
+      "slug": "bot-tram-xong-nha-hu-50g",
+      "category": "nhang-tram-huong",
+      "summary": "Bột trầm nguyên chất để xông nhà mới hoặc xông định kỳ.",
+      "description": "Bột nghiền từ gỗ trầm, không pha keo hay tinh dầu. Một hũ dùng được khoảng 25–30 lần xông, mỗi lần một thìa nhỏ.\n\nTheo phong tục, nhiều gia đình xông trầm khi dọn về nhà mới, trước ngày rằm, mùng một hoặc dịp Tết. Bột cho mùi đậm hơn nhang và tan nhanh hơn trầm miếng.",
+      "usage": "Rắc một thìa nhỏ lên than xông hoặc lò xông điện đã nóng. Không đốt trực tiếp bằng bật lửa. Đậy kín hũ sau khi dùng để giữ mùi.",
+      "specs": [
+        {
+          "label": "Khối lượng",
+          "value": "50g"
+        },
+        {
+          "label": "Số lần xông",
+          "value": "Khoảng 25–30"
+        },
+        {
+          "label": "Thành phần",
+          "value": "Bột gỗ trầm"
+        }
+      ],
+      "priceVnd": 480000,
+      "stock": 20,
+      "origin": "Khánh Hòa",
+      "featured": true,
+      "shopeeUrl": "https://shopee.vn/search?keyword=b%E1%BB%99t%20tr%E1%BA%A7m%20x%C3%B4ng%20nh%C3%A0"
     },
     {
       "name": "Lư xông trầm gốm men nâu",
@@ -263,9 +304,18 @@
       "description": "Lư gốm men nâu, đường kính 9cm, cao 7cm, có nắp đục lỗ. Dùng để đốt nụ trầm hoặc cắm nhang ngắn.\n\nĐáy lư có lót đế gỗ để không làm nóng mặt bàn.",
       "usage": "Lót cát hoặc tro dưới lòng lư trước khi đốt. Lau bằng khăn khô khi lư đã nguội hẳn.",
       "specs": [
-        { "label": "Chất liệu", "value": "Gốm men" },
-        { "label": "Đường kính", "value": "9cm" },
-        { "label": "Chiều cao", "value": "7cm" }
+        {
+          "label": "Chất liệu",
+          "value": "Gốm men"
+        },
+        {
+          "label": "Đường kính",
+          "value": "9cm"
+        },
+        {
+          "label": "Chiều cao",
+          "value": "7cm"
+        }
       ],
       "priceVnd": 450000,
       "stock": 6,
@@ -280,14 +330,193 @@
       "description": "Thác khói gốm cao 14cm, rãnh dạng suối để khói chảy xuống. Chỉ dùng với nụ trầm có lỗ ở đáy.",
       "usage": "Đặt nơi kín gió. Vệ sinh rãnh bằng cọ khô sau vài lần dùng để khói chảy đều.",
       "specs": [
-        { "label": "Chất liệu", "value": "Gốm" },
-        { "label": "Chiều cao", "value": "14cm" },
-        { "label": "Dùng với", "value": "Nụ trầm thác khói" }
+        {
+          "label": "Chất liệu",
+          "value": "Gốm"
+        },
+        {
+          "label": "Chiều cao",
+          "value": "14cm"
+        },
+        {
+          "label": "Dùng với",
+          "value": "Nụ trầm thác khói"
+        }
       ],
       "priceVnd": 380000,
       "stock": 0,
       "origin": "Bát Tràng, Hà Nội",
       "tiktokUrl": "https://www.tiktok.com/search?q=th%C3%A1c%20kh%C3%B3i%20g%E1%BB%91m"
+    },
+    {
+      "name": "Lư xông gốm mini men trắng",
+      "slug": "lu-xong-gom-mini-men-trang",
+      "category": "lu-xong-va-phu-kien",
+      "summary": "Lư nhỏ 7cm cho bàn làm việc, dùng được với nụ và nhang không tăm.",
+      "description": "Lư gốm tráng men trắng ngà, đường kính 7cm, cao 4cm, kèm một gói tro lót. Kích thước gọn, đặt vừa góc bàn làm việc hoặc kệ đầu giường.\n\nMen có thể ngả màu nhẹ ở vùng gần đốm than sau thời gian dùng, đây là hiện tượng bình thường của gốm.",
+      "usage": "Lót tro dày khoảng 1cm trước khi đặt nụ hoặc nhang. Lau bằng khăn ẩm khi lư đã nguội.",
+      "specs": [
+        {
+          "label": "Đường kính",
+          "value": "7cm"
+        },
+        {
+          "label": "Chiều cao",
+          "value": "4cm"
+        },
+        {
+          "label": "Chất liệu",
+          "value": "Gốm tráng men"
+        }
+      ],
+      "priceVnd": 150000,
+      "stock": 24,
+      "origin": "Bát Tràng",
+      "shopeeUrl": "https://shopee.vn/search?keyword=l%C6%B0%20x%C3%B4ng%20tr%E1%BA%A7m%20mini"
+    },
+    {
+      "name": "Vòng tay trầm hương 8mm, 22 hạt",
+      "slug": "vong-tay-tram-huong-8mm-22-hat",
+      "category": "vong-tay-tram-huong",
+      "summary": "Hạt 8mm, hợp cổ tay nhỏ, mùi ngọt nhẹ.",
+      "description": "Vòng gồm 22 hạt trầm 8mm, xâu bằng dây chun co giãn, vừa cổ tay khoảng 14–15cm. Hạt có vân gỗ tự nhiên, màu nâu không đều giữa các hạt.\n\nMùi trầm rõ nhất trong vài tuần đầu và khi vòng ấm theo nhiệt độ da. Mùi nhạt dần theo thời gian, đây là đặc tính của gỗ.",
+      "usage": "Tháo vòng khi tắm, rửa tay hoặc dùng nước hoa. Lau bằng khăn mềm khô. Thay dây chun sau khoảng 6–12 tháng.",
+      "specs": [
+        {
+          "label": "Cỡ hạt",
+          "value": "8mm"
+        },
+        {
+          "label": "Số hạt",
+          "value": "22"
+        },
+        {
+          "label": "Vừa cổ tay",
+          "value": "14–15cm"
+        },
+        {
+          "label": "Dây",
+          "value": "Chun co giãn"
+        }
+      ],
+      "priceVnd": 1200000,
+      "stock": 14,
+      "origin": "Khánh Hòa",
+      "shopeeUrl": "https://shopee.vn/search?keyword=v%C3%B2ng%20tay%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng%208mm",
+      "tiktokUrl": "https://www.tiktok.com/search?q=v%C3%B2ng%20tay%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng"
+    },
+    {
+      "name": "Vòng tay trầm hương 10mm, 19 hạt",
+      "slug": "vong-tay-tram-huong-10mm-19-hat",
+      "category": "vong-tay-tram-huong",
+      "summary": "Hạt 10mm, cỡ phổ biến cho cổ tay trung bình.",
+      "description": "Vòng gồm 19 hạt trầm 10mm, vừa cổ tay khoảng 15–16cm. Hạt đánh bóng nhẹ, giữ vân gỗ.\n\nCỡ 10mm cân đối, đeo hằng ngày không vướng tay áo.",
+      "usage": "Tháo vòng khi tắm và khi tiếp xúc hoá chất. Cất trong túi vải khi không đeo.",
+      "specs": [
+        {
+          "label": "Cỡ hạt",
+          "value": "10mm"
+        },
+        {
+          "label": "Số hạt",
+          "value": "19"
+        },
+        {
+          "label": "Vừa cổ tay",
+          "value": "15–16cm"
+        },
+        {
+          "label": "Dây",
+          "value": "Chun co giãn"
+        }
+      ],
+      "priceVnd": 1800000,
+      "stock": 9,
+      "origin": "Khánh Hòa",
+      "featured": true,
+      "shopeeUrl": "https://shopee.vn/search?keyword=v%C3%B2ng%20tay%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng%2010mm",
+      "tiktokUrl": "https://www.tiktok.com/search?q=v%C3%B2ng%20tay%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng"
+    },
+    {
+      "name": "Vòng tay trầm hương 12mm, 18 hạt",
+      "slug": "vong-tay-tram-huong-12mm-18-hat",
+      "category": "vong-tay-tram-huong",
+      "summary": "Hạt 12mm, hợp cổ tay to.",
+      "description": "Vòng gồm 18 hạt trầm 12mm, vừa cổ tay khoảng 16–17cm. Hạt lớn nên vân gỗ và màu sắc thấy rõ hơn.\n\nVòng 12mm, 18 hạt có mùi ngọt nhẹ khi tiếp xúc với hơi ấm của da.",
+      "usage": "Tháo vòng khi tắm và khi ngủ. Lau bằng khăn mềm khô, không dùng dầu đánh bóng.",
+      "specs": [
+        {
+          "label": "Cỡ hạt",
+          "value": "12mm"
+        },
+        {
+          "label": "Số hạt",
+          "value": "18"
+        },
+        {
+          "label": "Vừa cổ tay",
+          "value": "16–17cm"
+        },
+        {
+          "label": "Dây",
+          "value": "Chun co giãn"
+        }
+      ],
+      "priceVnd": 2500000,
+      "compareAtPriceVnd": 2800000,
+      "stock": 4,
+      "origin": "Quảng Nam",
+      "shopeeUrl": "https://shopee.vn/search?keyword=v%C3%B2ng%20tay%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng%2012mm",
+      "tiktokUrl": "https://www.tiktok.com/search?q=v%C3%B2ng%20tay%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng"
+    },
+    {
+      "name": "Chuỗi trầm hương 108 hạt 6mm",
+      "slug": "chuoi-tram-huong-108-hat-6mm",
+      "category": "vong-tay-tram-huong",
+      "summary": "108 hạt 6mm, quấn được nhiều vòng tay hoặc đeo cổ.",
+      "description": "Chuỗi 108 hạt trầm 6mm, dài khoảng 68cm khi trải thẳng. Quấn 4 vòng trên cổ tay hoặc đeo như vòng cổ.\n\nHạt nhỏ, nhẹ, phù hợp người mới đeo trầm.",
+      "usage": "Quấn lỏng tay để dây không căng quá. Tháo khi tắm và khi vận động mạnh.",
+      "specs": [
+        {
+          "label": "Cỡ hạt",
+          "value": "6mm"
+        },
+        {
+          "label": "Số hạt",
+          "value": "108"
+        },
+        {
+          "label": "Chiều dài",
+          "value": "Khoảng 68cm"
+        }
+      ],
+      "priceVnd": 2900000,
+      "stock": 3,
+      "origin": "Khánh Hòa",
+      "shopeeUrl": "https://shopee.vn/search?keyword=chu%E1%BB%97i%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng%20108%20h%E1%BA%A1t",
+      "featured": true
+    },
+    {
+      "name": "Trầm miếng xông, gói 20g",
+      "slug": "tram-mieng-xong-goi-20g",
+      "category": "tram-mieng",
+      "summary": "Miếng nhỏ để xông bằng bếp điện.",
+      "description": "Gói 20g gồm nhiều miếng nhỏ, mỗi miếng khoảng 1–3g. Dùng để xông bằng bếp điện ở nhiệt độ thấp.\n\nMùi gỗ nguyên bản, không phối hương.",
+      "usage": "Đặt một miếng lên bếp xông điện, để nhiệt thấp. Một miếng dùng được nhiều lần đến khi gỗ sẫm màu và hết mùi.",
+      "specs": [
+        {
+          "label": "Trọng lượng",
+          "value": "20g"
+        },
+        {
+          "label": "Cách xông",
+          "value": "Bếp điện, nhiệt thấp"
+        }
+      ],
+      "priceVnd": 900000,
+      "stock": 7,
+      "origin": "Quảng Nam",
+      "tiktokUrl": "https://www.tiktok.com/search?q=tr%E1%BA%A7m%20mi%E1%BA%BFng%20x%C3%B4ng"
     }
   ],
   "postCategories": [
@@ -320,7 +549,11 @@
       "excerpt": "Năm dấu hiệu bạn có thể tự kiểm tra ở nhà: vân gỗ, mùi khi chưa đốt, mùi khi đốt, khói và tro.",
       "metaDescription": "Năm dấu hiệu tự kiểm tra trầm hương thật ở nhà: vân gỗ, mùi khi chưa đốt và khi đốt, màu khói, tro. Kèm những điều nên hỏi người bán trước khi mua.",
       "content": "Trầm hương là phần gỗ của cây dó bầu đã tích tụ tinh dầu. Vì giá trị cao, trên thị trường có nhiều sản phẩm pha tạp hoặc tẩm hương liệu. Bài này nêu những dấu hiệu bạn có thể tự quan sát ở nhà.\n\n## Nhìn vân gỗ\n\nGỗ trầm tự nhiên có vân dầu sẫm màu xen lẫn phần gỗ sáng, không đều nhau. Hạt vòng đều màu tuyệt đối, bóng như sơn, thường đã qua xử lý bề mặt.\n\n## Ngửi khi chưa đốt\n\nTrầm thật có mùi nhẹ, phải đưa sát mũi mới rõ. Mùi quá nồng ngay khi mở hộp có thể đến từ hương liệu tẩm thêm.\n\n## Ngửi khi đốt\n\nKhói trầm thật có mùi ngọt và dịu, không gây cay mắt. Mùi hắc hoặc cay mũi là dấu hiệu nên cân nhắc.\n\n## Quan sát khói và tro\n\n- Khói trầm thật thường mỏng, màu trắng xanh.\n- Tro của nhang không tăm tốt có màu xám nhạt, giữ được hình dạng một lúc rồi mới rơi.\n- Khói đen, đặc hoặc tro vụn ngay thường do nhiều phụ gia.\n\n## Những điều nên hỏi người bán\n\n- Trầm tự nhiên hay trầm cấy, có tỉ lệ phụ gia không.\n- Xuất xứ và căn cứ cho xuất xứ đó.\n- Chính sách đổi trả nếu sản phẩm không đúng mô tả.\n\nKhông có dấu hiệu nào chắc chắn tuyệt đối khi đứng riêng. Bạn nên kết hợp nhiều dấu hiệu và mua ở nơi ghi rõ thông tin sản phẩm.",
-      "products": ["vong-tay-tram-huong-10mm-19-hat", "nhang-tram-khong-tam-hop-100g", "tram-mieng-xong-goi-20g"]
+      "products": [
+        "vong-tay-tram-huong-10mm-19-hat",
+        "nhang-tram-khong-tam-hop-100g",
+        "tram-mieng-xong-goi-20g"
+      ]
     },
     {
       "title": "Trầm tự nhiên và trầm cấy khác nhau thế nào",
@@ -331,7 +564,10 @@
       "excerpt": "Hai cách tạo trầm, khác biệt về mùi, giá và cách người bán nên ghi trên sản phẩm.",
       "metaDescription": "So sánh trầm tự nhiên và trầm cấy: cách hình thành, khác biệt về mùi, giá và thời gian tích dầu. Cách đọc thông tin loại trầm ghi trên sản phẩm.",
       "content": "Trầm hương hình thành khi cây dó bầu bị tổn thương và tiết ra tinh dầu để tự bảo vệ. Tuỳ cách tổn thương xảy ra, người ta chia thành trầm tự nhiên và trầm cấy.\n\n## Trầm tự nhiên\n\nTrầm tự nhiên hình thành trong rừng, do cây bị gãy, sét đánh hoặc côn trùng. Quá trình tích dầu kéo dài nhiều năm, nên trầm tự nhiên hiếm và giá cao.\n\n## Trầm cấy\n\nTrầm cấy được tạo bằng cách khoan và đưa chế phẩm vào thân cây trồng để kích thích tiết dầu. Thời gian thu hoạch ngắn hơn, nguồn cung ổn định hơn và giá dễ tiếp cận hơn.\n\n## Khác biệt khi dùng\n\n- Mùi trầm tự nhiên thường sâu và nhiều tầng hơn.\n- Trầm cấy có mùi nhẹ và đơn giản hơn, vẫn phù hợp để xông và làm nhang hằng ngày.\n\n## Người bán nên ghi gì\n\nMỗi sản phẩm nên ghi rõ loại trầm, xuất xứ và có phụ gia hay không. Khi người bán không có căn cứ, thông tin đó nên để trống thay vì phỏng đoán.",
-      "products": ["vong-tay-tram-huong-12mm-18-hat", "tram-mieng-xong-goi-20g"]
+      "products": [
+        "vong-tay-tram-huong-12mm-18-hat",
+        "tram-mieng-xong-goi-20g"
+      ]
     },
     {
       "title": "Cách đốt nụ trầm đúng cách",
@@ -342,7 +578,11 @@
       "excerpt": "Chuẩn bị lư, châm lửa, thổi tắt và những lưu ý để nụ cháy đều, ít khói.",
       "metaDescription": "Hướng dẫn đốt nụ trầm từng bước: chuẩn bị lư có lót cát, châm lửa ở đỉnh, thổi tắt để nụ cháy âm ỉ, cách dùng với thác khói và lưu ý an toàn.",
       "content": "Nụ trầm dễ dùng nhưng đốt sai cách sẽ khiến nụ tắt giữa chừng hoặc khói nhiều. Dưới đây là các bước cơ bản.\n\n## Chuẩn bị\n\n- Lư xông gốm hoặc đĩa chịu nhiệt.\n- Một lớp cát hoặc tro mỏng lót đáy lư.\n- Bật lửa hoặc nến.\n\n## Các bước\n\n### Châm lửa\n\nCầm phần đáy nụ, hơ đỉnh nụ trên lửa khoảng 5 giây đến khi bắt lửa.\n\n### Thổi tắt\n\nĐể lửa cháy vài giây rồi thổi tắt. Đầu nụ đỏ âm ỉ và bắt đầu toả khói là được.\n\n### Đặt vào lư\n\nĐặt nụ đứng trên lớp cát, đậy nắp nếu lư có nắp đục lỗ.\n\n## Dùng với thác khói\n\nChỉ nụ có lỗ ở đáy mới tạo được dòng khói chảy xuống. Đặt thác khói nơi kín gió để khói chảy đều.\n\n## Lưu ý an toàn\n\nKhông đặt lư gần rèm, giấy hoặc nơi trẻ nhỏ với tới. Đợi tro nguội hẳn rồi mới đổ.",
-      "products": ["nu-tram-huong-hop-50-vien", "nu-tram-thac-khoi-hop-40-vien", "lu-xong-tram-gom-men-nau"]
+      "products": [
+        "nu-tram-huong-hop-50-vien",
+        "nu-tram-thac-khoi-hop-40-vien",
+        "lu-xong-tram-gom-men-nau"
+      ]
     },
     {
       "title": "Bảo quản vòng tay trầm hương để giữ mùi lâu",
@@ -353,7 +593,11 @@
       "excerpt": "Những việc nên và không nên làm để vòng trầm giữ mùi và độ bền.",
       "metaDescription": "Cách bảo quản vòng tay trầm hương: tránh nước, nước hoa và hoá chất, lau bằng khăn khô, cất trong túi vải, thay dây chun định kỳ để vòng bền lâu.",
       "content": "Vòng trầm là gỗ tự nhiên nên cần bảo quản đúng để giữ mùi và tránh nứt hạt.\n\n## Nên làm\n\n- Lau vòng bằng khăn mềm khô sau khi đeo cả ngày.\n- Cất vòng trong túi vải hoặc hộp gỗ khi không đeo.\n- Thay dây chun sau khoảng 6–12 tháng, sớm hơn nếu thấy dây giãn.\n\n## Không nên làm\n\n- Đeo vòng khi tắm, bơi hoặc rửa bát.\n- Xịt nước hoa, kem dưỡng trực tiếp lên vòng.\n- Phơi vòng dưới nắng gắt hoặc để gần nguồn nhiệt.\n\n## Khi vòng nhạt mùi\n\nMùi nhạt dần theo thời gian là đặc tính của gỗ. Bạn có thể cất vòng trong hộp kín vài ngày, mùi sẽ đậm hơn khi lấy ra.",
-      "products": ["vong-tay-tram-huong-8mm-22-hat", "vong-tay-tram-huong-10mm-19-hat", "chuoi-tram-huong-108-hat-6mm"]
+      "products": [
+        "vong-tay-tram-huong-8mm-22-hat",
+        "vong-tay-tram-huong-10mm-19-hat",
+        "chuoi-tram-huong-108-hat-6mm"
+      ]
     },
     {
       "title": "Chuẩn bị nhang trầm cho rằm tháng Giêng",
@@ -364,18 +608,92 @@
       "excerpt": "Gợi ý chọn loại nhang, lượng cần dùng và thời điểm nên mua trước dịp rằm.",
       "metaDescription": "Gợi ý chuẩn bị nhang trầm cho rằm tháng Giêng: chọn nhang có tăm hay không tăm, ước lượng số lượng cần dùng và nên mua trước bao lâu để kịp giao.",
       "content": "Rằm tháng Giêng là dịp nhiều gia đình thắp hương nhiều nhất trong năm. Chuẩn bị sớm giúp bạn chọn được loại nhang phù hợp và tránh giao hàng trễ.\n\n## Chọn loại nhang\n\n- Nhang có tăm dài 30cm hợp bàn thờ gia tiên và lư hương lớn.\n- Nhang không tăm ít khói, hợp nhà chung cư hoặc phòng kín.\n- Nhang vòng hợp khi cần giữ hương nhiều giờ, luôn đặt đế chống cháy.\n\n## Ước lượng số lượng\n\nMột bó 500g có khoảng 350 cây. Gia đình thắp 3 cây mỗi lần, ngày hai lần, dùng một bó được khoảng hai tháng.\n\n## Nên mua trước bao lâu\n\nThời gian giao thường 2–4 ngày làm việc, dịp lễ có thể lâu hơn. Bạn nên đặt trước ít nhất một tuần.",
-      "products": ["nhang-tram-co-tam-30cm-bo-500g", "nhang-tram-khong-tam-hop-100g", "nhang-vong-tram-24-gio-hop-24-khoanh"]
+      "products": [
+        "nhang-tram-co-tam-30cm-bo-500g",
+        "nhang-tram-khong-tam-hop-100g",
+        "nhang-vong-tram-24-gio-hop-24-khoanh"
+      ]
+    },
+    {
+      "title": "Xông trầm ở góc làm việc cho người mới bắt đầu",
+      "slug": "xong-tram-o-goc-lam-viec",
+      "category": "huong-dan-su-dung",
+      "authorName": "An Chi Trầm Hương",
+      "publishedAt": "2026-10-20T08:00:00+07:00",
+      "excerpt": "Chọn nụ hay nhang không tăm, đặt lư ở đâu và xông bao lâu để phòng thơm mà không ngột.",
+      "metaDescription": "Hướng dẫn xông trầm ở bàn làm việc và phòng ngủ cho người mới: chọn nụ trầm hay nhang không tăm, cỡ lư, thời gian xông và cách giữ phòng thoáng.",
+      "content": "## Chọn loại trầm\n\nNụ trầm cho khói rõ và mùi lan nhanh, mỗi nụ cháy 15–20 phút. Nhang không tăm khói mỏng hơn, hợp phòng nhỏ và người nhạy với khói.\n\nNếu chưa biết mình hợp mùi nào, hãy bắt đầu bằng hộp nhỏ rồi mới mua hộp lớn.\n\n## Đặt lư ở đâu\n\nĐặt lư trên mặt phẳng không bắt lửa, cách xa giấy tờ, rèm và quạt thổi thẳng. Lư 7cm là đủ cho bàn làm việc.\n\n## Xông bao lâu\n\nPhòng 10–15m² chỉ cần một nụ hoặc một que nhang. Mở hé cửa để không khí lưu thông, tránh xông liên tục nhiều giờ trong phòng kín.\n\n## Sau khi xông\n\nĐể tro nguội hẳn rồi mới đổ. Cất nụ và nhang trong hộp kín, tránh ẩm để giữ mùi.",
+      "products": [
+        "bo-khoi-dau-nu-tram-lu-gom-mini",
+        "nhang-tram-khong-tam-hop-50g",
+        "lu-xong-gom-mini-men-trang"
+      ]
+    },
+    {
+      "title": "Chọn nhang trầm cho bàn thờ gia đình",
+      "slug": "chon-nhang-tram-cho-ban-tho",
+      "category": "van-hoa-va-dip-le",
+      "authorName": "An Chi Trầm Hương",
+      "publishedAt": "2026-10-27T08:00:00+07:00",
+      "excerpt": "Đọc thành phần trên bao bì, chọn độ dài nhang theo lư và nhận biết nhang có phụ gia.",
+      "metaDescription": "Cách chọn nhang trầm cho bàn thờ gia đình: đọc thành phần, chọn nhang có tăm hay không tăm theo cỡ lư, nhận biết nhang có hương liệu và cách bảo quản.",
+      "content": "## Đọc thành phần\n\nBao bì nên ghi rõ nhang làm từ bột trầm, có keo kết dính gì và có thêm hương liệu hay không. Nhang không ghi thành phần thì bạn nên hỏi người bán trước khi mua.\n\n## Có tăm hay không tăm\n\nNhang có tăm 30cm dễ cắm, hợp lư hương lớn trên bàn thờ. Nhang không tăm cháy hết, ít tàn, hợp bàn thờ trong phòng kín hoặc căn hộ.\n\n## Nhận biết nhang có hương liệu\n\nNhang có hương liệu thường thơm gắt ngay khi chưa đốt và mùi giống nhau giữa các lần mua. Nhang từ bột trầm có mùi gỗ nhẹ khi chưa đốt, mùi thay đổi theo từng mẻ gỗ.\n\n## Bảo quản\n\nĐể nhang nơi khô ráo, tránh ánh nắng trực tiếp. Bó nhang đã mở nên cho vào túi kín.",
+      "products": [
+        "nhang-tram-co-tam-30cm-bo-500g",
+        "nhang-tram-khong-tam-hop-100g",
+        "bot-tram-xong-nha-hu-50g"
+      ]
     }
   ],
   "customers": [
-    { "name": "Nguyễn Thị Lan", "phone": "0900000101", "password": "khachmau123", "email": "lan.nguyen@example.com", "address": "12 Đường Mẫu, Phường 1, Quận 3, TP. Hồ Chí Minh", "marketingConsent": true },
-    { "name": "Trần Văn Minh", "phone": "0900000102", "password": "khachmau123", "address": "45 Phố Mẫu, Phường Láng Hạ, Quận Đống Đa, Hà Nội" },
-    { "name": "Lê Thu Hà", "phone": "0900000103", "email": "ha.le@example.com", "address": "8 Đường Mẫu, Phường Hải Châu 1, Quận Hải Châu, Đà Nẵng" },
-    { "name": "Phạm Quốc Bảo", "phone": "0900000104", "address": "102 Đường Mẫu, Phường 7, TP. Đà Lạt, Lâm Đồng", "marketingConsent": true },
-    { "name": "Võ Ngọc Anh", "phone": "0900000105", "email": "anh.vo@example.com", "address": "23 Hẻm Mẫu, Phường An Hòa, Quận Ninh Kiều, Cần Thơ" },
-    { "name": "Đặng Hoàng Nam", "phone": "0900000106", "address": "5 Đường Mẫu, Phường Lộc Thọ, TP. Nha Trang, Khánh Hòa" },
-    { "name": "Bùi Thị Mai", "phone": "0900000107", "email": "mai.bui@example.com", "address": "67 Đường Mẫu, Phường Vĩnh Ninh, TP. Huế" },
-    { "name": "Hoàng Đức Long", "phone": "0900000108", "address": "31 Đường Mẫu, Phường Tân Định, Quận 1, TP. Hồ Chí Minh" }
+    {
+      "name": "Nguyễn Thị Lan",
+      "phone": "0900000101",
+      "password": "khachmau123",
+      "email": "lan.nguyen@example.com",
+      "address": "12 Đường Mẫu, Phường 1, Quận 3, TP. Hồ Chí Minh",
+      "marketingConsent": true
+    },
+    {
+      "name": "Trần Văn Minh",
+      "phone": "0900000102",
+      "password": "khachmau123",
+      "address": "45 Phố Mẫu, Phường Láng Hạ, Quận Đống Đa, Hà Nội"
+    },
+    {
+      "name": "Lê Thu Hà",
+      "phone": "0900000103",
+      "email": "ha.le@example.com",
+      "address": "8 Đường Mẫu, Phường Hải Châu 1, Quận Hải Châu, Đà Nẵng"
+    },
+    {
+      "name": "Phạm Quốc Bảo",
+      "phone": "0900000104",
+      "address": "102 Đường Mẫu, Phường 7, TP. Đà Lạt, Lâm Đồng",
+      "marketingConsent": true
+    },
+    {
+      "name": "Võ Ngọc Anh",
+      "phone": "0900000105",
+      "email": "anh.vo@example.com",
+      "address": "23 Hẻm Mẫu, Phường An Hòa, Quận Ninh Kiều, Cần Thơ"
+    },
+    {
+      "name": "Đặng Hoàng Nam",
+      "phone": "0900000106",
+      "address": "5 Đường Mẫu, Phường Lộc Thọ, TP. Nha Trang, Khánh Hòa"
+    },
+    {
+      "name": "Bùi Thị Mai",
+      "phone": "0900000107",
+      "email": "mai.bui@example.com",
+      "address": "67 Đường Mẫu, Phường Vĩnh Ninh, TP. Huế"
+    },
+    {
+      "name": "Hoàng Đức Long",
+      "phone": "0900000108",
+      "address": "31 Đường Mẫu, Phường Tân Định, Quận 1, TP. Hồ Chí Minh"
+    }
   ],
   "orders": [
     {
@@ -385,7 +703,16 @@
       "paymentMethod": "BANK_TRANSFER",
       "paymentStatus": "PAID",
       "status": "COMPLETED",
-      "items": [{ "product": "vong-tay-tram-huong-8mm-22-hat", "quantity": 1 }, { "product": "nhang-tram-khong-tam-hop-100g", "quantity": 2 }]
+      "items": [
+        {
+          "product": "vong-tay-tram-huong-8mm-22-hat",
+          "quantity": 1
+        },
+        {
+          "product": "nhang-tram-khong-tam-hop-100g",
+          "quantity": 2
+        }
+      ]
     },
     {
       "code": "AC2610C3D4",
@@ -394,7 +721,12 @@
       "paymentMethod": "COD",
       "paymentStatus": "PAID",
       "status": "COMPLETED",
-      "items": [{ "product": "nhang-tram-co-tam-30cm-bo-500g", "quantity": 2 }]
+      "items": [
+        {
+          "product": "nhang-tram-co-tam-30cm-bo-500g",
+          "quantity": 2
+        }
+      ]
     },
     {
       "code": "AC2610E5F6",
@@ -403,7 +735,16 @@
       "paymentMethod": "BANK_TRANSFER",
       "paymentStatus": "PAID",
       "status": "COMPLETED",
-      "items": [{ "product": "nu-tram-huong-hop-50-vien", "quantity": 2 }, { "product": "lu-xong-tram-gom-men-nau", "quantity": 1 }]
+      "items": [
+        {
+          "product": "nu-tram-huong-hop-50-vien",
+          "quantity": 2
+        },
+        {
+          "product": "lu-xong-tram-gom-men-nau",
+          "quantity": 1
+        }
+      ]
     },
     {
       "code": "AC2610G7H8",
@@ -413,7 +754,12 @@
       "paymentStatus": "UNPAID",
       "status": "CANCELLED",
       "note": "Khách gọi huỷ vì đặt nhầm cỡ hạt.",
-      "items": [{ "product": "vong-tay-tram-huong-12mm-18-hat", "quantity": 1 }]
+      "items": [
+        {
+          "product": "vong-tay-tram-huong-12mm-18-hat",
+          "quantity": 1
+        }
+      ]
     },
     {
       "code": "AC2610J9K2",
@@ -422,7 +768,12 @@
       "paymentMethod": "COD",
       "paymentStatus": "PAID",
       "status": "COMPLETED",
-      "items": [{ "product": "nhang-vong-tram-24-gio-hop-24-khoanh", "quantity": 1 }]
+      "items": [
+        {
+          "product": "nhang-vong-tram-24-gio-hop-24-khoanh",
+          "quantity": 1
+        }
+      ]
     },
     {
       "code": "AC2610L3M4",
@@ -431,7 +782,16 @@
       "paymentMethod": "BANK_TRANSFER",
       "paymentStatus": "PAID",
       "status": "SHIPPING",
-      "items": [{ "product": "vong-tay-tram-huong-10mm-19-hat", "quantity": 1 }, { "product": "tram-mieng-xong-goi-20g", "quantity": 1 }]
+      "items": [
+        {
+          "product": "vong-tay-tram-huong-10mm-19-hat",
+          "quantity": 1
+        },
+        {
+          "product": "tram-mieng-xong-goi-20g",
+          "quantity": 1
+        }
+      ]
     },
     {
       "code": "AC2610N5P6",
@@ -440,7 +800,12 @@
       "paymentMethod": "COD",
       "paymentStatus": "UNPAID",
       "status": "SHIPPING",
-      "items": [{ "product": "nu-tram-thac-khoi-hop-40-vien", "quantity": 3 }]
+      "items": [
+        {
+          "product": "nu-tram-thac-khoi-hop-40-vien",
+          "quantity": 3
+        }
+      ]
     },
     {
       "code": "AC2610Q7R8",
@@ -450,7 +815,12 @@
       "paymentStatus": "UNPAID",
       "status": "PENDING",
       "note": "Giao giờ hành chính giúp mình.",
-      "items": [{ "product": "chuoi-tram-huong-108-hat-6mm", "quantity": 1 }]
+      "items": [
+        {
+          "product": "chuoi-tram-huong-108-hat-6mm",
+          "quantity": 1
+        }
+      ]
     },
     {
       "code": "AC2611S9T2",
@@ -459,7 +829,16 @@
       "paymentMethod": "COD",
       "paymentStatus": "UNPAID",
       "status": "CONFIRMED",
-      "items": [{ "product": "nhang-tram-khong-tam-hop-100g", "quantity": 1 }, { "product": "nu-tram-huong-hop-50-vien", "quantity": 1 }]
+      "items": [
+        {
+          "product": "nhang-tram-khong-tam-hop-100g",
+          "quantity": 1
+        },
+        {
+          "product": "nu-tram-huong-hop-50-vien",
+          "quantity": 1
+        }
+      ]
     },
     {
       "code": "AC2611U3V4",
@@ -468,7 +847,48 @@
       "paymentMethod": "COD",
       "paymentStatus": "UNPAID",
       "status": "PENDING",
-      "items": [{ "product": "nhang-tram-co-tam-30cm-bo-500g", "quantity": 1 }]
+      "items": [
+        {
+          "product": "nhang-tram-co-tam-30cm-bo-500g",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "code": "AC2611W5X6",
+      "customerPhone": "0900000105",
+      "createdAt": "2026-11-01T20:15:00+07:00",
+      "paymentMethod": "COD",
+      "paymentStatus": "UNPAID",
+      "status": "PENDING",
+      "items": [
+        {
+          "product": "bo-khoi-dau-nu-tram-lu-gom-mini",
+          "quantity": 1
+        },
+        {
+          "product": "nhang-tram-khong-tam-hop-50g",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "code": "AC2611Y7Z8",
+      "customerPhone": "0900000102",
+      "createdAt": "2026-11-02T09:40:00+07:00",
+      "paymentMethod": "BANK_TRANSFER",
+      "paymentStatus": "PAID",
+      "status": "CONFIRMED",
+      "items": [
+        {
+          "product": "bot-tram-xong-nha-hu-50g",
+          "quantity": 1
+        },
+        {
+          "product": "chuoi-tram-huong-108-hat-6mm",
+          "quantity": 1
+        }
+      ]
     }
   ]
 }

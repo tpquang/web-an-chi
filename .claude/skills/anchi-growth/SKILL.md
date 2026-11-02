@@ -30,7 +30,23 @@ Khách mua trầm hương sợ nhất là mua phải hàng giả. Lời mời n�
 - Không popup giảm giá khi khách vừa vào trang.
 - Mã giảm giá có điều kiện rõ ràng, hạn dùng thật.
 
-## 3. Quảng cáo
+## 3. Theo nhóm khách
+
+Hai nhóm chính mô tả ở [anchi-brand mục 6](../anchi-brand/SKILL.md). Đường đi mong muốn: khách nhóm 1 vào bằng món nhỏ rồi mua lặp lại; khách nhóm 2 vào bằng nhang, bột xông rồi lên vòng tay.
+
+| | Nhóm 1 (22–30) | Nhóm 2 (31–45) |
+|---|---|---|
+| Món vào cửa | Bộ khởi đầu, hộp nhỏ dưới 350.000đ | Nhang thờ, bột trầm xông nhà |
+| Bán kèm | Nụ hoặc nhang đi với lư gốm mini | Nhang đi với bột xông; vòng tay sau đơn nhang đầu tiên, không đặt cạnh nút mua nhang |
+| Dịp nhắc | Hết hàng sau 1–2 tháng, theo hướng dẫn dùng đã gửi | Rằm, mùng một, Tết, Vu Lan, nhà mới |
+| Kênh | Sàn và mạng xã hội; website giữ vai trò hướng dẫn và chứng minh nguồn gốc | Website, Zalo, Facebook; ưu tiên trang sản phẩm đủ xuất xứ, thành phần |
+| Nội dung | Video, ảnh thật cách đốt, lượng khói, thời gian cháy | Cách đọc thành phần, phân biệt hàng thật, giấy tờ nguồn gốc |
+
+- Trang chủ và mục nổi bật xếp món vào cửa của nhóm 1 và món chủ lực của nhóm 2 trước. Danh mục xếp: nụ, nhang, lư và phụ kiện, vòng tay, trầm miếng.
+- Không làm landing, banner hay quảng cáo cho nhóm 3 trên web khi chưa có hàng và giấy tờ xác minh.
+- Các con số mức chi, tần suất mua lại là giả định. Đo bằng phễu ở mục 8 rồi sửa bảng này theo số thật.
+
+## 4. Quảng cáo
 
 An Chi là site bán hàng, nên **không đặt quảng cáo bên thứ ba** như AdSense trên bất kỳ trang nào, vì chúng có thể dẫn khách sang đối thủ.
 
@@ -47,7 +63,7 @@ An Chi là site bán hàng, nên **không đặt quảng cáo bên thứ ba** nh
 
 **Kỹ thuật:** khối banner tự giữ chỗ để không gây CLS; pixel và script `lazyOnload`, không nạp ở môi trường test.
 
-## 4. Bán kèm
+## 5. Bán kèm
 
 - Gợi ý theo cách dùng thật: nhang đi với lư xông, nụ đi với thác khói. Chỉ gợi ý món còn hàng.
 - Dạng mặc định là link chữ cuối khối hoặc thẻ nhỏ, không tự thêm vào giỏ, không chọn sẵn.
@@ -56,7 +72,7 @@ An Chi là site bán hàng, nên **không đặt quảng cáo bên thứ ba** nh
 - Link sang Shopee, TikTok Shop là lời mời phụ: nút viền dưới khối mua của trang sản phẩm và ở footer, không bao giờ là nút primary. Không đặt trong giỏ, thanh toán, trang đơn hàng.
 - Mỗi nội dung một bản gốc, không sao chép giữa website và các sàn hay kênh khác.
 
-## 5. Dữ liệu cá nhân
+## 6. Dữ liệu cá nhân
 
 - Chỉ thu thứ cần để giao hàng: tên, điện thoại, địa chỉ. Email và ghi chú là tuỳ chọn.
 - Có trang chính sách bảo mật; làm đúng quy định bảo vệ dữ liệu cá nhân hiện hành.
@@ -64,7 +80,7 @@ An Chi là site bán hàng, nên **không đặt quảng cáo bên thứ ba** nh
 - Nhắc qua email, Zalo chỉ gửi người đã đồng ý riêng, tối đa 2 tin mỗi tháng, theo dịp có thật, có cách huỷ.
 - Không chọn sẵn ô đồng ý nhận tiếp thị.
 
-## 6. Giữ chân
+## 7. Giữ chân
 
 | Chỗ rơi | Cách giữ |
 |---|---|
@@ -73,7 +89,7 @@ An Chi là site bán hàng, nên **không đặt quảng cáo bên thứ ba** nh
 | Bỏ form đặt hàng | Ít ô, giữ dữ liệu đã nhập, nói rõ phí giao và thời gian giao |
 | Mua xong không quay lại | Hướng dẫn dùng và bảo quản, nhắc theo dịp với người đã đồng ý |
 
-## 7. Đo
+## 8. Đo
 
 - Đặt phễu ngay từ đầu: xem sản phẩm → thêm vào giỏ → bắt đầu đặt hàng → đặt thành công → mua lại sau 90 ngày.
 - Mỗi khối gợi ý có `utm_content` hoặc tên sự kiện riêng. Tỉ lệ bấm dưới 1% sau 2 tuần thì đổi câu chữ hoặc bỏ.

@@ -62,7 +62,7 @@ export default async function AboutPage() {
           </p>
         </div>
         <div className="flex items-start justify-center lg:col-span-4">
-          <BrandLogo variant="stacked" className="w-56 text-wood" />
+          <BrandLogo variant="stacked" className="text-5xl text-wood" />
         </div>
       </div>
 

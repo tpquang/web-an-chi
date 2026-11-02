@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Be_Vietnam_Pro, Noto_Serif } from "next/font/google";
+import { Be_Vietnam_Pro, Cormorant_SC } from "next/font/google";
 import type { ReactNode } from "react";
 import { SiteHeader } from "@/components/site-header";
+import { getCategories } from "@/lib/api";
 import { Toaster } from "@/components/ui/toast";
 import { site } from "@/lib/site";
 import "./globals.css";
 
-const serif = Noto_Serif({
+const serif = Cormorant_SC({
   subsets: ["latin", "vietnamese"],
   weight: ["400", "500", "600", "700"],
   variable: "--next-serif",
@@ -37,14 +38,16 @@ export const viewport: Viewport = {
 
 const themeScript = `try{var t=localStorage.getItem("anchi-theme");document.documentElement.dataset.theme=t||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}catch(e){}`;
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  // Menu sổ xuống không được làm hỏng cả trang khi API lỗi, lỗi thì chỉ còn link "Tất cả sản phẩm"
+  const categories = await getCategories().then((list) => list.map(({ name, slug }) => ({ name, slug })), () => []);
   return (
     <html lang="vi" className={`${serif.variable} ${sans.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="flex min-h-dvh flex-col">
-        <SiteHeader />
+        <SiteHeader categories={categories} />
         {children}
         <Toaster />
       </body>

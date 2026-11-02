@@ -56,7 +56,7 @@ Nội dung = `min(1180, cửa sổ − 2 × lề)`.
 
 ## Thẳng hàng
 
-Breadcrumb, tiêu đề trang và mọi khối nội dung dùng chung một mép trái.
+Breadcrumb, tiêu đề trang và mọi khối nội dung dùng chung một mép trái. Breadcrumb chữ 13px, cách H1 12px, vùng bấm tối thiểu 24px, dấu `/` màu `line-strong`, mục cuối một dòng.
 
 - **Không căn giữa khối hẹp** bằng `max-w-*` kèm `mx-auto`.
 - Chỉ dùng hai độ rộng: đủ 12 cột, hoặc 8 cột căn trái.

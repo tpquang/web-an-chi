@@ -40,7 +40,7 @@ export function pageMeta({ title, description, path, noindex, absoluteTitle, ima
       title,
       description: desc,
       url: absoluteUrl(path),
-      ...(image ? { images: [{ url: image, width: 1200, height: 630 }] } : {}),
+      images: [{ url: image ?? "/brand/default-og.png", width: 1200, height: 630 }],
     },
   };
 }

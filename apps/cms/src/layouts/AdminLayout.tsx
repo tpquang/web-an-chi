@@ -35,7 +35,7 @@ export function AdminLayout() {
       <aside className="border-b border-line bg-surface md:sticky md:top-0 md:flex md:h-dvh md:w-60 md:flex-none md:flex-col md:border-r md:border-b-0">
         <div className="flex items-center justify-between gap-2 px-4 pt-4 md:block">
           <p className="flex items-center gap-2 text-wood md:mb-4 md:px-3">
-            <BrandLogo className="h-8" />
+            <BrandLogo className="text-2xl" />
             <span className="text-sm font-semibold">CMS</span>
           </p>
           <div className="md:hidden">

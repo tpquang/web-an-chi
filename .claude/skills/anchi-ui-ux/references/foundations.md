@@ -4,12 +4,12 @@
 
 | Token | Class | Font | Dùng cho |
 |---|---|---|---|
-| `--serif` | `font-serif` | Noto Serif 400–700 | Tiêu đề, thương hiệu, giá tiền |
+| `--serif` | `font-serif` | Cormorant SC 400–700 | Tiêu đề, thương hiệu, chữ trong logo, giá tiền |
 | `--sans` | `font-sans` | Be Vietnam Pro 400–600 | Nội dung, form, nút, bảng |
 
 Web nạp bằng `next/font/google`, gắn biến `--next-serif`, `--next-sans` lên `<html>`. CMS nạp Be Vietnam Pro và cũng dùng serif cho tiêu đề thương hiệu.
 
-Noto Serif có mặt chữ lớn, đủ rõ cho số và dấu tiếng Việt, nhưng không dùng cho đoạn văn dài. `body` đặt `font-variant-numeric: lining-nums`; cột số trong bảng thêm `tabular-nums`, chữ serif có số thì ghi đủ `lining-nums tabular-nums` vì class của Tailwind ghi đè cả hai.
+Cormorant SC là chữ hoa nhỏ: chữ thường hiện thành chữ hoa cỡ nhỏ, mặt chữ thấp, nét mảnh. Dùng từ 18px trở lên và độ đậm từ 500; không dùng cho đoạn văn, nhãn form, nút hay chữ phụ. `body` đặt `font-variant-numeric: lining-nums`; cột số trong bảng thêm `tabular-nums`, chữ serif có số thì ghi đủ `lining-nums tabular-nums` vì class của Tailwind ghi đè cả hai.
 
 | Cấp | Cỡ / line-height | Kiểu |
 |---|---|---|
@@ -87,7 +87,7 @@ Token, thời gian và cách viết ở [motion.md](motion.md).
 
 ## Icon
 
-Inline SVG trong một file `components/icons.tsx` của từng app, không dùng thư viện. Khung 24×24, nét 1.5, đầu tròn, `currentColor`, hiển thị 18–22px, `aria-hidden`. Nét mảnh để hợp với đường cong logo. Không dùng emoji trang trí.
+Inline SVG trong một file `components/icons.tsx` của từng app, không dùng thư viện. Khung 24×24, nét 1.5, đầu tròn, `currentColor`, hiển thị 18–22px, `aria-hidden`. Nét mảnh, góc bo mềm, không góc nhọn, để hợp với đường cong logo. Header chỉ dùng icon cho giỏ hàng và tài khoản, kèm `aria-label` và `title`, nút tròn 44px. Không dùng emoji trang trí.
 
 ## Nền
 

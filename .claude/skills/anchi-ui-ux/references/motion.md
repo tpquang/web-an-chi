@@ -38,6 +38,8 @@ Không dùng hiệu ứng nảy vượt đích, vì trái với nguyên tắc tr
 | Thẻ sản phẩm khi hover | Đổi viền, ảnh `scale(1.02)` | `--d-base` | Về như cũ | `--d-fast` |
 | Tooltip | Fade | `--d-base` | Fade | `--d-fast` |
 | Dropdown, Select, DatePicker | Fade, `translateY(-4px)→0` | `--d-base` | Fade | `--d-fast` |
+| Link menu chính khi hover | Gạch chân 1px `scale-x` từ trái | `--d-base` | Thu về | `--d-base` |
+| Menu sổ xuống "Sản phẩm" | Hover hoặc focus bên trong, fade và `translateY(-4px)→0` | `--d-base` | Fade | `--d-fast` |
 | Modal giữa màn hình | Fade, `scale(.96)→1` | `--d-modal` | Fade | `--d-base` |
 | Lớp phủ sau modal | Fade | Theo modal | Fade | Theo modal |
 | Bottom sheet | Slide từ đáy | `--d-sheet` | Slide về đáy | `--d-slow` |

@@ -12,7 +12,7 @@ export function SiteFooter({ store, minimal }: { store: Store | null; minimal?: 
     <footer className="mt-24 border-t border-line bg-paper-2 py-10 pb-[max(40px,env(safe-area-inset-bottom))] text-sm">
       <PageFrame className="grid gap-8 md:grid-cols-3">
         <div>
-          <BrandLogo className="h-10 text-wood" />
+          <BrandLogo className="text-3xl text-wood" />
           {store && (
             <address className="mt-3 flex flex-col gap-1 not-italic text-ink-2">
               {store.address && <span>{store.address}</span>}

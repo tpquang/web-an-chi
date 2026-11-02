@@ -46,7 +46,7 @@
 
   /* Chữ. Web: next/font gắn --next-serif, --next-sans lên <html>. CMS: nạp theo tên font.
      Không đặt tên biến là --font-serif: Tailwind đã dùng tên đó và trỏ ngược về --serif, sẽ thành vòng lặp */
-  --serif: var(--next-serif, "Noto Serif"), "Times New Roman", Times, serif;
+  --serif: var(--next-serif, "Cormorant SC"), "Times New Roman", Times, serif;
   --sans: var(--next-sans, "Be Vietnam Pro"), system-ui, -apple-system, "Segoe UI", sans-serif;
 
   /* Khung trang */

@@ -6,7 +6,6 @@ import { cart } from "@/lib/cart";
 import type { QuoteLine } from "@/lib/client-api";
 import { productHref } from "@/lib/links";
 import { formatVnd } from "@/lib/site";
-import { BrandMark } from "../brand-mark";
 import { TrashIcon } from "../icons";
 import { IconButton } from "../ui/button";
 import { QuantityInput } from "../ui/quantity-input";
@@ -29,9 +28,7 @@ export function CartLine({ line, disabled }: { line: QuoteLine; disabled?: boole
         {product?.image ? (
           <Image src={product.image.url} alt={product.image.alt ?? name} fill sizes="72px" className="object-cover" />
         ) : (
-          <span className="flex size-full items-center justify-center text-line-strong">
-            <BrandMark className="size-8" />
-          </span>
+          <Image src="/brand/default-thumb.svg" alt="" fill sizes="72px" unoptimized className="object-cover" />
         )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-3">
