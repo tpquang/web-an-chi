@@ -306,7 +306,8 @@ getent hosts viettel-synergy.io.vn cms.viettel-synergy.io.vn www.viettel-synergy
 Chạy script:
 
 ```bash
-sudo EMAIL=<email-cua-ban> bash scripts/deploy.sh
+sudo EMAIL=quangtran.180495@gmail.com bash scripts/deploy.sh
+
 ```
 
 - `EMAIL=...` truyền email cho Let's Encrypt. Ví dụ `sudo EMAIL=quang@gmail.com bash scripts/deploy.sh`.
@@ -327,9 +328,11 @@ Lần đầu mất khoảng 5 đến 15 phút. Đừng đóng Terminal trong lú
 | `==> Cài Docker` | Chỉ hiện khi máy chưa có Docker |
 | `==> Tạo file .env` | Tạo cấu hình cho API, web, CMS. Mật khẩu database, mật khẩu admin, `AUTH_SECRET` được sinh ngẫu nhiên. `apps/api/.env` đã có thì giữ nguyên |
 | `==> Khởi động PostgreSQL riêng` | Chạy database trong Docker, tách biệt với Postgres của dịch vụ cũ |
-| `==> Cài thư viện và build` | `npm ci` rồi `npm run build`, bước lâu nhất |
+| `==> Cài thư viện và build API` | `npm ci` rồi build API |
 | `==> Chạy migration database` | Tạo bảng trong database. Có `SEED=1` thì nạp thêm dữ liệu mẫu |
-| `==> Khởi động API và web bằng PM2` | Chạy `anchi-api` và `anchi-web` nền, tự bật lại khi VPS khởi động lại |
+| `==> Khởi động API` | Chạy `anchi-api` nền bằng PM2. Web cần gọi API lúc build nên API phải chạy trước |
+| `==> Build CMS và web` | Bước lâu nhất |
+| `==> Khởi động web` | Chạy `anchi-web` nền, cả hai tự bật lại khi VPS khởi động lại |
 | `==> Chép CMS` | Chép CMS đã build vào `/var/www/anchi-cms` |
 | `==> Cấu hình nginx` | Ghi file nginx, kiểm tra bằng `nginx -t` rồi reload. Cấu hình sai thì dừng trước khi reload, site cũ không bị ảnh hưởng |
 | `==> Xin chứng chỉ HTTPS` | Xin chứng chỉ cho 3 tên miền, tự chuyển `http` sang `https` |
