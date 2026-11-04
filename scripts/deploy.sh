@@ -3,13 +3,13 @@
 # Chạy lại nhiều lần được: lần sau chỉ build lại và khởi động lại.
 #
 #   https://DOMAIN        → web (Next.js)
-#   https://cms.DOMAIN    → CMS (file tĩnh), /api/ trên cùng tên miền → API
+#   https://mun.DOMAIN    → CMS (file tĩnh), /api/ trên cùng tên miền → API
 #
-# Biến tuỳ chọn: DOMAIN, EMAIL (cho Let's Encrypt), SEED=1 (nạp dữ liệu mẫu), SKIP_SSL=1
+# Biến tuỳ chọn: DOMAIN, CMS_DOMAIN, EMAIL (cho Let's Encrypt), SEED=1 (nạp dữ liệu mẫu), SKIP_SSL=1
 set -euo pipefail
 
-DOMAIN="${DOMAIN:-viettel-synergy.io.vn}"
-CMS_DOMAIN="cms.${DOMAIN}"
+DOMAIN="${DOMAIN:-tramhuonganchi.vn}"
+CMS_DOMAIN="${CMS_DOMAIN:-mun.${DOMAIN}}"
 EMAIL="${EMAIL:-admin@${DOMAIN}}"
 # Cổng 4000 và 5432 trên VPS đã có dịch vụ khác dùng
 WEB_PORT=3100
@@ -56,6 +56,8 @@ EOF
   chmod 600 apps/api/.env
   NEW_ADMIN=1
 fi
+# .env cũ được giữ, nhưng CORS phải theo tên miền CMS hiện tại (đổi tên miền thì tự cập nhật)
+sed -i "s#^CORS_ORIGINS=.*#CORS_ORIGINS=https://${CMS_DOMAIN}#" apps/api/.env
 cat > apps/web/.env <<EOF
 API_URL=http://127.0.0.1:${API_PORT}
 NEXT_PUBLIC_SITE_URL=https://${DOMAIN}

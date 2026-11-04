@@ -1,6 +1,6 @@
 # Triển khai An Chi lên VPS
 
-Hướng dẫn từng lệnh để đưa website lên VPS Ubuntu với tên miền `viettel-synergy.io.vn`. Mỗi lệnh có giải thích nó làm gì và kết quả đúng trông thế nào. Gõ (hoặc dán) từng lệnh một, chờ chạy xong, xem kết quả rồi mới sang lệnh tiếp theo.
+Hướng dẫn từng lệnh để đưa website lên VPS Ubuntu với tên miền `tramhuonganchi.vn`. Mỗi lệnh có giải thích nó làm gì và kết quả đúng trông thế nào. Gõ (hoặc dán) từng lệnh một, chờ chạy xong, xem kết quả rồi mới sang lệnh tiếp theo.
 
 Quy ước trong tài liệu:
 
@@ -12,10 +12,10 @@ Quy ước trong tài liệu:
 
 | Địa chỉ | Dùng để | Chạy ở cổng nội bộ |
 |---|---|---|
-| `https://viettel-synergy.io.vn` | Website bán hàng (Next.js) | 3100 |
-| `https://www.viettel-synergy.io.vn` | Như trên | 3100 |
-| `https://cms.viettel-synergy.io.vn` | Trang quản trị (CMS) | file tĩnh, nginx phục vụ |
-| `https://cms.viettel-synergy.io.vn/api/` | API cho CMS | 4100 |
+| `https://tramhuonganchi.vn` | Website bán hàng (Next.js) | 3100 |
+| `https://www.tramhuonganchi.vn` | Như trên | 3100 |
+| `https://mun.tramhuonganchi.vn` | Trang quản trị (CMS) | file tĩnh, nginx phục vụ |
+| `https://mun.tramhuonganchi.vn/api/` | API cho CMS | 4100 |
 | PostgreSQL trong Docker | Cơ sở dữ liệu | 5433, chỉ nghe `127.0.0.1` |
 
 VPS đang chạy dịch vụ khác ở cổng 4000 và 5432, nên An Chi dùng cổng khác để không trùng. Script không sửa cấu hình nginx cũ, chỉ thêm file `/etc/nginx/sites-available/anchi.conf`.
@@ -24,7 +24,7 @@ VPS đang chạy dịch vụ khác ở cổng 4000 và 5432, nên An Chi dùng c
 
 - Mật khẩu hoặc SSH key để đăng nhập VPS bằng `root`.
 - IP của VPS.
-- Quyền vào trang quản lý tên miền `viettel-synergy.io.vn`.
+- Quyền vào trang quản lý tên miền `tramhuonganchi.vn`.
 - Link repo Git chứa source, ví dụ `git@github.com:ten-ban/web-an-chi.git`.
 - Một email thật để Let's Encrypt gửi thông báo khi chứng chỉ HTTPS sắp hết hạn.
 
@@ -38,25 +38,25 @@ Vào trang quản lý DNS của tên miền (nơi bạn mua tên miền), thêm 
 |---|---|---|---|
 | A | `@` | IP VPS | mặc định |
 | A | `www` | IP VPS | mặc định |
-| A | `cms` | IP VPS | mặc định |
+| A | `mun` | IP VPS | mặc định |
 
-`@` là tên miền gốc `viettel-synergy.io.vn`, `www` và `cms` là tên miền con.
+`@` là tên miền gốc `tramhuonganchi.vn`, `www` và `mun` (CMS) là tên miền con.
 
 Kiểm tra **(máy bạn)**:
 
 ```bash
-ping -c 1 viettel-synergy.io.vn
+ping -c 1 tramhuonganchi.vn
 ```
 
 - `ping` gửi một gói tin tới tên miền, `-c 1` là chỉ gửi 1 lần rồi dừng.
-- Kết quả đúng: dòng đầu có dạng `PING viettel-synergy.io.vn (103.12.34.56)`, trong ngoặc là IP VPS của bạn.
+- Kết quả đúng: dòng đầu có dạng `PING tramhuonganchi.vn (103.12.34.56)`, trong ngoặc là IP VPS của bạn.
 - Nếu báo `cannot resolve` hoặc ra IP khác: DNS chưa có hiệu lực, đợi 5 đến 30 phút rồi thử lại.
 
 Làm tương tự cho hai tên miền con:
 
 ```bash
-ping -c 1 www.viettel-synergy.io.vn
-ping -c 1 cms.viettel-synergy.io.vn
+ping -c 1 www.tramhuonganchi.vn
+ping -c 1 mun.tramhuonganchi.vn
 ```
 
 Cả ba phải ra đúng IP VPS mới làm tiếp bước 7. Các bước 2 đến 6 có thể làm trong lúc chờ.
@@ -154,7 +154,7 @@ ls /etc/nginx/sites-enabled/
 - Liệt kê các site nginx đang bật, ghi nhớ lại. Sau khi cài sẽ có thêm `anchi.conf`, những file khác là của dịch vụ cũ, không đụng vào.
 
 ```bash
-grep -r "viettel-synergy" /etc/nginx/sites-enabled/ || echo "Chưa có site nào dùng tên miền này"
+grep -r "tramhuonganchi" /etc/nginx/sites-enabled/ || echo "Chưa có site nào dùng tên miền này"
 ```
 
 - Kiểm tra có site cũ nào đã khai báo tên miền này chưa.
@@ -270,7 +270,7 @@ nano scripts/deploy.sh
 
 Những dòng nên xem, ở gần đầu file:
 
-- `DOMAIN="${DOMAIN:-viettel-synergy.io.vn}"`: tên miền chính.
+- `DOMAIN="${DOMAIN:-tramhuonganchi.vn}"`: tên miền chính.
 - `WEB_PORT=3100`, `API_PORT=4100`, `DB_PORT=5433`: các cổng nội bộ. Nếu bước 4 báo cổng nào bị chiếm, đổi số ở đây.
 
 Ở khoảng giữa file:
@@ -298,7 +298,7 @@ bash -n scripts/deploy.sh && echo "Cú pháp OK"
 Kiểm tra lại DNS đã trỏ xong (bước 1), ngay trên VPS:
 
 ```bash
-getent hosts viettel-synergy.io.vn cms.viettel-synergy.io.vn www.viettel-synergy.io.vn
+getent hosts tramhuonganchi.vn mun.tramhuonganchi.vn www.tramhuonganchi.vn
 ```
 
 - In IP của từng tên miền. Cả ba phải là IP VPS này. Chưa đúng thì đợi thêm, vì bước xin HTTPS cần DNS đã xong.
@@ -347,7 +347,7 @@ Script gặp lỗi ở đâu sẽ dừng ngay ở đó và in `Lỗi: ...` hoặ
 Cuối lần chạy đầu, script in ra:
 
 ```
-Tài khoản CMS: admin@viettel-synergy.io.vn / <mật-khẩu>
+Tài khoản CMS: admin@tramhuonganchi.vn / <mật-khẩu>
 ```
 
 Chép lại ngay vào trình quản lý mật khẩu. Quên thì xem lại bằng:
@@ -391,13 +391,13 @@ curl -I http://127.0.0.1:3100
 - Kết quả đúng: dòng đầu `HTTP/1.1 200 OK`.
 
 ```bash
-curl -I https://viettel-synergy.io.vn
+curl -I https://tramhuonganchi.vn
 ```
 
 - Gọi qua nginx và HTTPS. Kết quả đúng: `HTTP/2 200`.
 
 ```bash
-curl -I https://cms.viettel-synergy.io.vn
+curl -I https://mun.tramhuonganchi.vn
 ```
 
 - Kết quả đúng: `HTTP/2 200`.
@@ -410,10 +410,10 @@ docker ps --filter name=anchi
 
 Mở trình duyệt trên máy bạn và đánh dấu từng mục:
 
-- [ ] `https://viettel-synergy.io.vn` hiện trang chủ, thanh địa chỉ có ổ khoá.
-- [ ] `http://viettel-synergy.io.vn` tự chuyển sang `https`.
-- [ ] `https://www.viettel-synergy.io.vn` mở được.
-- [ ] `https://cms.viettel-synergy.io.vn` hiện trang đăng nhập, đăng nhập được bằng tài khoản ở bước 8.
+- [ ] `https://tramhuonganchi.vn` hiện trang chủ, thanh địa chỉ có ổ khoá.
+- [ ] `http://tramhuonganchi.vn` tự chuyển sang `https`.
+- [ ] `https://www.tramhuonganchi.vn` mở được.
+- [ ] `https://mun.tramhuonganchi.vn` hiện trang đăng nhập, đăng nhập được bằng tài khoản ở bước 8.
 - [ ] Gửi thử một tin nhắn chat trên website, tin nhắn hiện ra trong hộp thư CMS mà không cần tải lại trang.
 - [ ] Dịch vụ cũ trên VPS vẫn chạy bình thường.
 
@@ -440,6 +440,35 @@ sudo bash scripts/deploy.sh
 ```
 
 - Build và khởi động lại. Không xoá dữ liệu, không đổi mật khẩu. Không cần `EMAIL` vì chứng chỉ đã có. Đừng thêm `SEED=1` khi đã có dữ liệu thật.
+
+---
+
+## Đổi tên miền khi đã cài rồi
+
+Dùng khi VPS đã chạy script với tên miền cũ (ví dụ `viettel-synergy.io.vn`) và giờ chuyển sang `tramhuonganchi.vn`, CMS ở `mun.tramhuonganchi.vn`.
+
+1. Trỏ DNS của `tramhuonganchi.vn`: bản ghi A cho `@`, `www`, `mun` về IP VPS (như bước 1). Kiểm tra bằng `getent hosts tramhuonganchi.vn www.tramhuonganchi.vn mun.tramhuonganchi.vn`.
+2. Lấy code mới và chạy lại script:
+
+```bash
+cd /opt/web-an-chi
+git pull
+sudo EMAIL=quangtran.180495@gmail.com bash scripts/deploy.sh
+```
+
+- Script ghi đè `anchi.conf` của nginx bằng tên miền mới, build lại web và CMS với địa chỉ mới, tự sửa `CORS_ORIGINS` trong `apps/api/.env`, rồi xin chứng chỉ HTTPS mới.
+- Mật khẩu database và tài khoản admin giữ nguyên. Email đăng nhập CMS vẫn là email cũ (`admin@viettel-synergy.io.vn`), xem bằng `grep ADMIN_ /opt/web-an-chi/apps/api/.env`.
+
+3. Xoá chứng chỉ của tên miền cũ (không bắt buộc):
+
+```bash
+sudo certbot certificates
+sudo certbot delete --cert-name viettel-synergy.io.vn
+```
+
+- Lệnh đầu liệt kê chứng chỉ, chỉ xoá cái chứa tên miền cũ và không còn dùng.
+
+---
 
 ## Lệnh hay dùng
 
@@ -558,7 +587,7 @@ grep CORS_ORIGINS /opt/web-an-chi/apps/api/.env
 cat /opt/web-an-chi/apps/cms/.env
 ```
 
-- Phải ra `CORS_ORIGINS=https://cms.viettel-synergy.io.vn` và `VITE_API_URL=https://cms.viettel-synergy.io.vn`. Sửa sai thì chạy lại script.
+- Phải ra `CORS_ORIGINS=https://mun.tramhuonganchi.vn` và `VITE_API_URL=https://mun.tramhuonganchi.vn`. Sửa sai thì chạy lại script.
 
 **`npm run build` bị dừng với chữ `Killed` hoặc `heap out of memory`.** Hết RAM, làm phần [Thêm swap](#thêm-swap-khi-ram-ít) rồi chạy lại script.
 
@@ -572,7 +601,7 @@ sudo bash scripts/deploy.sh
 
 Lệnh `down -v` xoá toàn bộ dữ liệu An Chi. Có dữ liệu thật thì sao lưu trước.
 
-**Nginx báo `conflicting server name`.** Một site cũ trên VPS đã khai báo cùng tên miền. Tìm bằng `grep -r viettel-synergy /etc/nginx/sites-enabled/` và tắt site đó.
+**Nginx báo `conflicting server name`.** Một site cũ trên VPS đã khai báo cùng tên miền. Tìm bằng `grep -r tramhuonganchi /etc/nginx/sites-enabled/` và tắt site đó.
 
 ## Bảo mật
 
