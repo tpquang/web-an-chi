@@ -4,6 +4,8 @@ Mẫu App trong `anchi-ui-ux`, không có giới hạn 1180px. Dùng chung token
 
 | Route | Màn hình |
 |---|---|
+| `/inbox`, `/inbox/:id` | Hộp thư: danh sách hội thoại (đang mở, của tôi, chưa ai nhận, đã xong), khung trả lời có câu mẫu gõ "/", phân công, thẻ, ghi chú nội bộ, thông tin và đơn của khách. Huy hiệu số tin chưa đọc ở menu và tiêu đề tab |
+| `/staff` | Nhân viên (chỉ chủ shop): thêm, đổi quyền, khoá tài khoản |
 | `/` | Tổng quan: đơn chờ xác nhận, đang giao, doanh thu 30 ngày, khách hàng, đơn mới, sắp hết hàng |
 | `/orders`, `/orders/:id` | Đơn hàng: tìm, lọc trạng thái, xem chi tiết, đổi trạng thái đơn và thanh toán |
 | `/customers`, `/customers/:id` | Khách hàng: tìm theo tên hoặc số điện thoại, lịch sử đơn, đồng ý nhận tin |

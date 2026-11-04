@@ -2,9 +2,18 @@ import { NavLink, Outlet } from "react-router-dom";
 import { BrandLogo } from "../components/BrandMark";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { useAuth } from "../lib/auth";
+import { useInboxUnread } from "../lib/use-inbox-unread";
 
-const groups = [
-  { label: "", links: [{ to: "/", label: "Tổng quan" }] },
+type NavGroup = { label: string; ownerOnly?: boolean; links: { to: string; label: string }[] };
+
+const groups: NavGroup[] = [
+  {
+    label: "",
+    links: [
+      { to: "/", label: "Tổng quan" },
+      { to: "/inbox", label: "Hộp thư" },
+    ],
+  },
   {
     label: "Bán hàng",
     links: [
@@ -14,6 +23,7 @@ const groups = [
   },
   {
     label: "Kinh doanh",
+    ownerOnly: true,
     links: [
       { to: "/business", label: "Đợt nhập hàng" },
       { to: "/materials", label: "Nguyên liệu thô" },
@@ -35,10 +45,12 @@ const groups = [
       { to: "/post-categories", label: "Chủ đề bài viết" },
     ],
   },
+  { label: "Cửa hàng", ownerOnly: true, links: [{ to: "/staff", label: "Nhân viên" }] },
 ];
 
 export function AdminLayout() {
-  const { logout } = useAuth();
+  const { logout, staff, isOwner } = useAuth();
+  const unread = useInboxUnread();
   return (
     <div className="min-h-dvh bg-paper text-ink md:flex">
       <aside className="border-b border-line bg-surface md:sticky md:top-0 md:flex md:h-dvh md:w-60 md:flex-none md:flex-col md:border-r md:border-b-0">
@@ -52,7 +64,7 @@ export function AdminLayout() {
           </div>
         </div>
         <nav aria-label="Menu quản trị" className="flex gap-1 overflow-x-auto px-4 pb-3 md:flex-1 md:flex-col md:gap-4 md:overflow-y-auto md:pb-4">
-          {groups.map((group) => (
+          {groups.filter((g) => !g.ownerOnly || isOwner).map((group) => (
             <div key={group.label || "root"} className="flex gap-1 md:flex-col">
               {group.label && <p className="hidden px-3 pb-1 text-xs font-semibold text-ink-3 md:block">{group.label}</p>}
               {group.links.map((link) => (
@@ -61,10 +73,13 @@ export function AdminLayout() {
                   to={link.to}
                   end={link.to === "/"}
                   className={({ isActive }) =>
-                    `inline-flex min-h-11 items-center rounded-md px-3 text-sm whitespace-nowrap ${isActive ? "bg-wood text-on-wood" : "hover:bg-paper-2"}`
+                    `inline-flex min-h-11 items-center gap-2 rounded-md px-3 text-sm whitespace-nowrap ${isActive ? "bg-wood text-on-wood" : "hover:bg-paper-2"}`
                   }
                 >
                   {link.label}
+                  {link.to === "/inbox" && unread > 0 && (
+                    <span aria-label={`${unread} tin chưa đọc`} className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-err px-1.5 text-[11px] leading-5 font-semibold text-surface">{unread}</span>
+                  )}
                 </NavLink>
               ))}
             </div>
@@ -76,7 +91,7 @@ export function AdminLayout() {
             <ThemeToggle compact />
           </div>
           <button type="button" onClick={logout} className="min-h-11 px-3 text-left text-sm text-ink-2 hover:text-wood">
-            Đăng xuất
+            Đăng xuất{staff ? ` (${staff.name})` : ""}
           </button>
         </div>
       </aside>

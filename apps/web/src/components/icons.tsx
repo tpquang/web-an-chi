@@ -98,3 +98,16 @@ export const UserIcon = (p: P) => (
     <path d="M5 20a7 7 0 0 1 14 0" />
   </Icon>
 );
+
+export const ChatIcon = (p: P) => (
+  <Icon {...p}>
+    <path d="M4 5.5h16v10H9l-5 4v-14Z" />
+    <path d="M8 9.5h8M8 12.5h5" />
+  </Icon>
+);
+
+export const SendIcon = (p: P) => (
+  <Icon {...p}>
+    <path d="M4 12 20 4l-6 16-3-7-7-1Z" />
+  </Icon>
+);

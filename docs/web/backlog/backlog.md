@@ -20,6 +20,10 @@
 
 ## P1
 
+- [ ] Nối Facebook Page, Zalo OA vào Hộp thư (cần duyệt ứng dụng Meta, OA đã xác minh, tên miền HTTPS)
+- [ ] Thông báo tin chat mới cho nhân viên khi không mở CMS (Zalo, email hoặc thông báo trình duyệt)
+- [ ] Gửi ảnh trong chat
+
 - [ ] Quên mật khẩu, đổi mật khẩu cho tài khoản khách
 
 - [ ] Ảnh OG mặc định và theo trang

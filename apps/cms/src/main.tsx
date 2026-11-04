@@ -8,6 +8,8 @@ import { AuthProvider, useAuth } from "./lib/auth";
 import { BatchesPage } from "./pages/BatchesPage";
 import { BatchFormPage } from "./pages/BatchFormPage";
 import { CustomerDetailPage, CustomersPage } from "./pages/CustomersPage";
+import { InboxPage } from "./pages/InboxPage";
+import { StaffPage } from "./pages/StaffPage";
 import { MaterialsPage } from "./pages/MaterialsPage";
 import { MovementsPage } from "./pages/MovementsPage";
 import { PackingPage } from "./pages/PackingPage";
@@ -31,6 +33,9 @@ function App() {
     <Routes>
       <Route element={<AdminLayout />}>
         <Route index element={<DashboardPage />} />
+        <Route path="inbox" element={<InboxPage />} />
+        <Route path="inbox/:id" element={<InboxPage />} />
+        <Route path="staff" element={<StaffPage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="products/new" element={<ProductFormPage />} />
         <Route path="products/:id" element={<ProductFormPage />} />
