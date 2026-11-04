@@ -347,7 +347,7 @@ Script gặp lỗi ở đâu sẽ dừng ngay ở đó và in `Lỗi: ...` hoặ
 Cuối lần chạy đầu, script in ra:
 
 ```
-Tài khoản CMS: admin@tramhuonganchi.vn / <mật-khẩu>
+Tài khoản CMS: admin / <mật-khẩu>
 ```
 
 Chép lại ngay vào trình quản lý mật khẩu. Quên thì xem lại bằng:

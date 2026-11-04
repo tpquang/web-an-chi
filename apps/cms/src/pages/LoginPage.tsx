@@ -19,7 +19,7 @@ export function LoginPage() {
     event.preventDefault();
     if (inFlight.current) return;
     if (!email.trim() || !password) {
-      setError("Bạn nhập đủ email và mật khẩu.");
+      setError("Bạn nhập đủ tài khoản và mật khẩu.");
       return;
     }
     inFlight.current = true;
@@ -65,8 +65,8 @@ export function LoginPage() {
           <p className="font-serif text-3xl font-semibold text-wood">An Chi CMS</p>
           <h1 className="mt-1 text-ink-2">Đăng nhập để quản lý cửa hàng</h1>
         </div>
-        <Field label="Email">
-          <Input type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} disabled={submitting} />
+        <Field label="Tài khoản">
+          <Input type="text" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} disabled={submitting} />
         </Field>
         <Field label="Mật khẩu" error={error}>
           <Input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} disabled={submitting} />

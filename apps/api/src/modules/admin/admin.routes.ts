@@ -37,7 +37,7 @@ adminRouter.post("/login", async (req, res) => {
   else if (checkCredentials(email, password)) user = await ensureOwner();
   if (!user) {
     limiter.fail(ip);
-    throw new HttpError(401, "Email hoặc mật khẩu chưa đúng.", "BAD_CREDENTIALS");
+    throw new HttpError(401, "Tài khoản hoặc mật khẩu chưa đúng.", "BAD_CREDENTIALS");
   }
   limiter.reset(ip);
   res.json({ data: issueToken(user.id) });
