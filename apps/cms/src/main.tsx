@@ -5,7 +5,12 @@ import { ConfirmHost } from "./components/ui/Modal";
 import { Toaster } from "./components/ui/Toast";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { AuthProvider, useAuth } from "./lib/auth";
+import { BatchesPage } from "./pages/BatchesPage";
+import { BatchFormPage } from "./pages/BatchFormPage";
 import { CustomerDetailPage, CustomersPage } from "./pages/CustomersPage";
+import { MaterialsPage } from "./pages/MaterialsPage";
+import { MovementsPage } from "./pages/MovementsPage";
+import { PackingPage } from "./pages/PackingPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { LoginPage } from "./pages/LoginPage";
 import { OrderDetailPage } from "./pages/OrderDetailPage";
@@ -38,6 +43,12 @@ function App() {
         <Route path="orders/:id" element={<OrderDetailPage />} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="customers/:id" element={<CustomerDetailPage />} />
+        <Route path="business" element={<BatchesPage />} />
+        <Route path="business/new" element={<BatchFormPage />} />
+        <Route path="business/:id" element={<BatchFormPage />} />
+        <Route path="materials" element={<MaterialsPage />} />
+        <Route path="packing" element={<PackingPage />} />
+        <Route path="stock" element={<MovementsPage />} />
         <Route path="login" element={<Navigate to="/" replace />} />
         <Route path="*" element={<PlaceholderPage title="Không tìm thấy trang" />} />
       </Route>

@@ -8,6 +8,7 @@
     "node": ">=22.12"
   },
   "scripts": {
+    "start": "bash scripts/dev.sh",
     "dev": "concurrently -n api,web,cms -c blue,green,magenta \"npm run dev -w @an-chi/api\" \"npm run dev -w @an-chi/web\" \"npm run dev -w @an-chi/cms\"",
     "build": "npm run build -w @an-chi/api && npm run build -w @an-chi/cms && npm run build -w @an-chi/web",
     "typecheck": "npm run typecheck --workspaces",

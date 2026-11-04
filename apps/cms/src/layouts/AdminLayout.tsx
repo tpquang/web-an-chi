@@ -13,6 +13,15 @@ const groups = [
     ],
   },
   {
+    label: "Kinh doanh",
+    links: [
+      { to: "/business", label: "Đợt nhập hàng" },
+      { to: "/materials", label: "Nguyên liệu thô" },
+      { to: "/packing", label: "Đóng gói" },
+      { to: "/stock", label: "Sổ kho" },
+    ],
+  },
+  {
     label: "Hàng hoá",
     links: [
       { to: "/products", label: "Sản phẩm" },

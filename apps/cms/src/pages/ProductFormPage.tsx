@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { RecipePanel } from "../components/business/RecipePanel";
 import { RowsEditor } from "../components/RowsEditor";
 import { Button } from "../components/ui/Button";
 import { Field, Input, MoneyInput, Switch, Textarea } from "../components/ui/Field";
@@ -123,6 +124,7 @@ export function ProductFormPage() {
             <RowsEditor rows={values.images} onChange={(rows) => set("images", rows as Values["images"])} columns={[{ key: "url", label: "Link ảnh", placeholder: "https://...", wide: true }, { key: "alt", label: "Mô tả ảnh (alt)" }]} addLabel="Thêm ảnh" disabled={submitting} max={12} />
             {errors.images && <p role="alert" className="mt-2 text-sm text-err">Link ảnh cần là địa chỉ https đầy đủ.</p>}
           </Panel>
+          {!isNew && id && <RecipePanel productId={id} priceVnd={values.priceVnd ?? 0} />}
           <Panel title="SEO">
             <div className="flex flex-col gap-4">
               <Field label="Tiêu đề trên Google" optional hint={'Để trống thì dùng tên sản phẩm. Website tự thêm " | An Chi Trầm Hương".'} counter={{ value: (values.metaTitle ?? "").length, max: 45 }}><Input {...text("metaTitle")} placeholder={values.name} /></Field>

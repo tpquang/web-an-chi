@@ -5,7 +5,9 @@ import { checkCredentials, issueToken, requireAdmin } from "../../lib/auth.js";
 import { failureLimiter } from "../../lib/rate-limit.js";
 import { HttpError } from "../../middleware/errors.js";
 import { adminBlogRouter } from "./admin.blog.js";
+import { adminBusinessRouter } from "./admin.business.js";
 import { adminCatalogRouter } from "./admin.catalog.js";
+import { adminInventoryRouter } from "./admin.inventory.js";
 import { adminSalesRouter } from "./admin.sales.js";
 
 export const adminRouter = Router();
@@ -40,3 +42,5 @@ adminRouter.get("/me", (_req, res) => {
 adminRouter.use(adminCatalogRouter);
 adminRouter.use(adminBlogRouter);
 adminRouter.use(adminSalesRouter);
+adminRouter.use(adminBusinessRouter);
+adminRouter.use(adminInventoryRouter);
