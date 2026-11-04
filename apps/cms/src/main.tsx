@@ -6,6 +6,7 @@ import { Toaster } from "./components/ui/Toast";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { AuthProvider, useAuth } from "./lib/auth";
 import { BatchesPage } from "./pages/BatchesPage";
+import { BeadTexturesPage } from "./pages/BeadTexturesPage";
 import { BatchFormPage } from "./pages/BatchFormPage";
 import { CustomerDetailPage, CustomersPage } from "./pages/CustomersPage";
 import { InboxPage } from "./pages/InboxPage";
@@ -40,6 +41,7 @@ function App() {
         <Route path="products/new" element={<ProductFormPage />} />
         <Route path="products/:id" element={<ProductFormPage />} />
         <Route path="categories" element={<TaxonomyPage kind="categories" />} />
+        <Route path="bead-textures" element={<BeadTexturesPage />} />
         <Route path="posts" element={<PostsPage />} />
         <Route path="posts/new" element={<PostFormPage />} />
         <Route path="posts/:id" element={<PostFormPage />} />

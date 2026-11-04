@@ -483,3 +483,16 @@ model Bead {
 
   @@index([active, position])
 }
+
+// Ảnh vân vật liệu cho hạt 3D, dùng chung cho mọi hạt cùng chất liệu (trùng Bead.material).
+// Ảnh vuông 1024px đã cắt và nén ở CMS, nhỏ nên lưu thẳng trong database cho khỏi lo chỗ chứa file.
+model BeadTexture {
+  id        String   @id @default(cuid())
+  material  String   @unique
+  image     Bytes
+  mime      String
+  // 0 là bóng như gương, 1 là mờ hẳn
+  roughness Float    @default(0.5)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

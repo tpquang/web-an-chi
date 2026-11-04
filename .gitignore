@@ -15,3 +15,5 @@ apps/api/src/generated/
 ._*
 *.log
 docker-compose.prod.yml
+# Cấu hình VPS do scripts/deploy.sh sinh ra
+.deploy.env

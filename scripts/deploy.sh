@@ -1,20 +1,25 @@
 #!/usr/bin/env bash
-# Triển khai An Chi lên VPS Ubuntu bằng một lệnh: sudo bash scripts/deploy.sh
-# Chạy lại nhiều lần được: lần sau chỉ build lại và khởi động lại.
+# Cài An Chi lên VPS Ubuntu mới bằng một lệnh: sudo bash scripts/deploy.sh
+# Lo phần một lần: gói hệ thống, .env, database, nginx, HTTPS. Phần build gọi scripts/update.sh.
+# Cập nhật code về sau chỉ cần: sudo bash scripts/update.sh
+# Đổi VPS: clone repo sang máy mới, chạy lại script này (xem docs/setup.md phần chuyển VPS).
 #
 #   https://DOMAIN        → web (Next.js)
 #   https://mun.DOMAIN    → CMS (file tĩnh), /api/ trên cùng tên miền → API
 #
-# Biến tuỳ chọn: DOMAIN, CMS_DOMAIN, EMAIL (cho Let's Encrypt), SEED=1 (nạp dữ liệu mẫu), SKIP_SSL=1
+# Biến tuỳ chọn: DOMAIN, CMS_DOMAIN, EMAIL (cho Let's Encrypt), SEED=1 (nạp dữ liệu mẫu), SKIP_SSL=1,
+#   INDEXING=on (cho Google index; mặc định off vì đang là web demo),
+#   WEB_PORT, API_PORT, DB_PORT (đổi khi VPS mới có dịch vụ khác chiếm cổng)
 set -euo pipefail
 
 DOMAIN="${DOMAIN:-tramhuonganchi.vn}"
 CMS_DOMAIN="${CMS_DOMAIN:-mun.${DOMAIN}}"
 EMAIL="${EMAIL:-admin@${DOMAIN}}"
 # Cổng 4000 và 5432 trên VPS đã có dịch vụ khác dùng
-WEB_PORT=3100
-API_PORT=4100
-DB_PORT=5433
+WEB_PORT="${WEB_PORT:-3100}"
+API_PORT="${API_PORT:-4100}"
+DB_PORT="${DB_PORT:-5433}"
+INDEXING="${INDEXING:-off}"
 
 APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CMS_ROOT="/var/www/anchi-cms"
@@ -61,7 +66,7 @@ sed -i "s#^CORS_ORIGINS=.*#CORS_ORIGINS=https://${CMS_DOMAIN}#" apps/api/.env
 cat > apps/web/.env <<EOF
 API_URL=http://127.0.0.1:${API_PORT}
 NEXT_PUBLIC_SITE_URL=https://${DOMAIN}
-SITE_INDEXING=on
+SITE_INDEXING=${INDEXING}
 IMAGE_HOSTNAMES=
 EOF
 echo "VITE_API_URL=https://${CMS_DOMAIN}" > apps/cms/.env
@@ -79,38 +84,21 @@ EOF
 docker compose -p anchi -f docker-compose.yml -f docker-compose.prod.yml up -d postgres
 until docker compose -p anchi -f docker-compose.yml exec -T postgres pg_isready -U anchi -d anchi >/dev/null 2>&1; do sleep 2; done
 
-log "Cài thư viện và build API"
-npm ci --include=dev
-npm run build -w @an-chi/api
+# Lưu cấu hình để scripts/update.sh dùng lại
+cat > .deploy.env <<EOF
+DOMAIN=${DOMAIN}
+CMS_DOMAIN=${CMS_DOMAIN}
+WEB_PORT=${WEB_PORT}
+API_PORT=${API_PORT}
+CMS_ROOT=${CMS_ROOT}
+INDEXING=${INDEXING}
+EOF
 
-log "Chạy migration database"
-npm run db:deploy -w @an-chi/api
-if [ "${SEED:-0}" = "1" ]; then npm run db:seed -w @an-chi/api; fi
-
-# Next prerender trang lúc build nên API phải chạy trước khi build web
-log "Khởi động API"
-pm2 delete anchi-api anchi-web >/dev/null 2>&1 || true
-pm2 start npm --name anchi-api --cwd "$APP_DIR/apps/api" -- start
-for _ in $(seq 1 30); do
-  curl -s -o /dev/null "http://127.0.0.1:${API_PORT}/" && break
-  sleep 1
-done
-curl -s -o /dev/null "http://127.0.0.1:${API_PORT}/" || { pm2 logs anchi-api --lines 30 --nostream; die "API không khởi động được"; }
-
-log "Build CMS và web"
-npm run build -w @an-chi/cms
-npm run build -w @an-chi/web
-
-log "Khởi động web"
-pm2 start "$APP_DIR/node_modules/next/dist/bin/next" --name anchi-web --cwd "$APP_DIR/apps/web" -- start -p "$WEB_PORT" -H 127.0.0.1
-pm2 save
+NO_PULL=1 SEED="${SEED:-0}" bash "$APP_DIR/scripts/update.sh"
 pm2 startup systemd -u root --hp /root >/dev/null
 
-log "Chép CMS vào ${CMS_ROOT}"
-mkdir -p "$CMS_ROOT"
-rm -rf "${CMS_ROOT:?}"/*
-cp -r apps/cms/dist/. "$CMS_ROOT/"
-
+ROBOTS_HEADER=""
+[ "$INDEXING" = "on" ] || ROBOTS_HEADER='    add_header X-Robots-Tag "noindex, nofollow" always;'
 log "Cấu hình nginx cho ${DOMAIN} và ${CMS_DOMAIN}"
 cat > "$NGINX_CONF" <<EOF
 server {
@@ -118,6 +106,7 @@ server {
     listen [::]:80;
     server_name ${DOMAIN} www.${DOMAIN};
     client_max_body_size 10m;
+${ROBOTS_HEADER}
 
     location / {
         proxy_pass http://127.0.0.1:${WEB_PORT};
@@ -136,6 +125,8 @@ server {
     root ${CMS_ROOT};
     index index.html;
     client_max_body_size 10m;
+    # CMS không bao giờ được index
+    add_header X-Robots-Tag "noindex, nofollow" always;
 
     location /api/ {
         proxy_pass http://127.0.0.1:${API_PORT};

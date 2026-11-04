@@ -7,6 +7,7 @@ import { prisma } from "../../lib/prisma.js";
 import { failureLimiter } from "../../lib/rate-limit.js";
 import { HttpError } from "../../middleware/errors.js";
 import { adminBlogRouter } from "./admin.blog.js";
+import { adminBraceletRouter } from "./admin.bracelet.js";
 import { adminBusinessRouter } from "./admin.business.js";
 import { adminCatalogRouter } from "./admin.catalog.js";
 import { adminInboxRouter } from "./admin.inbox.js";
@@ -59,6 +60,7 @@ adminRouter.get("/me", (_req, res) => {
 
 adminRouter.use(adminInboxRouter);
 adminRouter.use(adminCatalogRouter);
+adminRouter.use(adminBraceletRouter);
 adminRouter.use(adminBlogRouter);
 adminRouter.use(adminSalesRouter);
 // Vốn, kho, nhân viên chỉ chủ shop xem

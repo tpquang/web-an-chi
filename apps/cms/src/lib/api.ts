@@ -74,7 +74,30 @@ export const api = {
   put: <T>(path: string, body: unknown) => request<T>("PUT", path, body),
   patch: <T>(path: string, body: unknown) => request<T>("PATCH", path, body),
   delete: (path: string) => request<void>("DELETE", path),
+  upload,
 };
+
+// Gửi thẳng file ảnh làm body, không bọc JSON
+async function upload<T>(path: string, file: Blob): Promise<T> {
+  const token = getToken();
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/api/v1/admin${path}`, {
+      method: "PUT",
+      headers: { "content-type": file.type, ...(token ? { authorization: `Bearer ${token}` } : {}) },
+      body: file,
+    });
+  } catch {
+    throw new ApiError(0, "Không kết nối được API. Kiểm tra mạng hoặc API đã chạy chưa.");
+  }
+  const json = await res.json().catch(() => ({}));
+  if (res.status === 401) setToken(null);
+  if (!res.ok) throw new ApiError(res.status, json.error ?? `Lỗi ${res.status}`, json.code);
+  return json.data as T;
+}
+
+// Link ảnh công khai do API trả, dùng cho ảnh vân hạt
+export const publicUrl = (path: string) => `${API_URL}/api/v1${path}`;
 
 export function errorMessage(err: unknown) {
   return err instanceof Error ? err.message : "Có lỗi chưa rõ nguyên nhân. Bạn thử lại.";

@@ -425,21 +425,45 @@ Mỗi lần có code mới, trên máy bạn `git push` như bước 2, rồi tr
 
 ```bash
 cd /opt/web-an-chi
+sudo bash scripts/update.sh
 ```
 
-- Vào thư mục source.
+- Script tự `git pull`, cài thư viện, chạy migration database, build API, CMS, web rồi khởi động lại. Không đụng tới nginx, HTTPS, mật khẩu, dữ liệu.
+- Thêm `SEED=1` để nạp lại dữ liệu mẫu (sản phẩm, bài viết, hạt vòng tay): `sudo SEED=1 bash scripts/update.sh`. Dữ liệu mẫu cùng mã sẽ bị ghi đè, nên chỉ dùng khi web còn là bản demo.
+- Lần đầu dùng `update.sh` trên VPS đã cài từ trước: chạy `sudo bash scripts/deploy.sh` một lần để script tạo file `.deploy.env` (tên miền, cổng). Từ đó về sau chỉ cần `update.sh`.
+
+## Google index
+
+Mặc định tắt vì web đang là bản demo: `robots.txt` chặn hết, mọi trang có `noindex`, nginx gửi thêm `X-Robots-Tag`. CMS luôn `noindex`.
+
+Khi mở bán thật, bật lên bằng:
 
 ```bash
-git pull
+sudo INDEXING=on bash scripts/deploy.sh
 ```
 
-- Tải code mới nhất về. Kết quả có dạng `Fast-forward` kèm danh sách file thay đổi, hoặc `Already up to date` nếu không có gì mới.
+Sau đó vào Google Search Console gửi `https://<ten-mien>/sitemap.xml`.
+
+## Chuyển sang VPS khác
+
+1. Trên VPS cũ, sao lưu database:
 
 ```bash
-sudo bash scripts/deploy.sh
+cd /opt/web-an-chi
+sudo docker compose -p anchi exec -T postgres pg_dump -U anchi -d anchi -Fc > anchi.dump
 ```
 
-- Build và khởi động lại. Không xoá dữ liệu, không đổi mật khẩu. Không cần `EMAIL` vì chứng chỉ đã có. Đừng thêm `SEED=1` khi đã có dữ liệu thật.
+2. Chép `anchi.dump` và `apps/api/.env` sang máy mới (ví dụ bằng `scp`). Giữ `apps/api/.env` để không đổi mật khẩu admin và khoá đăng nhập.
+3. Trên VPS mới làm lại từ bước 3 (clone repo vào `/opt/web-an-chi`), đặt `apps/api/.env` vào trước khi chạy script, rồi chạy `sudo EMAIL=<email-cua-ban> bash scripts/deploy.sh`. Cổng bị chiếm thì thêm `WEB_PORT=... API_PORT=... DB_PORT=...`; nhớ sửa `PORT` và cổng trong `DATABASE_URL` của `apps/api/.env` cho khớp.
+4. Nạp lại database:
+
+```bash
+cd /opt/web-an-chi
+sudo docker compose -p anchi exec -T postgres pg_restore -U anchi -d anchi --clean --if-exists < anchi.dump
+pm2 restart anchi-api anchi-web
+```
+
+5. Trỏ DNS về IP mới. Nếu lúc chạy script DNS chưa trỏ xong, HTTPS sẽ báo lỗi: đợi DNS xong rồi chạy lại `deploy.sh`.
 
 ---
 

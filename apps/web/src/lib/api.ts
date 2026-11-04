@@ -218,7 +218,10 @@ export type Bead = {
   color: string;
   finish: string;
   note: string | null;
+  // Ảnh vân chất liệu tải ở CMS, null thì hạt dùng màu trơn
+  texture: { id: string; version: number; roughness: number } | null;
 };
+
 
 export type BraceletRules = {
   wristCm: { min: number; max: number };

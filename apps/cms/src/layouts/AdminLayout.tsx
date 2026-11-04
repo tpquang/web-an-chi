@@ -36,6 +36,7 @@ const groups: NavGroup[] = [
     links: [
       { to: "/products", label: "Sản phẩm" },
       { to: "/categories", label: "Danh mục sản phẩm" },
+      { to: "/bead-textures", label: "Vân vật liệu hạt" },
     ],
   },
   {

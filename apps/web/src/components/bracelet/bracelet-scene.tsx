@@ -6,6 +6,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import type { Bead } from "@/lib/api";
 
+const beadTextureUrl = (texture: NonNullable<Bead["texture"]>) => `/api/bead-textures/${texture.id}?v=${texture.version}`;
+
 // key cố định theo từng hạt để hạt giữ mesh và trượt êm khi thứ tự đổi
 export type SceneItem = { key: number; bead: Bead };
 
@@ -89,11 +91,46 @@ function grain(color: string) {
   return texture;
 }
 
+// Ảnh vân từ CMS. Cách bọc giống hệt phần xem trước ở apps/cms/src/components/BeadPreview.tsx:
+// hai cực của hạt nằm ở lỗ xâu dây, ảnh lặp gương hai lần quanh hạt nên nối liền mà không cần chỉnh ảnh
+const photoCache = new Map<string, THREE.Texture>();
+const loader = typeof window === "undefined" ? null : new THREE.TextureLoader();
+function photo(texture: NonNullable<Bead["texture"]>, onLoad: () => void) {
+  const url = beadTextureUrl(texture);
+  const cached = photoCache.get(url);
+  if (cached) {
+    if (cached.image) onLoad();
+    else cached.userData.waiting.push(onLoad);
+    return cached;
+  }
+  const tex = loader!.load(url, () => {
+    for (const fn of tex.userData.waiting as (() => void)[]) fn();
+    tex.userData.waiting = [];
+  });
+  tex.userData.waiting = [onLoad];
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.MirroredRepeatWrapping;
+  tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.repeat.set(2, 1);
+  tex.anisotropy = 8;
+  photoCache.set(url, tex);
+  return tex;
+}
+
 function material(bead: Bead): THREE.MeshStandardMaterial {
+  const roughness = bead.texture?.roughness;
   const mat =
-    bead.finish === "metal" ? new THREE.MeshStandardMaterial({ color: bead.color, metalness: 1, roughness: 0.28 })
-    : bead.finish === "stone" ? new THREE.MeshPhysicalMaterial({ color: bead.color, roughness: 0.12, clearcoat: 1, transmission: 0.25, thickness: 0.5 })
-    : new THREE.MeshStandardMaterial({ map: grain(bead.color), roughness: 0.5, metalness: 0 });
+    bead.finish === "metal" ? new THREE.MeshStandardMaterial({ color: bead.color, metalness: 1, roughness: roughness ?? 0.28 })
+    : bead.finish === "stone" ? new THREE.MeshPhysicalMaterial({ color: bead.color, roughness: roughness ?? 0.12, clearcoat: 1, transmission: bead.texture ? 0 : 0.25, thickness: 0.5 })
+    : new THREE.MeshStandardMaterial({ map: grain(bead.color), roughness: roughness ?? 0.5, metalness: 0 });
+  // Có ảnh vân thì hiện vân giả trước, ảnh tải xong mới thay để hạt không trắng trơn lúc chờ
+  if (bead.texture) {
+    const tex = photo(bead.texture, () => {
+      mat.map = tex;
+      mat.color.set(0xffffff);
+      mat.needsUpdate = true;
+    });
+  }
   mat.emissive.setHex(0x6b4a1c);
   mat.emissiveIntensity = 0;
   return mat;
@@ -103,7 +140,8 @@ function geometry(bead: Bead) {
   const r = (bead.sizeMm * MM) / 2;
   // Chặn hạt dẹt như con lăn, charm hơi dẹt, hạt tròn đều
   if (bead.kind === "CHARM" && bead.sizeMm <= 6) return new THREE.CylinderGeometry(r * 1.4, r * 1.4, r * 1.6, 32).rotateZ(Math.PI / 2);
-  const g = new THREE.SphereGeometry(r, 40, 28);
+  // Xoay để hai cực của hình cầu nằm theo lỗ xâu (trục z của hạt là tiếp tuyến vòng)
+  const g = new THREE.SphereGeometry(r, 40, 28).rotateX(Math.PI / 2);
   if (bead.kind === "CHARM") g.scale(0.85, 1.05, 1.05);
   return g;
 }
