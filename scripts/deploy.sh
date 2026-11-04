@@ -77,17 +77,29 @@ EOF
 docker compose -p anchi -f docker-compose.yml -f docker-compose.prod.yml up -d postgres
 until docker compose -p anchi -f docker-compose.yml exec -T postgres pg_isready -U anchi -d anchi >/dev/null 2>&1; do sleep 2; done
 
-log "Cài thư viện và build"
+log "Cài thư viện và build API"
 npm ci --include=dev
-npm run build
+npm run build -w @an-chi/api
 
 log "Chạy migration database"
 npm run db:deploy -w @an-chi/api
 if [ "${SEED:-0}" = "1" ]; then npm run db:seed -w @an-chi/api; fi
 
-log "Khởi động API và web bằng PM2"
+# Next prerender trang lúc build nên API phải chạy trước khi build web
+log "Khởi động API"
 pm2 delete anchi-api anchi-web >/dev/null 2>&1 || true
 pm2 start npm --name anchi-api --cwd "$APP_DIR/apps/api" -- start
+for _ in $(seq 1 30); do
+  curl -s -o /dev/null "http://127.0.0.1:${API_PORT}/" && break
+  sleep 1
+done
+curl -s -o /dev/null "http://127.0.0.1:${API_PORT}/" || { pm2 logs anchi-api --lines 30 --nostream; die "API không khởi động được"; }
+
+log "Build CMS và web"
+npm run build -w @an-chi/cms
+npm run build -w @an-chi/web
+
+log "Khởi động web"
 pm2 start "$APP_DIR/node_modules/next/dist/bin/next" --name anchi-web --cwd "$APP_DIR/apps/web" -- start -p "$WEB_PORT" -H 127.0.0.1
 pm2 save
 pm2 startup systemd -u root --hp /root >/dev/null
