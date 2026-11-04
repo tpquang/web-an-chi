@@ -24,6 +24,18 @@ if [ "${NO_PULL:-0}" != "1" ]; then
   git pull --ff-only
 fi
 
+# npm ci và build Next cần khoảng 2-3 GB RAM. VPS ít RAM mà chưa có swap thì tiến trình bị Killed
+if [ "$(swapon --noheadings | wc -l)" -eq 0 ] && [ "$(awk '/MemTotal/ {print $2}' /proc/meminfo)" -lt 4000000 ]; then
+  log "Tạo swap 4 GB vì VPS ít RAM"
+  [ -f /swapfile ] || { fallocate -l 4G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=4096; }
+  chmod 600 /swapfile
+  mkswap /swapfile >/dev/null
+  swapon /swapfile
+  grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
+# Giới hạn bộ nhớ Node để build không chiếm hết RAM
+export NODE_OPTIONS="--max-old-space-size=1536"
+
 log "Cài thư viện và build API"
 npm ci --include=dev
 npm run build -w @an-chi/api
