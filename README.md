@@ -11,6 +11,14 @@ Website bán trầm hương.
 | `docs` | [Tài liệu dự án](docs/README.md) | |
 | `.claude/skills` | Rule của dự án, xem [CLAUDE.md](CLAUDE.md) | |
 
+## Chạy nhanh
+
+```bash
+npm start
+```
+
+Hoặc bấm đúp `start.command` trong Finder. Script `scripts/dev.sh` tự cài thư viện và tạo `.env` nếu thiếu, mở Docker nếu đang tắt, bật PostgreSQL, áp migration mới, rồi chạy cả API, web, CMS. Ctrl+C để dừng.
+
 ## Chạy lần đầu
 
 Cần Node.js 22.12 trở lên và PostgreSQL ở cổng 5433 (`npm run db:up` dùng Docker).
@@ -38,7 +46,8 @@ Khi chạy dev có các lối tắt để test giao diện: nút **Đăng nhập
 
 | Lệnh | Tác dụng |
 | --- | --- |
-| `npm run dev` | Chạy cả 3 app |
+| `npm start` | Bật Docker, database, migration rồi chạy cả 3 app |
+| `npm run dev` | Chạy cả 3 app, khi database đã bật |
 | `npm run build` | Build cả 3 app |
 | `npm run typecheck` | Kiểm tra kiểu |
 | `npm run db:up` / `db:down` | Bật / tắt PostgreSQL |

@@ -5,7 +5,14 @@ import { ConfirmHost } from "./components/ui/Modal";
 import { Toaster } from "./components/ui/Toast";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { AuthProvider, useAuth } from "./lib/auth";
+import { BatchesPage } from "./pages/BatchesPage";
+import { BatchFormPage } from "./pages/BatchFormPage";
 import { CustomerDetailPage, CustomersPage } from "./pages/CustomersPage";
+import { InboxPage } from "./pages/InboxPage";
+import { StaffPage } from "./pages/StaffPage";
+import { MaterialsPage } from "./pages/MaterialsPage";
+import { MovementsPage } from "./pages/MovementsPage";
+import { PackingPage } from "./pages/PackingPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { LoginPage } from "./pages/LoginPage";
 import { OrderDetailPage } from "./pages/OrderDetailPage";
@@ -26,6 +33,9 @@ function App() {
     <Routes>
       <Route element={<AdminLayout />}>
         <Route index element={<DashboardPage />} />
+        <Route path="inbox" element={<InboxPage />} />
+        <Route path="inbox/:id" element={<InboxPage />} />
+        <Route path="staff" element={<StaffPage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="products/new" element={<ProductFormPage />} />
         <Route path="products/:id" element={<ProductFormPage />} />
@@ -38,6 +48,12 @@ function App() {
         <Route path="orders/:id" element={<OrderDetailPage />} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="customers/:id" element={<CustomerDetailPage />} />
+        <Route path="business" element={<BatchesPage />} />
+        <Route path="business/new" element={<BatchFormPage />} />
+        <Route path="business/:id" element={<BatchFormPage />} />
+        <Route path="materials" element={<MaterialsPage />} />
+        <Route path="packing" element={<PackingPage />} />
+        <Route path="stock" element={<MovementsPage />} />
         <Route path="login" element={<Navigate to="/" replace />} />
         <Route path="*" element={<PlaceholderPage title="Không tìm thấy trang" />} />
       </Route>

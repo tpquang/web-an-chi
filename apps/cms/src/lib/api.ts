@@ -87,6 +87,9 @@ export function fieldErrors(err: unknown): Record<string, string> {
   for (const issue of err.issues) {
     const key = String(issue.path[0] ?? "");
     if (key && !out[key]) out[key] = issue.message;
+    // Lỗi trong danh sách lồng nhau, ví dụ items.0.kg
+    const full = issue.path.join(".");
+    if (full !== key && !out[full]) out[full] = issue.message;
   }
   return out;
 }

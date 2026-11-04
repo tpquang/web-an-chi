@@ -1,7 +1,9 @@
 import {
   cloneElement,
   forwardRef,
+  useEffect,
   useId,
+  useState,
   type InputHTMLAttributes,
   type ReactElement,
   type ReactNode,
@@ -124,3 +126,47 @@ export function Switch({ checked, onChange, label, disabled }: SwitchProps) {
     </label>
   );
 }
+
+type NumberProps = Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "onChange"> & {
+  value: number | null;
+  onChange: (value: number | null) => void;
+  suffix?: string;
+  decimals?: number;
+};
+
+// Số có phần thập phân như kg, phần trăm. Nhận cả dấu phẩy và dấu chấm
+export const NumberInput = forwardRef<HTMLInputElement, NumberProps>(function NumberInput(
+  { value, onChange, suffix, decimals = 2, className = "", ...props },
+  ref,
+) {
+  const [text, setText] = useState(value == null ? "" : String(value).replace(".", ","));
+  useEffect(() => {
+    const parsed = Number(text.replace(",", "."));
+    if (value == null ? text !== "" : parsed !== value) setText(value == null ? "" : String(value).replace(".", ","));
+    // Chỉ đồng bộ khi giá trị bên ngoài đổi, để không ghi đè lúc đang gõ "1,"
+  }, [value]);
+  return (
+    <div className="relative">
+      <input
+        ref={ref}
+        inputMode="decimal"
+        value={text}
+        onChange={(event) => {
+          // Cho phép dấu trừ ở đầu cho số điều chỉnh kho
+          const raw = event.target.value.replace(/[^\d.,-]/g, "").replace(/(?!^)-/g, "");
+          setText(raw);
+          if (raw === "" || raw === "-") return onChange(null);
+          const parsed = Number(raw.replace(",", "."));
+          if (Number.isFinite(parsed)) onChange(Math.round(parsed * 10 ** decimals) / 10 ** decimals);
+        }}
+        className={`${controlClass} h-11 text-right tabular-nums ${suffix ? "pr-11" : ""} ${className}`}
+        {...props}
+      />
+      {suffix && (
+        <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-3">
+          {suffix}
+        </span>
+      )}
+    </div>
+  );
+});

@@ -23,6 +23,8 @@
 
 **Thành phần bán hàng:** `ProductCard`, `ProductGrid`, `ProductImage` (ô có dấu logo khi chưa có ảnh thật), `AddToCart`, `CartButton`, `CartLine`, `OrderSummary`, `MarketplaceLinks`, `PostCard`, `TopicNav`, `PostBody`.
 
+**Chat với shop:** nút "Nhắn shop" góc phải dưới (`ChatLauncher`), khung chat chỉ tải khi mở. Ẩn ở giỏ và đặt hàng nếu khách chưa từng chat, để khu đặt hàng gọn. Khách điền tên, số điện thoại (không bắt buộc) và câu hỏi; đã đăng nhập thì điền sẵn.
+
 **Giỏ hàng:** chỉ lưu slug và số lượng trong `localStorage` (`lib/cart.ts`); giá và tồn kho luôn hỏi lại API. Dữ liệu form đặt hàng giữ trong `sessionStorage` của tab, đóng tab thì mất.
 
 **Chỉ có khi dev:** nút đăng nhập nhanh bằng khách mẫu ở `/dang-nhap` và khối điền nhanh ở `/thanh-toan`, đọc 3 khách đầu trong `sample-data.json` qua `/api/dev/sample-customers` (trả 404 ngoài `next dev`, không trả mật khẩu mẫu).

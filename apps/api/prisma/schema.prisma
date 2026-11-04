@@ -75,6 +75,12 @@ model Product {
   images            ProductImage[]
   orderItems        OrderItem[]
   posts             Post[]
+  components        ProductComponent[]
+  batchPlans        BatchPlan[]
+  movements         StockMovement[]
+  packRuns          PackRun[]
+  // Giá vốn bình quân mỗi sản phẩm đã đóng gói, cập nhật mỗi lần đóng gói
+  unitCostVnd       Float?
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
 
@@ -139,6 +145,7 @@ model Customer {
   address          String?
   // Chỉ true khi khách tự đánh dấu đồng ý nhận tin
   marketingConsent Boolean  @default(false)
+  conversations    Conversation[]
   // null: khách chỉ đặt hàng, chưa tạo tài khoản. Dạng "scrypt$<salt>$<hash>"
   passwordHash     String?
   orders           Order[]
@@ -193,4 +200,257 @@ model Setting {
   key       String   @id
   value     Json
   updatedAt DateTime @updatedAt
+}
+
+// ---- Kho và đợt nhập hàng
+// Nhập nguyên liệu thô (nụ, hộp, túi...), đóng gói theo công thức thành sản phẩm bán (Product.stock).
+// Mọi thay đổi tồn kho ghi vào StockMovement. Số lượng tính theo đơn vị gốc của nguyên liệu.
+
+model Material {
+  id          String              @id @default(cuid())
+  name        String              @unique
+  // Đơn vị gốc: viên, cái, gam...
+  unit        String
+  // Quy đổi để nhập theo kg, ví dụ 800 viên mỗi kg. Để trống nếu không nhập theo kg
+  unitsPerKg  Int?
+  stock       Int                 @default(0)
+  // Giá vốn bình quân mỗi đơn vị, cập nhật mỗi lần nhập kho
+  avgCostVnd  Float               @default(0)
+  note        String?
+  components  ProductComponent[]
+  lines       PurchaseLine[]
+  writeOffs   BatchWriteOff[]
+  movements   StockMovement[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+// Công thức đóng gói: một sản phẩm bán gồm bao nhiêu đơn vị của từng nguyên liệu
+model ProductComponent {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  materialId String
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  quantity   Int
+  position   Int      @default(0)
+
+  @@unique([productId, materialId])
+}
+
+enum BatchStatus {
+  PLANNED
+  ORDERED
+  RECEIVED
+}
+
+model PurchaseBatch {
+  id          String          @id @default(cuid())
+  name        String
+  supplier    String?
+  orderedAt   DateTime?
+  receivedAt  DateTime?
+  status      BatchStatus     @default(PLANNED)
+  // Vốn đang có cho đợt này, để so với vốn cần
+  capitalVnd  Int?
+  // Phí bán ước tính trên doanh thu (sàn, thanh toán), phần trăm
+  feePct      Float           @default(0)
+  note        String?
+  lines       PurchaseLine[]
+  extras      PurchaseExtra[]
+  writeOffs   BatchWriteOff[]
+  plans       BatchPlan[]
+  movements   StockMovement[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([createdAt])
+}
+
+// Một dòng nguyên liệu trong đợt nhập
+model PurchaseLine {
+  id           String        @id @default(cuid())
+  batchId      String
+  batch        PurchaseBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  materialId   String
+  material     Material      @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  position     Int           @default(0)
+  // Số lượng theo đơn vị gốc của nguyên liệu
+  quantity     Int
+  // Thành tiền của dòng
+  totalCostVnd Int
+  // Chỉ để hiển thị lại khi nhập theo kg
+  inputKg      Float?
+  pricePerKgVnd Int?
+
+  @@index([batchId, position])
+}
+
+// Chi phí phát sinh của đợt nhập: ship nhập, thuế... chia vào giá vốn theo tỉ lệ tiền hàng
+model PurchaseExtra {
+  id        String        @id @default(cuid())
+  batchId   String
+  batch     PurchaseBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  position  Int           @default(0)
+  label     String
+  amountVnd Int
+
+  @@index([batchId, position])
+}
+
+// Hao hụt khi nhận hàng: móp, vỡ, ẩm, tiêu huỷ. Không vào kho, chi phí dồn vào phần còn lại
+model BatchWriteOff {
+  id         String        @id @default(cuid())
+  batchId    String
+  batch      PurchaseBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  materialId String
+  material   Material      @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  quantity   Int
+  reason     String
+  position   Int           @default(0)
+}
+
+// Dự kiến đóng bao nhiêu thành phẩm từ đợt nhập, để tính lợi nhuận trước khi nhập kho
+model BatchPlan {
+  id        String        @id @default(cuid())
+  batchId   String
+  batch     PurchaseBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int
+
+  @@unique([batchId, productId])
+}
+
+enum MovementType {
+  PURCHASE
+  WRITE_OFF
+  PACK_CONSUME
+  PACK_PRODUCE
+  ADJUST
+}
+
+// Sổ kho: quantity dương là tăng, âm là giảm
+model StockMovement {
+  id          String         @id @default(cuid())
+  type        MovementType
+  materialId  String?
+  material    Material?      @relation(fields: [materialId], references: [id], onDelete: SetNull)
+  productId   String?
+  product     Product?       @relation(fields: [productId], references: [id], onDelete: SetNull)
+  quantity    Int
+  unitCostVnd Float          @default(0)
+  batchId     String?
+  batch       PurchaseBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  packRunId   String?
+  packRun     PackRun?       @relation(fields: [packRunId], references: [id], onDelete: SetNull)
+  note        String?
+  createdAt   DateTime       @default(now())
+
+  @@index([createdAt])
+  @@index([materialId, createdAt])
+  @@index([productId, createdAt])
+}
+
+// Một lần đóng gói thành phẩm
+model PackRun {
+  id          String          @id @default(cuid())
+  productId   String
+  product     Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity    Int
+  unitCostVnd Float
+  note        String?
+  movements   StockMovement[]
+  createdAt   DateTime        @default(now())
+
+  @@index([createdAt])
+}
+
+// ---- Nhân viên và chăm sóc khách hàng
+
+enum StaffRole {
+  // Chủ shop: toàn quyền, kể cả vốn, kho, nhân viên
+  OWNER
+  // Bán hàng: hộp thư, đơn hàng, khách hàng, sản phẩm, bài viết
+  SALES
+}
+
+model StaffUser {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String
+  passwordHash  String
+  role          StaffRole      @default(SALES)
+  active        Boolean        @default(true)
+  conversations Conversation[]
+  messages      ChatMessage[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+enum ChatChannel {
+  WEB
+  FACEBOOK
+  ZALO
+}
+
+enum ConversationStatus {
+  OPEN
+  PENDING
+  CLOSED
+}
+
+model Conversation {
+  id                String             @id @default(cuid())
+  channel           ChatChannel        @default(WEB)
+  // Mã bí mật của trình duyệt khách (đã băm), lưu trong cookie httpOnly của web
+  visitorKeyHash    String?            @unique
+  name              String
+  phone             String?
+  customerId        String?
+  customer          Customer?          @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  status            ConversationStatus @default(OPEN)
+  assigneeId        String?
+  assignee          StaffUser?         @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
+  tags              String[]           @default([])
+  note              String?
+  // Trang khách đang xem khi bắt đầu chat
+  pageUrl           String?
+  unreadForStaff    Int                @default(0)
+  unreadForCustomer Int                @default(0)
+  lastMessageAt     DateTime           @default(now())
+  lastMessage       String?
+  messages          ChatMessage[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([status, lastMessageAt])
+  @@index([assigneeId, lastMessageAt])
+}
+
+enum MessageSender {
+  CUSTOMER
+  STAFF
+  SYSTEM
+}
+
+model ChatMessage {
+  id             String        @id @default(cuid())
+  conversationId String
+  conversation   Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         MessageSender
+  staffId        String?
+  staff          StaffUser?    @relation(fields: [staffId], references: [id], onDelete: SetNull)
+  body           String
+  createdAt      DateTime      @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+// Câu trả lời mẫu, gõ "/" trong ô chat để chèn
+model QuickReply {
+  id       String @id @default(cuid())
+  title    String
+  body     String
+  position Int    @default(0)
 }

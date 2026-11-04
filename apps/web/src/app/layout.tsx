@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Be_Vietnam_Pro, Cormorant_SC } from "next/font/google";
 import type { ReactNode } from "react";
+import { ChatLauncher } from "@/components/chat/chat-launcher";
 import { SiteHeader } from "@/components/site-header";
 import { getCategories } from "@/lib/api";
 import { Toaster } from "@/components/ui/toast";
@@ -49,6 +50,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body className="flex min-h-dvh flex-col">
         <SiteHeader categories={categories} />
         {children}
+        <ChatLauncher />
         <Toaster />
       </body>
     </html>

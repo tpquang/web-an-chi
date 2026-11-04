@@ -35,3 +35,9 @@ export function options<K extends string>(map: Record<K, { label: string } | str
     return { value, label: typeof entry === "string" ? entry : entry.label };
   });
 }
+
+export const batchStatus: Record<"PLANNED" | "ORDERED" | "RECEIVED", { label: string; tone: Tone }> = {
+  PLANNED: { label: "Đang tính", tone: "neutral" },
+  ORDERED: { label: "Đã đặt hàng", tone: "info" },
+  RECEIVED: { label: "Đã nhận hàng", tone: "ok" },
+};
