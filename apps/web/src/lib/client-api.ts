@@ -5,7 +5,7 @@ import type { CartItem } from "./cart";
 export type QuoteLine = {
   slug: string;
   quantity: number;
-  problem: "UNAVAILABLE" | "OUT_OF_STOCK" | "NOT_ENOUGH" | null;
+  problem: "UNAVAILABLE" | "OUT_OF_STOCK" | "NOT_ENOUGH" | "TOO_LONG" | "TOO_SHORT" | null;
   lineTotalVnd: number;
   product: {
     id: string;
@@ -14,6 +14,19 @@ export type QuoteLine = {
     image: { url: string; alt: string | null } | null;
     unitPriceVnd: number;
     stock: number;
+  } | null;
+  // Chỉ có ở vòng tự thiết kế
+  design: {
+    beads: string[];
+    beadDetails: { slug: string; name: string; sizeMm: number; priceVnd: number }[];
+    cordName?: string;
+    fitName?: string;
+    wristCm: number;
+    lengthMm: number;
+    engraving: string | null;
+    giftBox: boolean;
+    card: string | null;
+    giftWrap: boolean;
   } | null;
 };
 

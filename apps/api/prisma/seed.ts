@@ -34,6 +34,7 @@ type SampleData = {
     note?: string;
     items: { product: string; quantity: number }[];
   }[];
+  beads: { name: string; slug: string; kind: "BEAD" | "CHARM"; material: string; sizeMm: number; priceVnd: number; stock: number; color: string; finish: string; note?: string; position: number }[];
 };
 
 const sample: SampleData = JSON.parse(readFileSync(new URL("./sample-data.json", import.meta.url), "utf8"));
@@ -126,8 +127,12 @@ async function main() {
     });
   }
 
+  for (const bead of sample.beads) {
+    await prisma.bead.upsert({ where: { slug: bead.slug }, update: bead, create: bead });
+  }
+
   console.log(
-    `Seed xong: ${sample.categories.length} danh mục, ${sample.products.length} sản phẩm, ` +
+    `Seed xong: ${sample.beads.length} loại hạt, ${sample.categories.length} danh mục, ${sample.products.length} sản phẩm, ` +
       `${sample.postCategories.length} chủ đề, ${sample.posts.length} bài viết, ` +
       `${sample.customers.length} khách hàng, ${sample.orders.length} đơn hàng.`,
   );

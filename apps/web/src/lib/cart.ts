@@ -3,7 +3,27 @@
 import { useSyncExternalStore } from "react";
 
 // Giỏ chỉ lưu slug và số lượng trong trình duyệt. Giá, tồn kho luôn hỏi lại API
-export type CartItem = { slug: string; quantity: number };
+export type BraceletDesign = {
+  beads: string[];
+  cord: string;
+  fit: string;
+  wristCm: number;
+  engraving?: string;
+  giftBox: boolean;
+  card?: string;
+  giftWrap: boolean;
+};
+// Vòng tự thiết kế: slug là mã băm của thiết kế, hai vòng giống hệt nhau gộp thành một dòng
+export type CartItem = { slug: string; quantity: number; design?: BraceletDesign };
+
+export const BRACELET_PREFIX = "vong-";
+
+function designKey(design: BraceletDesign) {
+  const text = JSON.stringify([design.beads, design.cord, design.fit, design.wristCm, design.engraving ?? "", design.giftBox, design.card ?? "", design.giftWrap]);
+  let hash = 2166136261;
+  for (let i = 0; i < text.length; i++) hash = Math.imul(hash ^ text.charCodeAt(i), 16777619);
+  return BRACELET_PREFIX + (hash >>> 0).toString(36);
+}
 
 const KEY = "anchi-cart";
 const MAX_QUANTITY = 99;
@@ -75,6 +95,17 @@ export const cart = {
   },
   remove(slug: string) {
     write(read().filter((item) => item.slug !== slug));
+  },
+  addBracelet(design: BraceletDesign) {
+    const slug = designKey(design);
+    const items = read();
+    const current = items.find((item) => item.slug === slug);
+    write(
+      current
+        ? items.map((item) => (item.slug === slug ? { ...item, quantity: Math.min(item.quantity + 1, MAX_QUANTITY) } : item))
+        : [...items, { slug, quantity: 1, design }],
+    );
+    return slug;
   },
   clear() {
     write([]);

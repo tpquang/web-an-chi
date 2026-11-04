@@ -205,3 +205,38 @@ export async function forward(path: string, { method = "POST", body, token }: { 
   });
   return new Response(res.body, { status: res.status, headers: { "content-type": "application/json" } });
 }
+
+export type Bead = {
+  id: string;
+  name: string;
+  slug: string;
+  kind: "BEAD" | "CHARM";
+  material: string;
+  sizeMm: number;
+  priceVnd: number;
+  stock: number;
+  color: string;
+  finish: string;
+  note: string | null;
+};
+
+export type BraceletRules = {
+  wristCm: { min: number; max: number };
+  maxLengthMm: number;
+  minBeads: number;
+  maxBeads: number;
+  feeVnd: number;
+  leadTime: string;
+  cords: { id: string; name: string }[];
+  fits: { id: string; name: string; easeCm: number }[];
+  extras: {
+    engraving: { name: string; priceVnd: number; maxLength: number };
+    giftBox: { name: string; priceVnd: number };
+    card: { name: string; priceVnd: number; maxLength: number };
+    giftWrap: { name: string; priceVnd: number };
+  };
+};
+
+export async function getBracelet() {
+  return (await must<{ data: { rules: BraceletRules; beads: Bead[] } }>("/bracelet")).data;
+}

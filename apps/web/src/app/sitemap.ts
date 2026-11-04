@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getCategories, getPostCategories, getPosts, getProducts, type Paged } from "@/lib/api";
-import { categoryHref, postHref, postsHref, productHref, productsHref, topicHref } from "@/lib/links";
+import { braceletHref, categoryHref, postHref, postsHref, productHref, productsHref, topicHref } from "@/lib/links";
 import { absoluteUrl } from "@/lib/seo";
 
 export const revalidate = 3600;
@@ -23,6 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: absoluteUrl("/") },
     { url: absoluteUrl(productsHref) },
+    { url: absoluteUrl(braceletHref) },
     ...categories.map((category) => ({ url: absoluteUrl(categoryHref(category.slug)), lastModified: category.updatedAt })),
     // Trang sản phẩm mỏng đang noindex nên không đưa vào sitemap
     ...products

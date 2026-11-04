@@ -7,6 +7,7 @@ import { errorHandler, notFound } from "./middleware/errors.js";
 import { accountRouter } from "./modules/account/account.routes.js";
 import { adminRouter } from "./modules/admin/admin.routes.js";
 import { blogRouter } from "./modules/blog/blog.routes.js";
+import { braceletRouter } from "./modules/bracelet/bracelet.routes.js";
 import { catalogRouter } from "./modules/catalog/catalog.routes.js";
 import { chatRouter } from "./modules/chat/chat.routes.js";
 import { ordersRouter } from "./modules/orders/orders.routes.js";
@@ -31,6 +32,7 @@ app.get("/health", async (_req, res) => {
 app.use("/api/v1", catalogRouter);
 app.use("/api/v1", blogRouter);
 app.use("/api/v1", ordersRouter);
+app.use("/api/v1", braceletRouter);
 app.use("/api/v1/settings", settingsRouter);
 app.use("/api/v1/account", accountRouter);
 app.use("/api/v1/chat", chatRouter);
