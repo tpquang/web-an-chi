@@ -10,7 +10,7 @@ Set-Location (Join-Path $PSScriptRoot "..")
 function Step($text) { Write-Host "`n$text" -ForegroundColor Green }
 function Fail($text) { Write-Host "Lỗi: $text" -ForegroundColor Red; Read-Host "Nhấn Enter để đóng"; exit 1 }
 function Run($cmd) {
-  cmd /c $cmd
+  & $env:ComSpec /c $cmd
   if ($LASTEXITCODE -ne 0) { Fail "Lệnh '$cmd' báo lỗi (mã $LASTEXITCODE)." }
 }
 
@@ -61,4 +61,4 @@ Step "5/5 Chạy API, web, CMS (Ctrl+C để dừng)"
 Write-Host "Web  http://localhost:3000"
 Write-Host "CMS  http://localhost:3001"
 Write-Host "API  http://localhost:4000/health"
-cmd /c "npm run dev"
+& $env:ComSpec /c "npm run dev"
