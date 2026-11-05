@@ -24,7 +24,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={dark ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"}
-      className="inline-flex size-11 items-center justify-center rounded-md text-ink-2 hover:bg-paper-2 hover:text-wood"
+      className="inline-flex size-11 items-center justify-center rounded-full text-ink-2 hover:bg-paper-2 hover:text-wood"
     >
       {dark ? <SunIcon /> : <MoonIcon />}
     </button>

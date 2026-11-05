@@ -40,7 +40,7 @@ export function BatchesPage() {
         <>
           <div className="mb-6 grid gap-4 sm:grid-cols-3">
             {[["Tổng vốn các đợt", total.capital], ["Doanh thu thành phẩm dự kiến", total.revenue], ["Lợi nhuận dự kiến", total.profit]].map(([label, value]) => (
-              <div key={label} className="rounded-lg border border-line bg-surface p-4">
+              <div key={label} className="rounded-3xl border border-edge bg-surface p-5">
                 <p className="text-sm text-ink-2">{label}</p>
                 <p className={`mt-1 font-serif text-2xl font-semibold lining-nums tabular-nums ${label === "Lợi nhuận dự kiến" && (value as number) < 0 ? "text-err" : ""}`}>{formatVnd(value as number)}</p>
               </div>

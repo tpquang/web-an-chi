@@ -141,7 +141,7 @@ export function ProductFormPage() {
               <div data-field="priceVnd"><Field label="Giá bán" error={errors.priceVnd ? "Bạn nhập giá bán." : undefined}><MoneyInput value={values.priceVnd} onChange={(v) => set("priceVnd", v)} disabled={submitting} /></Field></div>
               <div data-field="compareAtPriceVnd"><Field label="Giá trước đây" optional hint="Chỉ nhập khi đã thực sự bán ở giá này." error={errors.compareAtPriceVnd}><MoneyInput value={values.compareAtPriceVnd} onChange={(v) => set("compareAtPriceVnd", v)} disabled={submitting} /></Field></div>
               <div data-field="stock"><Field label="Tồn kho" error={errors.stock}><Input inputMode="numeric" value={String(values.stock)} onChange={(e) => set("stock", Number(e.target.value.replace(/\D/g, "")) || 0)} disabled={submitting} className="text-right tabular-nums" /></Field></div>
-              <Switch checked={values.featured} onChange={(v) => set("featured", v)} label="Hiện ở mục tiêu biểu trang chủ" disabled={submitting} />
+              <Switch checked={values.featured} onChange={(v) => set("featured", v)} label="Nổi bật ở trang chủ, tối đa 4 sản phẩm" disabled={submitting} />
             </div>
           </Panel>
           <Panel title="Kênh bán khác">

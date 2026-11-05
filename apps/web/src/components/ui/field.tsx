@@ -37,7 +37,7 @@ export function Field({ label, hint, error, optional, children }: FieldProps) {
 }
 
 const control =
-  "w-full rounded-md border border-line-strong bg-surface px-3 text-base text-ink transition-shadow duration-(--d-fast) placeholder:text-ink-3 focus:border-wood focus:shadow-[0_0_0_3px_var(--wood-soft)] focus:outline-none disabled:bg-paper-2 aria-invalid:border-err read-only:bg-paper-2";
+  "w-full rounded-xl border border-line-strong bg-surface px-3 text-base text-ink transition-shadow duration-(--d-fast) placeholder:text-ink-3 focus:border-wood focus:shadow-[0_0_0_3px_var(--wood-soft)] focus:outline-none disabled:bg-paper-2 aria-invalid:border-err read-only:bg-paper-2";
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input(
   { className = "", ...props },

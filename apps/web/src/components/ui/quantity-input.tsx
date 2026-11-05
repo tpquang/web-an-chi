@@ -19,7 +19,7 @@ export function QuantityInput({ value, max, onChange, label, disabled }: Props) 
 
   return (
     <div className="flex flex-col gap-1.5">
-      <div role="group" aria-label={label} className="inline-flex h-11 w-fit items-stretch rounded-md border border-line-strong bg-surface">
+      <div role="group" aria-label={label} className="inline-flex h-11 w-fit items-stretch rounded-full border border-line-strong bg-surface">
         <button
           type="button"
           aria-label="Giảm số lượng"

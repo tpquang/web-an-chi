@@ -2,13 +2,13 @@ import type { ReactNode } from "react";
 import type { Tone } from "../../lib/labels";
 
 export function Skeleton({ className = "" }: { className?: string }) {
-  return <span aria-hidden className={`block animate-pulse rounded-md bg-paper-2 motion-reduce:animate-none ${className}`} />;
+  return <span aria-hidden className={`block animate-pulse rounded-xl bg-paper-2 motion-reduce:animate-none ${className}`} />;
 }
 
 // Khung bảng chờ dữ liệu, cùng chiều cao hàng với bảng thật
 export function TableSkeleton({ rows = 6 }: { rows?: number }) {
   return (
-    <div aria-busy className="rounded-lg border border-line bg-surface">
+    <div aria-busy className="rounded-3xl border border-edge bg-surface px-2">
       {Array.from({ length: rows }, (_, i) => (
         <div key={i} className="flex items-center gap-4 border-b border-line px-3 py-4 last:border-0">
           <Skeleton className="h-4 flex-1" />
@@ -22,7 +22,7 @@ export function TableSkeleton({ rows = 6 }: { rows?: number }) {
 
 export function EmptyState({ title, desc, action }: { title: string; desc?: string; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed border-line p-6">
+    <div className="flex flex-col items-start gap-3 rounded-2xl border border-dashed border-line p-6">
       <p className="font-medium">{title}</p>
       {desc && <p className="text-ink-2">{desc}</p>}
       {action}
@@ -32,7 +32,7 @@ export function EmptyState({ title, desc, action }: { title: string; desc?: stri
 
 export function ErrorState({ title, desc, onRetry }: { title: string; desc?: string; onRetry?: () => void }) {
   return (
-    <div role="alert" className="flex flex-col items-start gap-3 rounded-lg bg-err-soft p-6">
+    <div role="alert" className="flex flex-col items-start gap-3 rounded-2xl bg-err-soft p-6">
       <p className="font-medium text-err">{title}</p>
       {desc && <p className="text-ink-2">{desc}</p>}
       {onRetry && (
@@ -54,5 +54,5 @@ const tones: Record<Tone, string> = {
 };
 
 export function Tag({ tone = "neutral", children }: { tone?: Tone; children: ReactNode }) {
-  return <span className={`inline-flex h-5.5 items-center rounded-sm px-2 text-xs font-semibold whitespace-nowrap ${tones[tone]}`}>{children}</span>;
+  return <span className={`inline-flex h-5.5 items-center rounded-full px-2 text-xs font-semibold whitespace-nowrap ${tones[tone]}`}>{children}</span>;
 }

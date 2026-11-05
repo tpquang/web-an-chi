@@ -59,9 +59,9 @@ export function LoginPage() {
       <div className="fixed top-3 right-3">
         <ThemeToggle />
       </div>
-      <form onSubmit={handleSubmit} noValidate className="flex w-full max-w-sm flex-col gap-4 rounded-xl border border-line bg-surface p-6">
+      <form onSubmit={handleSubmit} noValidate className="flex w-full max-w-sm flex-col gap-4 rounded-3xl border border-line bg-surface p-6">
         <div>
-          <BrandMark className="mb-3 size-14 text-wood" />
+          <BrandMark className="mb-3 size-14 text-brand" />
           <p className="font-serif text-3xl font-semibold text-wood">An Chi CMS</p>
           <h1 className="mt-1 text-ink-2">Đăng nhập để quản lý cửa hàng</h1>
         </div>

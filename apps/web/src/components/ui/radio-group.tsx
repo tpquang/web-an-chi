@@ -24,7 +24,7 @@ export function RadioGroup<T extends string>({ name, value, options, onChange, l
         return (
           <label
             key={option.value}
-            className={`flex min-h-11 cursor-pointer items-start gap-2 rounded-md border bg-surface p-3 ${checked ? "border-wood" : "border-line"} ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
+            className={`flex min-h-11 cursor-pointer items-start gap-2 rounded-xl border bg-surface p-3 ${checked ? "border-wood" : "border-line"} ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
           >
             <input
               type="radio"

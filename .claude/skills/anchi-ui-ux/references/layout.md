@@ -54,6 +54,20 @@ Nội dung = `min(1180, cửa sổ − 2 × lề)`.
 | Bảng rộng | Cuộn trong khung riêng | Cuộn nếu thiếu chỗ | Đủ chỗ |
 | Modal | Sheet hoặc toàn màn hình | Hộp giữa màn hình | Hộp giữa màn hình |
 
+## Trang chủ
+
+Theo mẫu thiết kế: nền kem, tấm bo lớn, một khối tối. Thứ tự cố định, không thêm khối khác khi chưa ghi vào đây.
+
+| Khối | Dưới 960 | Từ 960 | Nguồn nội dung |
+|---|---|---|---|
+| Banner | Chữ trên, ảnh 4:3 dưới, hai thẻ thông tin xếp dưới ảnh | Chữ 6 cột, ảnh 6 cột tỉ lệ 5:6, thẻ kính nổi góc phải dưới ảnh | CMS `/home`: eyebrow, tiêu đề H1, lời dẫn, ảnh, hai nút. Thẻ thông tin lấy từ cấu hình cửa hàng |
+| Sản phẩm nổi bật | 2 cột | 4 cột | Sản phẩm bật nổi bật, tối đa 4. Không có thì ẩn khối |
+| Slide giới thiệu | Chữ dưới, lớp tối từ dưới lên | Chữ trái tối đa 576px, lớp tối từ trái sang | CMS `/home`, 1–6 slide |
+| Bài viết nổi bật | 1 cột, 2 cột từ 720 | 3 cột | Bài bật nổi bật, tối đa 3. Không có thì lấy 3 bài mới nhất |
+| Footer | Một cột | Ba cột trong tấm `rounded-3xl` | Cấu hình cửa hàng |
+
+Không đưa số liệu chưa kiểm chứng như "10K+ khách hài lòng" hay ảnh đại diện khách vào banner, theo `anchi-brand`.
+
 ## Thẳng hàng
 
 Breadcrumb, tiêu đề trang và mọi khối nội dung dùng chung một mép trái. Breadcrumb chữ 13px, cách H1 12px, vùng bấm tối thiểu 24px, dấu `/` màu `line-strong`, mục cuối một dòng.

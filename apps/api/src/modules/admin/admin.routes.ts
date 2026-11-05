@@ -10,6 +10,7 @@ import { adminBlogRouter } from "./admin.blog.js";
 import { adminBraceletRouter } from "./admin.bracelet.js";
 import { adminBusinessRouter } from "./admin.business.js";
 import { adminCatalogRouter } from "./admin.catalog.js";
+import { adminHomeRouter } from "./admin.home.js";
 import { adminInboxRouter } from "./admin.inbox.js";
 import { adminInventoryRouter } from "./admin.inventory.js";
 import { adminSalesRouter } from "./admin.sales.js";
@@ -59,6 +60,7 @@ adminRouter.get("/me", (_req, res) => {
 });
 
 adminRouter.use(adminInboxRouter);
+adminRouter.use(adminHomeRouter);
 adminRouter.use(adminCatalogRouter);
 adminRouter.use(adminBraceletRouter);
 adminRouter.use(adminBlogRouter);

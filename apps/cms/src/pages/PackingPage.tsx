@@ -92,7 +92,7 @@ export function PackingPage() {
                   <NumberInput value={quantity} onChange={(v) => setQuantity(v == null ? null : Math.round(v))} decimals={0} disabled={submitting} />
                 </Field>
                 {recipe && qty > 0 && (
-                  <dl aria-live="polite" className="flex flex-col gap-1 rounded-md bg-paper-2 p-3 text-sm">
+                  <dl aria-live="polite" className="flex flex-col gap-1 rounded-xl bg-paper-2 p-3 text-sm">
                     {recipe.components.map((c) => (
                       <div key={c.material.id} className="flex justify-between gap-3">
                         <dt className="text-ink-2">{c.material.name}</dt>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { PostCategory } from "@/lib/api";
 import { postsHref, topicHref } from "@/lib/links";
 
-const chip = "inline-flex min-h-11 items-center rounded-md border px-4 text-sm";
+const chip = "inline-flex min-h-11 items-center rounded-full border px-4 text-sm";
 
 // Hàng chủ đề trên đầu danh sách bài viết; mục đang xem có aria-current
 export function TopicNav({ topics, current }: { topics: PostCategory[]; current?: string }) {

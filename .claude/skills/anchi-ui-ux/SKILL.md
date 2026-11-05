@@ -20,6 +20,10 @@ description: Quy tắc giao diện An Chi gồm bảng màu gỗ sáng tối, to
 | Sinh lại bảng màu sau khi đổi token | `node .claude/skills/anchi-ui-ux/scripts/build-palette.mjs` |
 | Tìm màu viết cứng | `node .claude/skills/anchi-ui-ux/scripts/find-hardcoded-colors.mjs` |
 
+## 0. Phong cách
+
+Ấm, mềm, nhiều khoảng thở, theo mẫu trang chủ đã duyệt (11/2026): nền kem, nội dung trên tấm `surface` bo 24px không viền, nút viên thuốc màu gỗ caramel, mũi tên tròn, ảnh lớn bo góc, thẻ kính nổi trên ảnh, một khối tối than gỗ mỗi trang. Chữ giữ Cormorant SC và Be Vietnam Pro. Chi tiết ở `foundations.md` (bo góc, tấm, bóng), `colors.md` (khối tối), `components.md` (nút, thẻ, slider), `layout.md` (trang chủ). Web và CMS dùng chung phong cách này.
+
 ## 1. Token
 
 - Component chỉ dùng token vai trò qua class Tailwind như `bg-paper`, `text-ink`, `bg-wood`, `border-line`. Đổi màu toàn sản phẩm chỉ sửa một file, nên hex rải rác sẽ làm sót chỗ và vỡ theme tối.

@@ -22,7 +22,7 @@ function Stat({ label, value, to }: { label: string; value: string; to?: string 
       <p className="mt-1 font-serif text-[28px] leading-tight font-semibold lining-nums tabular-nums">{value}</p>
     </>
   );
-  const cls = "block rounded-lg border border-line bg-surface p-4";
+  const cls = "block rounded-3xl border border-edge bg-surface p-5";
   return to ? (
     <Link to={to} className={`${cls} hover:border-wood`}>
       {body}

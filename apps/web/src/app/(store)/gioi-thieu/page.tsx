@@ -62,14 +62,14 @@ export default async function AboutPage() {
           </p>
         </div>
         <div className="flex items-start justify-center lg:col-span-4">
-          <BrandLogo variant="stacked" className="text-5xl text-wood" />
+          <BrandLogo variant="stacked" className="text-5xl text-brand" />
         </div>
       </div>
 
       <Section title="Nguyên tắc bán hàng" id="nguyen-tac">
         <ul className="grid gap-4 md:grid-cols-2">
           {principles.map((item) => (
-            <li key={item.title} className="rounded-lg border border-line bg-surface p-5">
+            <li key={item.title} className="rounded-3xl border border-edge bg-surface p-5">
               <h3 className="font-serif text-xl font-semibold">{item.title}</h3>
               <p className="mt-2 text-ink-2">{item.text}</p>
             </li>

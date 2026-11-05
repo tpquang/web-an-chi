@@ -74,7 +74,7 @@ export function Thread({ conversation, messages, quickReplies, onSent, onManageR
           const staff = m.sender === "STAFF";
           return (
             <li key={m.id} className={`flex max-w-[80%] flex-col ${staff ? "items-end self-end" : "items-start self-start"}`}>
-              <span className={`rounded-lg px-3 py-2 text-[15px] whitespace-pre-line ${staff ? "bg-wood text-on-wood" : "border border-line bg-surface"}`}>{m.body}</span>
+              <span className={`rounded-2xl px-3 py-2 text-[15px] whitespace-pre-line ${staff ? "bg-wood text-on-wood" : "border border-line bg-surface"}`}>{m.body}</span>
               <span className="mt-0.5 text-xs text-ink-3">{staff && m.staff ? `${m.staff.name} · ` : ""}{clockTime(m.createdAt)}</span>
             </li>
           );
@@ -82,10 +82,10 @@ export function Thread({ conversation, messages, quickReplies, onSent, onManageR
       </ol>
       <form onSubmit={send} className="relative border-t border-line p-3">
         {matches.length > 0 && (
-          <ul role="listbox" aria-label="Câu trả lời mẫu" className="absolute right-3 bottom-full left-3 mb-1 max-h-60 overflow-y-auto rounded-lg border border-line bg-surface p-1.5 shadow-e2">
+          <ul role="listbox" aria-label="Câu trả lời mẫu" className="absolute right-3 bottom-full left-3 mb-1 max-h-60 overflow-y-auto rounded-2xl border border-line bg-surface p-1.5 shadow-e2">
             {matches.map((r, i) => (
               <li key={r.title + i} role="option" aria-selected={i === 0}>
-                <button type="button" onClick={() => pick(r)} className={`flex w-full flex-col rounded-md px-3 py-2 text-left text-sm hover:bg-paper-2 ${i === 0 ? "bg-paper-2" : ""}`}>
+                <button type="button" onClick={() => pick(r)} className={`flex w-full flex-col rounded-xl px-3 py-2 text-left text-sm hover:bg-paper-2 ${i === 0 ? "bg-paper-2" : ""}`}>
                   <span className="font-medium">{r.title}</span>
                   <span className="line-clamp-1 text-ink-3">{r.body}</span>
                 </button>

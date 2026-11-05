@@ -76,7 +76,7 @@ export function RecipePanel({ productId, priceVnd }: { productId: string; priceV
             <Button size="sm" onClick={save} loading={submitting}>Lưu cấu thành</Button>
           </div>
           {valid.length > 0 && (
-            <dl className="mt-2 grid gap-2 rounded-md bg-paper-2 p-3 text-sm sm:grid-cols-3">
+            <dl className="mt-2 grid gap-2 rounded-xl bg-paper-2 p-3 text-sm sm:grid-cols-3">
               <div><dt className="text-ink-3">Giá vốn theo kho</dt><dd className="font-medium tabular-nums">{formatVnd(cost)}</dd></div>
               <div><dt className="text-ink-3">Lãi gộp mỗi sản phẩm</dt><dd className={`font-medium tabular-nums ${priceVnd - cost < 0 ? "text-err" : "text-ok"}`}>{formatVnd(priceVnd - cost)}</dd></div>
               <div><dt className="text-ink-3">Đóng được từ kho</dt><dd className="font-medium tabular-nums">{formatQty(canPack, "sản phẩm")}</dd></div>

@@ -22,16 +22,29 @@ export function PageHeader({ title, desc, crumbs, actions }: HeaderProps) {
   );
 }
 
-type SectionProps = { title: string; id?: string; action?: ReactNode; children: ReactNode; className?: string };
+type SectionProps = { title: string; eyebrow?: string; id?: string; action?: ReactNode; children: ReactNode; className?: string };
 
-export function Section({ title, id, action, children, className = "" }: SectionProps) {
+// Dòng nhỏ trên tiêu đề, có gạch ngắn phía trước như mẫu trang chủ
+export function Eyebrow({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return (
+    <p className={`flex items-center gap-3 text-[13px] font-medium tracking-wide text-wood ${className}`}>
+      <span aria-hidden className="h-px w-6 bg-current" />
+      {children}
+    </p>
+  );
+}
+
+export function Section({ title, eyebrow, id, action, children, className = "" }: SectionProps) {
   const headingId = id ?? undefined;
   return (
-    <section aria-labelledby={headingId} className={`mt-16 ${className}`}>
-      <div className="mb-6 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-        <h2 id={headingId} className="font-serif text-[32px] leading-[1.15] font-medium">
-          {title}
-        </h2>
+    <section aria-labelledby={headingId} className={`mt-20 lg:mt-24 ${className}`}>
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+        <div>
+          {eyebrow && <Eyebrow className="mb-3">{eyebrow}</Eyebrow>}
+          <h2 id={headingId} className="font-serif text-[clamp(28px,3.2vw,40px)] leading-[1.12] font-medium">
+            {title}
+          </h2>
+        </div>
         {action}
       </div>
       {children}

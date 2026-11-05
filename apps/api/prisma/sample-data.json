@@ -293,7 +293,7 @@
       "priceVnd": 480000,
       "stock": 20,
       "origin": "Khánh Hòa",
-      "featured": true,
+      "featured": false,
       "shopeeUrl": "https://shopee.vn/search?keyword=b%E1%BB%99t%20tr%E1%BA%A7m%20x%C3%B4ng%20nh%C3%A0"
     },
     {
@@ -494,7 +494,7 @@
       "stock": 3,
       "origin": "Khánh Hòa",
       "shopeeUrl": "https://shopee.vn/search?keyword=chu%E1%BB%97i%20tr%E1%BA%A7m%20h%C6%B0%C6%A1ng%20108%20h%E1%BA%A1t",
-      "featured": true
+      "featured": false
     },
     {
       "name": "Trầm miếng xông, gói 20g",
@@ -543,6 +543,7 @@
     {
       "title": "Cách phân biệt trầm hương thật",
       "slug": "cach-phan-biet-tram-huong-that",
+      "featured": true,
       "category": "kien-thuc-tram-huong",
       "authorName": "Ban biên tập An Chi",
       "publishedAt": "2026-10-05T08:00:00+07:00",
@@ -558,6 +559,7 @@
     {
       "title": "Trầm tự nhiên và trầm cấy khác nhau thế nào",
       "slug": "tram-tu-nhien-va-tram-cay",
+      "featured": true,
       "category": "kien-thuc-tram-huong",
       "authorName": "Ban biên tập An Chi",
       "publishedAt": "2026-10-12T08:00:00+07:00",
@@ -572,6 +574,7 @@
     {
       "title": "Cách đốt nụ trầm đúng cách",
       "slug": "cach-dot-nu-tram",
+      "featured": true,
       "category": "huong-dan-su-dung",
       "authorName": "Ban biên tập An Chi",
       "publishedAt": "2026-10-18T08:00:00+07:00",

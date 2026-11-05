@@ -77,13 +77,13 @@ export const api = {
   upload,
 };
 
-// Gửi thẳng file ảnh làm body, không bọc JSON
-async function upload<T>(path: string, file: Blob): Promise<T> {
+// Gửi thẳng file ảnh làm body, không bọc JSON. PUT thay ảnh có sẵn, POST tạo ảnh mới
+async function upload<T>(path: string, file: Blob, method: "PUT" | "POST" = "PUT"): Promise<T> {
   const token = getToken();
   let res: Response;
   try {
     res = await fetch(`${API_URL}/api/v1/admin${path}`, {
-      method: "PUT",
+      method,
       headers: { "content-type": file.type, ...(token ? { authorization: `Bearer ${token}` } : {}) },
       body: file,
     });

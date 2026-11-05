@@ -51,6 +51,7 @@ export type PostRow = {
   title: string;
   slug: string;
   status: PublishStatus;
+  featured: boolean;
   publishedAt: string | null;
   updatedAt: string;
   authorName: string;
@@ -70,6 +71,7 @@ export type Post = {
   metaTitle: string | null;
   metaDescription: string | null;
   categoryId: string;
+  featured: boolean;
   productIds: string[];
 };
 
@@ -110,3 +112,13 @@ export type Order = OrderRow & {
 };
 
 export type Customer = Omit<CustomerRow, "spentVnd" | "lastOrderAt" | "_count"> & { orders: OrderRow[] };
+
+export type HomeLink = { label: string; href: string };
+export type HomeBanner = { eyebrow: string; title: string; text: string; imageId: string | null; imageAlt: string; primary: HomeLink; secondary: HomeLink | null };
+export type HomeSlide = { eyebrow: string; title: string; text: string; imageId: string | null; imageAlt: string; cta: HomeLink | null };
+export type HomeConfig = { banner: HomeBanner; slides: HomeSlide[] };
+export type FeaturedSummary = {
+  products: { id: string; name: string; status: PublishStatus }[];
+  posts: { id: string; title: string; status: PublishStatus }[];
+  limit: { products: number; posts: number };
+};

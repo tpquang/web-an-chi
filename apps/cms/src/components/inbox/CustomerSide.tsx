@@ -46,7 +46,7 @@ export function CustomerSide({ conversation, staff, onUpdated }: Props) {
               type="button"
               aria-pressed={conversation.status === s}
               onClick={() => patch({ status: s }, `Đã chuyển sang "${conversationStatus[s].label}".`)}
-              className={`min-h-9 rounded-md border px-3 text-sm ${conversation.status === s ? "border-wood bg-wood-soft text-wood" : "border-line hover:border-wood"}`}
+              className={`min-h-9 rounded-full border px-3 text-sm ${conversation.status === s ? "border-wood bg-wood-soft text-wood" : "border-line hover:border-wood"}`}
             >
               {conversationStatus[s].label}
             </button>
@@ -77,7 +77,7 @@ export function CustomerSide({ conversation, staff, onUpdated }: Props) {
             <ul className="flex flex-col gap-1">
               {c.orders.map((o) => (
                 <li key={o.id}>
-                  <Link to={`/orders/${o.id}`} className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 hover:bg-paper-2">
+                  <Link to={`/orders/${o.id}`} className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 hover:bg-paper-2">
                     <span>{o.code}<span className="block text-xs text-ink-3">{formatDate(o.createdAt)} · {formatVnd(o.totalVnd)}</span></span>
                     <Tag tone={orderStatus[o.status].tone}>{orderStatus[o.status].label}</Tag>
                   </Link>

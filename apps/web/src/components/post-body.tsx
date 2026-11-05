@@ -41,7 +41,7 @@ export function TableOfContents({ blocks }: { blocks: Block[] }) {
   const headings = blocks.filter((block): block is Heading => block.type === "h2");
   if (headings.length < 2) return null;
   return (
-    <nav aria-labelledby="muc-luc" className="rounded-lg border border-line bg-surface p-5">
+    <nav aria-labelledby="muc-luc" className="rounded-3xl border border-edge bg-surface p-5">
       <p id="muc-luc" className="font-serif text-xl font-semibold">
         Mục lục
       </p>

@@ -20,7 +20,7 @@ export function BankTransferBox({ payment, totalVnd }: { payment: NonNullable<Or
     ["Nội dung chuyển khoản", payment.transferNote],
   ];
   return (
-    <section aria-labelledby="chuyen-khoan" className="rounded-lg border border-wood bg-surface p-5 md:p-6">
+    <section aria-labelledby="chuyen-khoan" className="rounded-2xl border border-wood bg-surface p-5 md:p-6">
       <h2 id="chuyen-khoan" className="font-serif text-2xl leading-tight font-semibold">
         Thông tin chuyển khoản
       </h2>
@@ -39,7 +39,7 @@ export function BankTransferBox({ payment, totalVnd }: { payment: NonNullable<Or
 
 export function OrderDetails({ order }: { order: OrderSummary & { customerName?: string; address?: string } }) {
   return (
-    <section aria-labelledby="chi-tiet-don" className="rounded-lg border border-line bg-surface p-5 md:p-6">
+    <section aria-labelledby="chi-tiet-don" className="rounded-3xl border border-edge bg-surface p-5 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 id="chi-tiet-don" className="font-serif text-2xl leading-tight font-semibold">
           Đơn {order.code}

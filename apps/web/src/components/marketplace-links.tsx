@@ -19,7 +19,7 @@ export function MarketplaceLinks({ shopeeUrl, tiktokUrl, medium, content, classN
           href={link.href}
           target="_blank"
           rel="noopener"
-          className="inline-flex min-h-11 items-center gap-2 rounded-md border border-line-strong px-4 text-sm font-medium hover:border-wood hover:text-wood"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line-strong px-4 text-sm font-medium hover:border-wood hover:text-wood"
         >
           {link.label}
           <ExternalIcon size={16} />

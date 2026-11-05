@@ -54,7 +54,7 @@ export function Field({ label, hint, error, optional, counter, children }: Field
 }
 
 export const controlClass =
-  "w-full rounded-md border border-line-strong bg-surface px-3 text-base text-ink placeholder:text-ink-3 focus:border-wood focus:shadow-[0_0_0_3px_var(--wood-soft)] focus:outline-none disabled:bg-paper-2 aria-invalid:border-err";
+  "w-full rounded-xl border border-line-strong bg-surface px-3 text-base text-ink placeholder:text-ink-3 focus:border-wood focus:shadow-[0_0_0_3px_var(--wood-soft)] focus:outline-none disabled:bg-paper-2 aria-invalid:border-err";
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input({ className = "", ...props }, ref) {
   return <input ref={ref} className={`${controlClass} h-11 ${className}`} {...props} />;

@@ -8,10 +8,17 @@
   --color-ink-3: var(--ink-3);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
+  --color-edge: var(--edge);
   --color-wood: var(--wood);
   --color-wood-hover: var(--wood-hover);
   --color-wood-soft: var(--wood-soft);
   --color-on-wood: var(--on-wood);
+  --color-brand: var(--brand);
+  --color-night: var(--night);
+  --color-on-night: var(--on-night);
+  --color-on-night-2: var(--on-night-2);
+  --color-shade: var(--shade);
+  --color-glass: var(--glass);
   --color-brass: var(--brass);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);

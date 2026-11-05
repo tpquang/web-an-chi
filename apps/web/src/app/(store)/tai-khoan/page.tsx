@@ -34,7 +34,7 @@ export default async function AccountPage() {
             <ul className="flex flex-col gap-3">
               {account.orders.map((order) => (
                 <li key={order.code}>
-                  <Link href={orderHref(order.code)} className="block rounded-lg border border-line bg-surface p-4 hover:border-wood">
+                  <Link href={orderHref(order.code)} className="block rounded-2xl border border-edge bg-surface p-4 hover:border-wood">
                     <span className="flex flex-wrap items-center justify-between gap-2">
                       <span className="font-medium">{order.code}</span>
                       <Tag tone={order.status === "COMPLETED" ? "ok" : order.status === "CANCELLED" ? "neutral" : "info"}>

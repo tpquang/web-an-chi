@@ -26,7 +26,7 @@ export function CartLine({ line, disabled }: { line: QuoteLine; disabled?: boole
 
   return (
     <li className="flex gap-4 py-5">
-      <div className="relative size-18 flex-none overflow-hidden rounded-md bg-paper-2">
+      <div className="relative size-18 flex-none overflow-hidden rounded-xl bg-paper-2">
         {product?.image ? (
           <Image src={product.image.url} alt={product.image.alt ?? name} fill sizes="72px" className="object-cover" />
         ) : (

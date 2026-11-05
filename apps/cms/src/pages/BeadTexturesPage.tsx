@@ -238,7 +238,7 @@ function UploadModal({ row, onClose, onSaved }: { row: Row; onClose(): void; onS
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="relative aspect-square w-full overflow-hidden rounded-lg border border-line bg-paper-2">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-line bg-paper-2">
             <Suspense fallback={<p className="flex size-full items-center justify-center text-sm text-ink-3">Đang dựng hạt 3D…</p>}>
               <BeadPreview source={version ? output.current : null} version={version} sizeMm={sizeMm} roughness={roughness} finish={row.finish} />
             </Suspense>
@@ -377,7 +377,7 @@ function SampleCanvas({ kind }: { kind: "dung" | "hat-tron" | "lot-nen" | "bong-
       }
     }
   }, [kind]);
-  return <canvas ref={ref} aria-hidden className="aspect-square w-full rounded-md border border-line" />;
+  return <canvas ref={ref} aria-hidden className="aspect-square w-full rounded-xl border border-line" />;
 }
 
 function FilePicker({ onPick, error }: { onPick(file: File | undefined): void; error: string | null }) {
@@ -388,7 +388,7 @@ function FilePicker({ onPick, error }: { onPick(file: File | undefined): void; e
         onDragOver={(e) => (e.preventDefault(), setOver(true))}
         onDragLeave={() => setOver(false)}
         onDrop={(e) => (e.preventDefault(), setOver(false), onPick(e.dataTransfer.files[0]))}
-        className={`flex min-h-36 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed p-4 text-center transition-colors duration-(--d-fast) has-focus-visible:outline-2 has-focus-visible:outline-wood ${over ? "border-wood bg-wood-soft" : "border-line-strong hover:border-wood"}`}
+        className={`flex min-h-36 cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed p-4 text-center transition-colors duration-(--d-fast) has-focus-visible:outline-2 has-focus-visible:outline-wood ${over ? "border-wood bg-wood-soft" : "border-line-strong hover:border-wood"}`}
       >
         <span className="font-medium">Chọn ảnh vân hoặc kéo ảnh vào đây</span>
         <span className="text-sm text-ink-3">JPG, PNG, WebP · cạnh ngắn từ {TEXTURE_SIDE} px</span>
@@ -440,7 +440,7 @@ function CropStage({ bitmap, crop, onChange }: { bitmap: ImageBitmap; crop: Crop
 
   const pct = (v: number, total: number) => `${(v / total) * 100}%`;
   return (
-    <div ref={stage} className="relative w-full overflow-hidden rounded-lg border border-line bg-paper-2 select-none" style={{ aspectRatio: `${bitmap.width} / ${bitmap.height}` }}>
+    <div ref={stage} className="relative w-full overflow-hidden rounded-2xl border border-line bg-paper-2 select-none" style={{ aspectRatio: `${bitmap.width} / ${bitmap.height}` }}>
       <canvas ref={canvas} aria-hidden className="block size-full" />
       <div
         role="slider"
@@ -457,7 +457,7 @@ function CropStage({ bitmap, crop, onChange }: { bitmap: ImageBitmap; crop: Crop
         <span aria-hidden className="absolute inset-y-0 left-2/3 w-px bg-on-wood/60" />
         <span aria-hidden className="absolute inset-x-0 top-1/3 h-px bg-on-wood/60" />
         <span aria-hidden className="absolute inset-x-0 top-2/3 h-px bg-on-wood/60" />
-        <span className="absolute -top-7 left-0 rounded-sm bg-surface px-1.5 py-0.5 text-xs whitespace-nowrap text-ink shadow-e1">Kéo khung vào vùng vân đẹp nhất</span>
+        <span className="absolute -top-7 left-0 rounded-full bg-surface px-1.5 py-0.5 text-xs whitespace-nowrap text-ink shadow-e1">Kéo khung vào vùng vân đẹp nhất</span>
       </div>
     </div>
   );

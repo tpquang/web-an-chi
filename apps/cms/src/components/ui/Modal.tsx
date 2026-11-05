@@ -63,7 +63,7 @@ export function Modal({ open, onClose, title, children, footer, wide, locked }: 
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`relative flex max-h-[90dvh] w-full flex-col rounded-t-xl bg-surface shadow-e4 focus:outline-none md:rounded-xl ${wide ? "md:max-w-3xl" : "md:max-w-lg"}`}
+        className={`relative flex max-h-[90dvh] w-full flex-col rounded-t-3xl bg-surface shadow-e4 focus:outline-none md:rounded-3xl ${wide ? "md:max-w-3xl" : "md:max-w-lg"}`}
       >
         <div className="flex items-start justify-between gap-4 p-5 pb-0 md:p-6 md:pb-0">
           <h2 id={titleId} className="font-serif text-2xl leading-tight font-semibold">
@@ -74,7 +74,7 @@ export function Modal({ open, onClose, title, children, footer, wide, locked }: 
             onClick={onClose}
             disabled={locked}
             aria-label="Đóng"
-            className="-mt-2 -mr-2 inline-flex size-11 flex-none items-center justify-center rounded-md text-ink-3 hover:text-ink disabled:opacity-40"
+            className="-mt-2 -mr-2 inline-flex size-11 flex-none items-center justify-center rounded-full text-ink-3 hover:text-ink disabled:opacity-40"
           >
             <CloseIcon />
           </button>

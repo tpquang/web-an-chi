@@ -5,16 +5,14 @@ Thứ tự section từ trên xuống. Mọi section SEO render ở server.
 ## Trang chủ
 
 ```
-Hero: H1 có từ khoá + câu dẫn + một nút primary
-Danh mục chính: 3–6 thẻ
-Sản phẩm tiêu biểu: 4–8 thẻ
-Vì sao tin An Chi: nguồn hàng, cách kiểm tra, đổi trả. Chỉ dữ kiện thật
-Cách chọn trầm: ≤ 200 chữ, dẫn sang trang hub
-Bài viết mới: 3–4 bài
-Câu hỏi thường gặp
+Banner: H1 có từ khoá + câu dẫn + một nút primary, thẻ phí giao và cách đặt hàng (CMS /home)
+Sản phẩm nổi bật: tối đa 4 thẻ
+Slide giới thiệu trầm hương: 1–6 slide, có slide dẫn sang trang hub cách phân biệt trầm (CMS /home)
+Bài viết nổi bật: tối đa 3 bài
+Footer
 ```
 
-Khoảng 500–800 chữ. Bằng chứng xã hội chỉ dùng số thật.
+Thứ tự khối cố định theo `anchi-ui-ux/references/layout.md`. Danh mục nằm trong menu Sản phẩm ở header. Chữ của mọi slide có trong HTML server nên Google đọc được, slide nên giữ phần cách chọn trầm và lý do tin An Chi. Bằng chứng xã hội chỉ dùng số thật.
 
 ## Danh mục
 

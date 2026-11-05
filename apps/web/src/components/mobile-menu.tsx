@@ -57,13 +57,13 @@ export function MobileMenu({ onClose, account }: Props) {
         className="absolute inset-y-0 right-0 flex w-[min(360px,88vw)] flex-col bg-surface pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] shadow-e4"
       >
         <div className="flex h-(--header-h) items-center justify-between border-b border-line px-4">
-          <BrandMark className="size-9 text-wood" />
+          <BrandMark className="size-9 text-brand" />
           <button
             ref={closeRef}
             type="button"
             onClick={onClose}
             aria-label="Đóng menu"
-            className="inline-flex size-11 items-center justify-center rounded-md text-ink-2 hover:bg-paper-2"
+            className="inline-flex size-11 items-center justify-center rounded-full text-ink-2 hover:bg-paper-2"
           >
             <CloseIcon />
           </button>
@@ -76,7 +76,7 @@ export function MobileMenu({ onClose, account }: Props) {
                   href={link.href}
                   onClick={onClose}
                   aria-current={pathname === link.href ? "page" : undefined}
-                  className={`flex min-h-12 items-center rounded-md px-3 text-lg hover:bg-paper-2 ${isActive(pathname, link.href) ? "font-medium text-wood" : ""}`}
+                  className={`flex min-h-12 items-center rounded-xl px-3 text-lg hover:bg-paper-2 ${isActive(pathname, link.href) ? "font-medium text-wood" : ""}`}
                 >
                   {link.label}
                 </Link>

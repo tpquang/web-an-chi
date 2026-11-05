@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { FeaturedToggle } from "../components/FeaturedToggle";
 import { PlusIcon, SearchIcon } from "../components/icons";
 import { ButtonLink } from "../components/ui/Button";
 import { Input } from "../components/ui/Field";
@@ -84,6 +85,7 @@ export function ProductsPage() {
                 <th className={`${th} text-right`}>Giá</th>
                 <th className={`${th} text-right`}>Tồn kho</th>
                 <th className={th}>Trạng thái</th>
+                <th className={th}>Nổi bật (tối đa 4)</th>
               </tr>
             }
           >
@@ -93,13 +95,15 @@ export function ProductsPage() {
                   <Link to={`/products/${product.id}`} className="font-medium hover:text-wood">
                     {product.name}
                   </Link>
-                  {product.featured && <span className="ml-2 text-xs text-ink-3">Tiêu biểu</span>}
                 </td>
                 <td className={td}>{product.category.name}</td>
                 <td className={tdMoney}>{formatVnd(product.priceVnd)}</td>
                 <td className={`${tdMoney} ${product.stock === 0 ? "text-err" : ""}`}>{product.stock}</td>
                 <td className={td}>
                   <Tag tone={publishStatus[product.status as PublishStatus].tone}>{publishStatus[product.status as PublishStatus].label}</Tag>
+                </td>
+                <td className={td}>
+                  <FeaturedToggle kind="products" id={product.id} name={product.name} checked={product.featured} onChange={reload} />
                 </td>
               </tr>
             ))}

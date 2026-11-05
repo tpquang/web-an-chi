@@ -2,7 +2,7 @@
 
 | URL | Trang | Mẫu | Ghi chú |
 |---|---|---|---|
-| `/` | Trang chủ | | Hero, danh mục, sản phẩm tiêu biểu, lý do mua, cách chọn trầm, bài mới |
+| `/` | Trang chủ | | Banner, sản phẩm nổi bật (tối đa 4), slide giới thiệu trầm hương, bài viết nổi bật (tối đa 3, không có thì bài mới). Banner và slide cấu hình ở CMS `/home`, xem `layout.md` mục Trang chủ |
 | `/san-pham` | Tất cả sản phẩm | List | Phân trang `?trang=N` |
 | `/danh-muc/[slug]` | Danh mục sản phẩm | List | Hướng dẫn chọn, danh mục khác |
 | `/san-pham/[slug]` | Chi tiết sản phẩm | Shop | Thêm vào giỏ, link Shopee và TikTok Shop, thông số, sản phẩm cùng danh mục, bài liên quan |
@@ -17,9 +17,11 @@
 | `/dang-nhap`, `/dang-ky` | Đăng nhập, tạo tài khoản | App | noindex, số điện thoại và mật khẩu |
 | `/tai-khoan` | Tài khoản | App | noindex, đơn đã đặt, sửa thông tin giao hàng |
 
-**`components/ui`:** `Button`, `IconButton`, `Badge`, `Field`, `Input`, `Textarea`, `Checkbox`, `RadioGroup`, `QuantityInput`, `Price`, `Tag`, `Toast`, `Spinner`, `Skeleton`, `EmptyState`, `ErrorState`, `Alert`, `PageFrame`, `PageHeader`, `Section`, `PageBreadcrumb`, `Pagination`.
+**`components/ui`:** `Button` (thêm variant `light`), `IconButton`, `Badge`, `Field`, `Input`, `Textarea`, `Checkbox`, `RadioGroup`, `QuantityInput`, `Price`, `Tag`, `Toast`, `Spinner`, `Skeleton`, `EmptyState`, `ErrorState`, `Alert`, `PageFrame`, `PageHeader`, `Section` (có `eyebrow`), `Eyebrow`, `PageBreadcrumb`, `Pagination`.
 
 **Header:** logo, Giới thiệu, Sản phẩm, Bài viết, Giỏ hàng, Đăng nhập hoặc Tài khoản, đổi theme. Dưới 720px còn logo, giỏ và nút mở menu dạng drawer (`MobileMenu`). Header dính ở mọi độ rộng.
+
+**Trang chủ:** `HomeBanner`, `IntroSlider` trong `components/home`. Ảnh banner, slide đi qua `/api/site-images/[id]` để `next/image` tối ưu được.
 
 **Thành phần bán hàng:** `ProductCard`, `ProductGrid`, `ProductImage` (ô có dấu logo khi chưa có ảnh thật), `AddToCart`, `CartButton`, `CartLine`, `OrderSummary`, `MarketplaceLinks`, `PostCard`, `TopicNav`, `PostBody`.
 

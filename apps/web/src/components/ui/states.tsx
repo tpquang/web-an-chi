@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 export function EmptyState({ title, desc, action }: { title: string; desc?: string; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed border-line p-6">
+    <div className="flex flex-col items-start gap-3 rounded-2xl border border-dashed border-line p-6">
       <p className="font-medium">{title}</p>
       {desc && <p className="text-ink-2">{desc}</p>}
       {action}
@@ -12,7 +12,7 @@ export function EmptyState({ title, desc, action }: { title: string; desc?: stri
 
 export function ErrorState({ title, desc, onRetry }: { title: string; desc?: string; onRetry?: () => void }) {
   return (
-    <div role="alert" className="flex flex-col items-start gap-3 rounded-lg bg-err-soft p-6">
+    <div role="alert" className="flex flex-col items-start gap-3 rounded-2xl bg-err-soft p-6">
       <p className="font-medium text-err">{title}</p>
       {desc && <p className="text-ink-2">{desc}</p>}
       {onRetry && (
@@ -25,10 +25,10 @@ export function ErrorState({ title, desc, onRetry }: { title: string; desc?: str
 }
 
 export function Skeleton({ className = "" }: { className?: string }) {
-  return <span aria-hidden className={`block animate-pulse rounded-md bg-paper-2 motion-reduce:animate-none ${className}`} />;
+  return <span aria-hidden className={`block animate-pulse rounded-xl bg-paper-2 motion-reduce:animate-none ${className}`} />;
 }
 
 export function Alert({ tone = "info", children }: { tone?: "info" | "warn" | "ok"; children: ReactNode }) {
   const cls = { info: "bg-info-soft", warn: "bg-warn-soft", ok: "bg-ok-soft" }[tone];
-  return <div className={`rounded-lg p-4 text-sm ${cls}`}>{children}</div>;
+  return <div className={`rounded-2xl p-4 text-sm ${cls}`}>{children}</div>;
 }

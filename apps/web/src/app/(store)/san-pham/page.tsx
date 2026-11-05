@@ -41,7 +41,7 @@ export default async function ProductsPage({ searchParams }: Props) {
             <li key={category.id}>
               <Link
                 href={categoryHref(category.slug)}
-                className="inline-flex min-h-11 items-center rounded-md border border-line px-4 text-sm hover:border-wood hover:text-wood"
+                className="inline-flex min-h-11 items-center rounded-full border border-line px-4 text-sm hover:border-wood hover:text-wood"
               >
                 {category.name}
               </Link>

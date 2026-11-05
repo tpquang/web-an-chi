@@ -95,7 +95,7 @@ export default async function PostPage({ params }: Props) {
               <TableOfContents blocks={blocks} />
             </div>
           )}
-          <nav aria-labelledby="chu-de" className="rounded-lg border border-line bg-surface p-5">
+          <nav aria-labelledby="chu-de" className="rounded-3xl border border-edge bg-surface p-5">
             <p id="chu-de" className="font-serif text-xl font-semibold">
               Chủ đề
             </p>

@@ -17,22 +17,29 @@
   --wood-900: #2f1f15;
   --wood-950: #1c120c;
 
-  /* Vai trò */
-  --paper: #fbf8f3;
-  --paper-2: #f1eae0;
-  --surface: #fffdfa;
-  --ink: #2a1c13;
-  --ink-2: #5f4d40;
-  --ink-3: #6f5d4d;
-  --line: #e0d5c6;
+  /* Vai trò. Nền kem ấm, điểm nhấn gỗ caramel, khối tối màu than gỗ */
+  --paper: #f7f1ea;
+  --paper-2: #efe5da;
+  --surface: #fffcf8;
+  --ink: #241912;
+  --ink-2: #5c4a3d;
+  --ink-3: #6b5848;
+  --line: #e6dace;
   --line-strong: #8f7a66;
-  --wood: var(--wood-700);
-  --wood-hover: var(--wood-600);
-  --wood-soft: var(--wood-100);
-  --on-wood: #fbf8f3;
+  /* Viền thẻ không viền: trong suốt ở theme sáng, hiện ở theme tối vì bóng gần như vô hình */
+  --edge: transparent;
+  --wood: #9a5530;
+  --wood-hover: #7f4425;
+  --wood-soft: #f5e7dc;
+  --on-wood: #fffaf4;
+  --brand: var(--wood-700);
   --brass: #a57c2c;
-  --scrim: rgba(42, 28, 19, 0.45);
-  --glass: rgba(255, 253, 250, 0.76);
+  --night: #2b1d15;
+  --on-night: #f7efe6;
+  --on-night-2: #cdbba8;
+  --scrim: rgba(36, 25, 18, 0.45);
+  --shade: rgba(28, 18, 12, 0.82);
+  --glass: rgba(255, 252, 248, 0.82);
 
   /* Trạng thái */
   --ok: #2f6b4a;
@@ -83,20 +90,26 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
   --paper: #15100c;
-  --paper-2: #1f1812;
+  --paper-2: #201812;
   --surface: #1c1510;
   --ink: #f0e7db;
   --ink-2: #c4b5a3;
   --ink-3: #a89887;
   --line: #3a2d23;
   --line-strong: #7d6a58;
-  --wood: #c9a27e;
-  --wood-hover: #d9b996;
-  --wood-soft: #33261b;
+  --edge: #2e241c;
+  --wood: #e0a47c;
+  --wood-hover: #ebb894;
+  --wood-soft: #3a261a;
   --on-wood: #1c120c;
+  --brand: #f0e7db;
   --brass: #c9a45c;
+  --night: #0c0806;
+  --on-night: #f7efe6;
+  --on-night-2: #cdbba8;
   --scrim: rgba(0, 0, 0, 0.6);
-  --glass: rgba(31, 24, 18, 0.72);
+  --shade: rgba(8, 5, 3, 0.85);
+  --glass: rgba(31, 24, 18, 0.82);
   --ok: #7fb896;
   --ok-soft: #1a2b21;
   --warn: #d6ab5c;

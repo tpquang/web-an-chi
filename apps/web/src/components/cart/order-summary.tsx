@@ -8,7 +8,7 @@ export function OrderSummary({ quote, children, busy }: { quote: Quote; children
   const missing = shipping.freeFromVnd !== null && shippingVnd > 0 ? shipping.freeFromVnd - subtotalVnd : 0;
 
   return (
-    <section aria-labelledby="tom-tat" aria-busy={busy || undefined} className="rounded-lg border border-line bg-surface p-5 md:p-6">
+    <section aria-labelledby="tom-tat" aria-busy={busy || undefined} className="rounded-3xl border border-edge bg-surface p-5 md:p-6">
       <h2 id="tom-tat" className="font-serif text-2xl leading-tight font-semibold">
         Tóm tắt đơn hàng
       </h2>

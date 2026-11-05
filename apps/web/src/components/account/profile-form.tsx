@@ -48,7 +48,7 @@ export function ProfileForm({ account }: { account: Account }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4 rounded-lg border border-line bg-surface p-5 md:p-6">
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4 rounded-3xl border border-edge bg-surface p-5 md:p-6">
       <h2 className="font-serif text-2xl leading-tight font-semibold">Thông tin giao hàng</h2>
       <Field label="Họ tên" error={errors.name}>
         <Input value={values.name} onChange={(e) => setValues({ ...values, name: e.target.value })} disabled={submitting} autoComplete="name" />

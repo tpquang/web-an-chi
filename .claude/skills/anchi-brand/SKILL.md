@@ -14,11 +14,11 @@ Dùng để quyết định khi chưa có quy tắc cụ thể, rồi ghi quyế
 1. **Sản phẩm là nhân vật chính.** Không trang trí nào được làm giảm độ rõ của ảnh, giá và thông tin sản phẩm.
 2. **Tĩnh mà không cũ.** Gỗ, đường cong logo, chữ có chân chỉ là điểm nhấn. Bố cục và tương tác phải hiện đại.
 3. **Trang nhã, đáng tin.** Không màu chói, không hiệu ứng giật gân, không kiểu chợ giảm giá. Khách đang mua món giá trị và cần tin vào nguồn gốc.
-4. **Ít mà đủ.** Mỗi màn hình một điểm nhấn màu gỗ đậm. Thêm cái thứ hai thì bỏ bớt thứ khác.
+4. **Ít mà đủ.** Mỗi màn hình một điểm nhấn màu gỗ. Thêm cái thứ hai thì bỏ bớt thứ khác.
 
 ## 2. Nhận diện
 
-- **Màu:** gỗ sẫm `#5A3B26` là màu chính, trên nền kem `#FBF8F3` với chữ `#2A1C13`, đồng thau `#A57C2C` để trang trí. Theme tối dùng gỗ sáng `#C9A27E`. Bảng đầy đủ ở [colors.md](../anchi-ui-ux/references/colors.md).
+- **Màu:** gỗ sẫm `#5A3B26` là màu logo (`--brand`). Điểm nhấn giao diện là gỗ caramel `#9A5530` (`--wood`) cho nút và link, trên nền kem `#F7F1EA` với chữ `#241912`, đồng thau `#A57C2C` để trang trí, than gỗ `#2B1D15` cho một khối tối mỗi trang. Theme tối dùng caramel sáng `#E0A47C`, logo màu kem. Bảng đầy đủ ở [colors.md](../anchi-ui-ux/references/colors.md).
 - **Chữ:** Cormorant SC là font chính, cho tiêu đề, thương hiệu, giá và chữ trong logo; Be Vietnam Pro cho nội dung. Cả hai đều hỗ trợ tiếng Việt.
 - **Logo:** biểu tượng vòng tròn nét thanh ôm chữ A, cạnh đó là chữ "AN CHI" đặt bằng Cormorant SC, bản đứng thêm dòng "TRẦM HƯƠNG" bằng Be Vietnam Pro giãn chữ. Chữ trong logo luôn là chữ thật, không dùng bản chữ đã vẽ thành path. Bản nền sáng màu gỗ, bản nền tối màu kem. Giữ khoảng trống quanh logo tối thiểu bằng chiều cao chữ A trong vòng tròn, không đổ bóng, không kéo méo, không đặt lên ảnh rối. Trong code dùng `BrandMark`, `BrandLogo` (biểu tượng là mask theo `currentColor`, chữ là text), cỡ theo font-size. Bản đứng chỉ dùng khi chữ "AN CHI" từ 36px.
 - **Ấn phẩm đi kèm** như ảnh chia sẻ, avatar, bao bì, tem, danh thiếp, chữ ký email: dùng `logo-square.svg`, chữ "AN CHI" đặt bằng Cormorant SC bên cạnh hoặc bên dưới. Quy cách ở [brand.md](../../../docs/web/design/brand.md).

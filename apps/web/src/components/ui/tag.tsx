@@ -13,7 +13,7 @@ export type Tone = keyof typeof tones;
 
 export function Tag({ tone = "neutral", children }: { tone?: Tone; children: ReactNode }) {
   return (
-    <span className={`inline-flex h-5.5 items-center rounded-sm px-2 text-xs font-semibold whitespace-nowrap ${tones[tone]}`}>
+    <span className={`inline-flex h-5.5 items-center rounded-full px-2 text-xs font-semibold whitespace-nowrap ${tones[tone]}`}>
       {children}
     </span>
   );

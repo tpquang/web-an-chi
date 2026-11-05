@@ -6,21 +6,52 @@ Quy cách cho `components/ui/*` của từng app. Chưa có component thì làm 
 
 | Prop | Giá trị | Ghi chú |
 |---|---|---|
-| `variant` | `primary` (mặc định), `secondary`, `danger`, `outline`, `text` | Mỗi màn hình một `primary`. `danger` cho xoá |
+| `variant` | `primary` (mặc định), `secondary`, `danger`, `outline`, `light` (chỉ web), `text` | Mỗi màn hình một `primary`. `danger` cho xoá. `light` chỉ trên khối tối và ảnh |
 | `size` | `sm` 36px, `md` 44px (mặc định), `lg` 52px | Trên cảm ứng vẫn đảm bảo vùng chạm 44px |
 | `block` | boolean | Rộng 100% |
 | `loading` | boolean | Hiện spinner, tự `disabled`, `aria-busy` |
 | `href` | string | Có thì render link |
 
-Nhãn là động từ nói đúng việc xảy ra. `IconButton` vuông 44px, bắt buộc `label`, có `badge` cho số lượng giỏ.
+Mọi nút dạng viên thuốc `rounded-full`. Nhãn là động từ nói đúng việc xảy ra. Lời mời đi tiếp sang trang khác (Xem sản phẩm, Xem tất cả) thêm `ArrowRightIcon` 18px sau nhãn; nút gửi form, xoá, lưu không có mũi tên. `IconButton` tròn 44px, bắt buộc `label`, có `badge` cho số lượng giỏ.
 
 | Variant | Quy cách |
 |---|---|
 | `primary` | Nền `wood`, chữ `on-wood`, hover `wood-hover` |
-| `outline` | Viền `wood`, chữ `wood`, hover nền `wood-soft` |
+| `outline` | Viền `line-strong`, chữ `ink`, hover viền và chữ `wood`. Nút phụ cạnh nút chính, "Xem tất cả" ở đầu section |
+| `light` | Nền `on-night`, chữ `night`. Nút trên khối tối |
 | `secondary` | Nền `paper-2`, chữ `ink` |
 | `danger` | Nền `err`, chữ `surface` |
 | `text` | Chữ `wood`, gạch chân khi hover |
+
+## Mũi tên tròn
+
+Nút hoặc dấu hiệu mũi tên trong vòng tròn, lấy từ mẫu thiết kế.
+
+| Chỗ dùng | Quy cách |
+|---|---|
+| Trong thẻ sản phẩm | `span` 36px `aria-hidden` vì cả thẻ đã là link. Nền `paper-2`, hover thẻ thì nền `wood` chữ `on-wood`. Ẩn dưới 480px cho đỡ chật |
+| Chuyển slide | `button` 48px có `aria-label`. Trước: nền `wood`. Tiếp: nền `on-night`. Cạnh đó số `1 / 3` trong `aria-live="polite"` |
+
+## Thẻ
+
+| Thẻ | Quy cách |
+|---|---|
+| `ProductCard` | Cả thẻ là link. `rounded-3xl bg-surface border-edge p-2`, ảnh vuông `rounded-2xl`, danh mục 13px, tên 2 dòng, giá serif, mũi tên tròn góc phải dưới |
+| `PostCard` | Như trên. Ảnh bìa 3:2 nếu có, chủ đề và ngày, tiêu đề serif 20, tóm tắt 3 dòng, dòng "Đọc bài →" màu `wood` |
+| Tấm nội dung | `Panel` ở CMS, khối thông tin ở web: `rounded-3xl bg-surface border-edge`, padding 20–40 |
+
+## Eyebrow
+
+`Eyebrow` trong `components/ui/layout.tsx` của web: dòng 13px màu `wood` có gạch 24px phía trước, đặt trên H1 banner và H2 section qua prop `eyebrow` của `Section`. Nói nhóm nội dung (Sản phẩm nổi bật, Bài viết nổi bật), không lặp lại tiêu đề.
+
+## Slider
+
+Chỉ dùng cho slide giới thiệu trang chủ (`IntroSlider`). Không dùng slider cho sản phẩm: khách cần thấy hết để so sánh.
+
+- Không tự chạy. Đổi bằng nút, phím ← →, vuốt ngang trên 48px.
+- Mọi slide có trong HTML server, xếp chồng một ô lưới, đổi bằng `opacity` trong `--d-page`. Slide đang ẩn đặt `inert` và `aria-hidden`.
+- Vùng bọc `aria-roledescription="carousel"` và `aria-label`, mỗi slide `role="group"` `aria-roledescription="slide"` `aria-label="2 / 3"`.
+- Chữ trên ảnh luôn có lớp `shade`. Chiều cao tối thiểu 480px ở mobile, 460px từ 720px, để slide dài nhất không đẩy giật bố cục.
 
 ## Field, Input, Textarea
 
@@ -112,7 +143,7 @@ Phép thử: nhãn đọc như "hiện cái gì" thì dùng checkbox, đọc nh�
 
 | Component | Quy cách |
 |---|---|
-| `ProductCard` | Cả thẻ là link. Ảnh 1:1 `rounded-lg`, danh mục 14px `ink-3`, tên sans 500 16px tối đa 2 dòng, giá serif 600 20px. Hết hàng có `Tag` "Hết hàng", không ẩn thẻ |
+| `ProductCard` | Quy cách ở mục Thẻ phía trên. Ảnh 1:1, danh mục 13px `ink-3`, tên sans 500 16px tối đa 2 dòng, giá serif 600 20px. Hết hàng có `Tag` "Hết hàng", không ẩn thẻ |
 | `Price` | `Intl.NumberFormat('vi-VN')`, không xuống dòng. Giá gốc gạch ngang 14px `ink-3`, chỉ khi có thật |
 | `QuantityInput` | Hai nút 44px và ô số, không vượt tồn kho, nói rõ khi chạm giới hạn |
 | `CartLine` | Ảnh 72px, tên, đơn giá, số lượng, thành tiền căn phải, nút xoá có nhãn |
@@ -134,8 +165,8 @@ Phép thử: nhãn đọc như "hiện cái gì" thì dùng checkbox, đọc nh�
 
 | Phần | Quy cách |
 |---|---|
-| `Card` | Nền `surface`, viền `line`, `rounded-lg`, padding 20. Có `href` thì cả thẻ là link, hover viền `wood`. Tiêu đề serif 600 20px, meta 13px `ink-3`, thân 14px `ink-2` |
-| `Tag` | Cao 22px, padding ngang 8, `rounded-sm`, chữ 12px 600. Nền `-soft`, chữ màu đậm cùng tông |
+| `Card` | Nền `surface`, viền `edge`, `rounded-3xl`, padding 20–24 (thẻ nhỏ padding 16 thì `rounded-2xl`). Có `href` thì cả thẻ là link, hover `shadow-e2`. Tiêu đề serif 600 20px, meta 13px `ink-3`, thân 14px `ink-2` |
+| `Tag` | Cao 22px, padding ngang 8, `rounded-full`, chữ 12px 600. Nền `-soft`, chữ màu đậm cùng tông |
 | Badge số | Tròn, nền `wood`, chữ `on-wood` 11px |
 | `Tabs` | Hàng nút cách 24px, viền dưới `line`, cuộn ngang khi hẹp. Chữ sans 500 15px `ink-3`, đang chọn gạch dưới 2px `wood`. `role="tablist"`, `tab`, `tabpanel` |
 | Bảng dữ liệu (CMS) | Đầu cột 13px 600 `ink-3`, dòng cách nhau bằng viền `line`, cột số tiền căn phải và không xuống dòng, cuộn ngang trong khung riêng |
@@ -151,4 +182,4 @@ Phép thử: nhãn đọc như "hiện cái gì" thì dùng checkbox, đọc nh�
 
 ## Thông báo
 
-Toast cho kết quả của hành động, có tiêu đề đậm và một câu hướng dẫn. Toast lỗi nói sai gì và sửa thế nào. Alert là nền `-soft` nằm trong trang, cho thông tin cố định. Tooltip dùng `shadow-e2`, `rounded-sm`.
+Toast cho kết quả của hành động, có tiêu đề đậm và một câu hướng dẫn. Toast lỗi nói sai gì và sửa thế nào. Alert là nền `-soft` nằm trong trang, cho thông tin cố định. Tooltip dùng `shadow-e2`, `rounded-lg`. Toast `rounded-2xl`.

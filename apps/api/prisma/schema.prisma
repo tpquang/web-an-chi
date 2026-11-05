@@ -63,6 +63,7 @@ model Product {
   stock             Int            @default(0)
   // Xuất xứ, ví dụ "Khánh Hòa"; để trống khi chưa xác minh được
   origin            String?
+  // Hiện ở mục sản phẩm nổi bật trang chủ, tối đa 4 sản phẩm
   featured          Boolean        @default(false)
   // Link gian hàng của chính sản phẩm này trên sàn, để trống nếu không bán ở đó
   shopeeUrl         String?
@@ -129,6 +130,8 @@ model Post {
   category        PostCategory  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   // Sản phẩm liên quan hiện cuối bài
   products        Product[]
+  // Hiện ở mục bài viết nổi bật trang chủ, tối đa 3 bài
+  featured        Boolean       @default(false)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -495,4 +498,15 @@ model BeadTexture {
   roughness Float    @default(0.5)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Ảnh banner và slide trang chủ, tải lên từ CMS. Đã nén ở CMS, lưu thẳng trong database như ảnh vân hạt.
+// Setting "home" giữ id ảnh; ảnh không còn được dùng thì xoá khi lưu cấu hình trang chủ.
+model SiteImage {
+  id        String   @id @default(cuid())
+  image     Bytes
+  mime      String
+  width     Int
+  height    Int
+  createdAt DateTime @default(now())
 }

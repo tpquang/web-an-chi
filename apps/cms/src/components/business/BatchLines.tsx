@@ -25,7 +25,7 @@ export function BatchLines({ lines, costs, onChange, materials, errors, disabled
         const setKg = (kg: number | null, price = line.pricePerKgVnd) =>
           set(i, { inputKg: kg, pricePerKgVnd: price, quantity: kg != null && m?.unitsPerKg ? Math.round(kg * m.unitsPerKg) : null, totalCostVnd: kg != null && price != null ? Math.round(kg * price) : line.totalCostVnd });
         return (
-          <div key={i} role="group" aria-label={`Dòng nhập ${i + 1}`} className="rounded-lg border border-line p-4">
+          <div key={i} role="group" aria-label={`Dòng nhập ${i + 1}`} className="rounded-2xl border border-line p-4">
             <div className="grid gap-4 md:grid-cols-[1fr_44px]">
               <Field label="Nguyên liệu" error={err("materialId")}>
                 <Select value={line.materialId || null} placeholder="Chọn nguyên liệu" options={materialOptions(materials)} onChange={(v) => set(i, { materialId: v, inputKg: null, pricePerKgVnd: null })} searchable disabled={disabled} />

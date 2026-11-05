@@ -42,13 +42,15 @@ blogRouter.get("/post-categories/:slug", async (req, res) => {
 const listQuery = z.object({
   ...pageQuery,
   category: z.string().optional(),
+  featured: z.stringbool().optional(),
   exclude: z.string().optional(),
 });
 
 blogRouter.get("/posts", async (req, res) => {
-  const { page, limit, category, exclude } = listQuery.parse(req.query);
+  const { page, limit, category, featured, exclude } = listQuery.parse(req.query);
   const where: Prisma.PostWhereInput = {
     ...livePosts(),
+    ...(featured !== undefined ? { featured } : {}),
     ...(category ? { category: { slug: category } } : {}),
     ...(exclude ? { NOT: { slug: exclude } } : {}),
   };

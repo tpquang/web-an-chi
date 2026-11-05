@@ -139,3 +139,31 @@ export const SpinIcon = (p: P) => (
     <circle cx="12" cy="12" r="1" />
   </Icon>
 );
+
+export const ArrowRightIcon = (p: P) => (
+  <Icon {...p}>
+    <path d="M5 12h14M13.5 6.5 19 12l-5.5 5.5" />
+  </Icon>
+);
+
+export const ArrowLeftIcon = (p: P) => (
+  <Icon {...p}>
+    <path d="M19 12H5M10.5 6.5 5 12l5.5 5.5" />
+  </Icon>
+);
+
+export const TruckIcon = (p: P) => (
+  <Icon {...p}>
+    <path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h8a1.5 1.5 0 0 1 1.5 1.5V16h-11Z" />
+    <path d="M14.5 10h3.2a1.5 1.5 0 0 1 1.2.6l1.3 1.8a1.5 1.5 0 0 1 .3.9V16h-6" />
+    <circle cx="7.5" cy="17" r="1.8" />
+    <circle cx="17" cy="17" r="1.8" />
+  </Icon>
+);
+
+export const ShieldIcon = (p: P) => (
+  <Icon {...p}>
+    <path d="M12 3.5 5.5 6v5.2c0 4 2.7 7.4 6.5 8.8 3.8-1.4 6.5-4.8 6.5-8.8V6Z" />
+    <path d="m9 12 2.2 2.2L15.5 10" />
+  </Icon>
+);

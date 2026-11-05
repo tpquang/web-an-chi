@@ -39,7 +39,7 @@ export function Toaster() {
         <div
           key={toast.id}
           role={toast.type === "error" ? "alert" : "status"}
-          className="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border border-line bg-surface p-4 shadow-e3"
+          className="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-2xl border border-line bg-surface p-4 shadow-e3"
         >
           <span className={toast.type === "error" ? "text-err" : "text-ok"}>{toast.type === "error" ? <AlertIcon /> : <CheckIcon />}</span>
           <div className="min-w-0 flex-1">
@@ -50,7 +50,7 @@ export function Toaster() {
             type="button"
             onClick={() => dismiss(toast.id)}
             aria-label="Đóng thông báo"
-            className="-m-2 inline-flex size-11 flex-none items-center justify-center rounded-md text-ink-3 hover:text-ink"
+            className="-m-2 inline-flex size-11 flex-none items-center justify-center rounded-full text-ink-3 hover:text-ink"
           >
             <CloseIcon size={18} />
           </button>

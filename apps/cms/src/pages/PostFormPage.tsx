@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "../components/ui/Button";
-import { Checkbox, Field, Input, Textarea } from "../components/ui/Field";
+import { Checkbox, Field, Input, Switch, Textarea } from "../components/ui/Field";
 import { confirmDialog } from "../components/ui/Modal";
 import { PageHeader, Panel } from "../components/ui/Page";
 import { Select } from "../components/ui/Select";
@@ -17,7 +17,7 @@ import { useSubmit } from "../lib/use-submit";
 type Values = Omit<Post, "id">;
 const empty: Values = {
   title: "", slug: "", excerpt: "", content: "", coverUrl: "", authorName: "Ban biên tập An Chi", status: "DRAFT",
-  publishedAt: null, metaTitle: "", metaDescription: "", categoryId: "", productIds: [],
+  publishedAt: null, metaTitle: "", metaDescription: "", categoryId: "", featured: false, productIds: [],
 };
 const MAX_PRODUCTS = 3;
 
@@ -121,6 +121,7 @@ export function PostFormPage() {
               <div data-field="categoryId"><Field label="Chủ đề" error={errors.categoryId ? "Bạn chọn một chủ đề." : undefined}><Select value={values.categoryId || null} onChange={(v) => set("categoryId", v)} options={topics.state.status === "ready" ? topics.state.data.map((t) => ({ value: t.id, label: t.name })) : []} placeholder="Chọn chủ đề" disabled={submitting} /></Field></div>
               <div data-field="authorName"><Field label="Tác giả" error={errors.authorName}><Input {...text("authorName")} /></Field></div>
               <div data-field="coverUrl"><Field label="Ảnh bìa" optional error={errors.coverUrl}><Input {...text("coverUrl")} placeholder="https://..." inputMode="url" /></Field></div>
+              <Switch checked={values.featured} onChange={(v) => set("featured", v)} label="Nổi bật ở trang chủ, tối đa 3 bài" disabled={submitting} />
             </div>
           </Panel>
           <Panel title="Sản phẩm liên quan">

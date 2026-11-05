@@ -113,15 +113,15 @@ export function ChatPanel({ onClose, onRead }: { onClose: () => void; onRead: ()
       role="dialog"
       aria-modal="false"
       aria-label="Nhắn tin với shop"
-      className="fixed inset-0 z-(--z-overlay) flex flex-col bg-surface pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] sm:inset-auto sm:right-4 sm:bottom-4 sm:h-[min(560px,calc(100dvh-32px))] sm:w-90 sm:rounded-xl sm:border sm:border-line sm:shadow-e4"
+      className="fixed inset-0 z-(--z-overlay) flex flex-col bg-surface pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] sm:inset-auto sm:right-4 sm:bottom-4 sm:h-[min(560px,calc(100dvh-32px))] sm:w-90 sm:rounded-3xl sm:border sm:border-line sm:shadow-e4"
     >
       <div className="flex items-center gap-3 border-b border-line px-4 py-3">
-        <BrandMark className="size-9 text-wood" />
+        <BrandMark className="size-9 text-brand" />
         <div className="min-w-0 flex-1">
           <p className="font-serif text-lg leading-tight font-semibold">An Chi Trầm Hương</p>
           <p className="text-[13px] text-ink-3">Shop trả lời trong giờ làm việc</p>
         </div>
-        <button ref={closeRef} type="button" onClick={onClose} aria-label="Thu nhỏ khung chat" className="inline-flex size-11 items-center justify-center rounded-md text-ink-2 hover:bg-paper-2">
+        <button ref={closeRef} type="button" onClick={onClose} aria-label="Thu nhỏ khung chat" className="inline-flex size-11 items-center justify-center rounded-full text-ink-2 hover:bg-paper-2">
           <CloseIcon />
         </button>
       </div>
@@ -147,7 +147,7 @@ export function ChatPanel({ onClose, onRead }: { onClose: () => void; onRead: ()
               return (
                 <li key={m.id} className={`flex max-w-[85%] flex-col ${mine ? "self-end items-end" : "self-start items-start"}`}>
                   {!mine && m.staff && <span className="mb-0.5 text-xs text-ink-3">{m.staff.name}</span>}
-                  <span className={`rounded-lg px-3 py-2 text-[15px] whitespace-pre-line ${mine ? "bg-wood text-on-wood" : "bg-paper-2 text-ink"}`}>{m.body}</span>
+                  <span className={`rounded-2xl px-3 py-2 text-[15px] whitespace-pre-line ${mine ? "bg-wood text-on-wood" : "bg-paper-2 text-ink"}`}>{m.body}</span>
                   <span className="mt-0.5 text-xs text-ink-3">{time.format(new Date(m.createdAt))}</span>
                 </li>
               );
@@ -163,9 +163,9 @@ export function ChatPanel({ onClose, onRead }: { onClose: () => void; onRead: ()
               rows={Math.min(4, draft.split("\n").length)}
               placeholder="Nhập tin nhắn"
               disabled={sending}
-              className="min-h-11 w-full resize-none rounded-md border border-line-strong bg-surface px-3 py-2.5 text-base text-ink placeholder:text-ink-3 focus:border-wood focus:outline-none disabled:bg-paper-2"
+              className="min-h-11 w-full resize-none rounded-xl border border-line-strong bg-surface px-3 py-2.5 text-base text-ink placeholder:text-ink-3 focus:border-wood focus:outline-none disabled:bg-paper-2"
             />
-            <button type="submit" aria-label="Gửi" disabled={sending || !draft.trim()} className="inline-flex size-11 flex-none items-center justify-center rounded-md bg-wood text-on-wood hover:bg-wood-hover disabled:opacity-50">
+            <button type="submit" aria-label="Gửi" disabled={sending || !draft.trim()} className="inline-flex size-11 flex-none items-center justify-center rounded-full bg-wood text-on-wood hover:bg-wood-hover disabled:opacity-50">
               {sending ? <Spinner /> : <SendIcon size={20} />}
             </button>
           </form>

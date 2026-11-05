@@ -120,7 +120,7 @@ export default async function ProductPage({ params }: Props) {
               <h2 id="thong-so" className="mb-4 font-serif text-[32px] leading-[1.15] font-medium">
                 Thông số
               </h2>
-              <dl className="divide-y divide-line rounded-lg border border-line bg-surface">
+              <dl className="divide-y divide-line rounded-3xl border border-edge bg-surface">
                 {specs.map((spec) => (
                   <div key={spec.label} className="grid grid-cols-[minmax(120px,40%)_1fr] gap-4 px-4 py-3 text-sm">
                     <dt className="text-ink-3">{spec.label}</dt>
@@ -177,7 +177,7 @@ export default async function ProductPage({ params }: Props) {
             <ul className="flex flex-col gap-3">
               {product.posts.map((post) => (
                 <li key={post.slug}>
-                  <Link href={postHref(post.slug)} className="block rounded-lg border border-line bg-surface p-4 hover:border-wood">
+                  <Link href={postHref(post.slug)} className="block rounded-2xl border border-edge bg-surface p-4 hover:border-wood">
                     <span className="font-medium">{post.title}</span>
                     <span className="mt-1 block text-[13px] text-ink-3">{formatDate(post.publishedAt)}</span>
                   </Link>

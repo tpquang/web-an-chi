@@ -47,7 +47,7 @@ export function ThemeToggle({ compact }: { compact?: boolean }) {
   }
 
   return (
-    <div role="radiogroup" aria-label="Giao diện" className="inline-flex rounded-md border border-line bg-paper p-0.5">
+    <div role="radiogroup" aria-label="Giao diện" className="inline-flex rounded-full border border-line bg-paper p-0.5">
       {modes.map(({ value, label, Icon }) => {
         const active = mode === value;
         return (
@@ -59,7 +59,7 @@ export function ThemeToggle({ compact }: { compact?: boolean }) {
             aria-label={compact ? label : undefined}
             title={label}
             onClick={() => choose(value)}
-            className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-sm px-2 text-sm ${active ? "bg-wood text-on-wood" : "text-ink-2 hover:text-wood"}`}
+            className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full px-2 text-sm ${active ? "bg-wood text-on-wood" : "text-ink-2 hover:text-wood"}`}
           >
             <Icon size={18} />
             {!compact && <span>{label}</span>}

@@ -4,6 +4,7 @@ import { PublishStatus, type Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
 import { optionalText, optionalUrl, pageQuery, slugField } from "../../lib/text.js";
 import { HttpError } from "../../middleware/errors.js";
+import { assertFeaturedRoom } from "./admin.home.js";
 
 export const adminBlogRouter = Router();
 
@@ -60,6 +61,7 @@ const postInput = z.object({
   metaTitle: optionalText,
   metaDescription: optionalText,
   categoryId: z.string().min(1),
+  featured: z.boolean().default(false),
   productIds: z.array(z.string()).max(3, "Tối đa 3 sản phẩm liên quan.").default([]),
 });
 
@@ -95,6 +97,7 @@ adminBlogRouter.get("/posts", async (req, res) => {
         title: true,
         slug: true,
         status: true,
+        featured: true,
         publishedAt: true,
         updatedAt: true,
         authorName: true,
@@ -120,12 +123,15 @@ adminBlogRouter.get("/posts/:id", async (req, res) => {
 
 adminBlogRouter.post("/posts", async (req, res) => {
   const { products, ...data } = postData(postInput.parse(req.body));
+  if (data.featured) await assertFeaturedRoom("posts");
   const created = await prisma.post.create({ data: { ...data, products: { connect: products.set } } });
   res.status(201).json({ data: created });
 });
 
 adminBlogRouter.put("/posts/:id", async (req, res) => {
-  const data = await prisma.post.update({ where: { id: req.params.id }, data: postData(postInput.parse(req.body)) });
+  const input = postData(postInput.parse(req.body));
+  if (input.featured) await assertFeaturedRoom("posts", req.params.id);
+  const data = await prisma.post.update({ where: { id: req.params.id }, data: input });
   res.json({ data });
 });
 

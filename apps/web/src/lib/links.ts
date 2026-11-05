@@ -33,3 +33,6 @@ export function outboundHref(url: string, medium: string, content: string) {
     return url;
   }
 }
+
+// Ảnh banner, slide tải lên từ CMS đi qua tên miền web, link có ?v= nên cache vĩnh viễn
+export const homeImageUrl = (image: { id: string; version: number }) => `/api/site-images/${image.id}?v=${image.version}`;

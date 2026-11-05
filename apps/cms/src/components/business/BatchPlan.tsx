@@ -38,7 +38,7 @@ export function BatchPlan({ recipes, plans, result, includeStock, disabled, onCh
         <Button variant="outline" size="sm" onClick={onFillMax} disabled={disabled}>Điền số tối đa</Button>
       </div>
       {result.plans.some((p) => p.quantity > p.max) && (
-        <p role="alert" className="rounded-md bg-err-soft p-3 text-sm text-err">
+        <p role="alert" className="rounded-xl bg-err-soft p-3 text-sm text-err">
           Số dự kiến đóng vượt số nguyên liệu có. Giảm số lượng, nhập thêm nguyên liệu còn thiếu, hoặc bật "Tính cả nguyên liệu đang có trong kho". Lợi nhuận bên cạnh đang tính theo số chưa đủ hàng.
         </p>
       )}

@@ -4,6 +4,7 @@ import { PublishStatus, type Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
 import { optionalText, optionalUrl, pageQuery, slugField } from "../../lib/text.js";
 import { HttpError } from "../../middleware/errors.js";
+import { assertFeaturedRoom } from "./admin.home.js";
 
 export const adminCatalogRouter = Router();
 
@@ -128,12 +129,14 @@ adminCatalogRouter.get("/products/:id", async (req, res) => {
 
 adminCatalogRouter.post("/products", async (req, res) => {
   const { data, images } = productData(productInput.parse(req.body));
+  if (data.featured) await assertFeaturedRoom("products");
   const created = await prisma.product.create({ data: { ...data, images: { create: images } } });
   res.status(201).json({ data: created });
 });
 
 adminCatalogRouter.put("/products/:id", async (req, res) => {
   const { data, images } = productData(productInput.parse(req.body));
+  if (data.featured) await assertFeaturedRoom("products", req.params.id);
   // Ảnh gửi lên là danh sách đầy đủ theo thứ tự mới, nên thay toàn bộ
   const updated = await prisma.product.update({
     where: { id: req.params.id },

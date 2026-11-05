@@ -20,7 +20,7 @@ export function PageHeader({ title, desc, actions, back }: { title: string; desc
 
 export function Panel({ title, children, className = "" }: { title?: string; children: ReactNode; className?: string }) {
   return (
-    <section className={`rounded-lg border border-line bg-surface p-4 md:p-6 ${className}`}>
+    <section className={`rounded-3xl border border-edge bg-surface p-5 md:p-7 ${className}`}>
       {title && <h2 className="mb-4 font-serif text-xl leading-tight font-semibold">{title}</h2>}
       {children}
     </section>
@@ -30,7 +30,7 @@ export function Panel({ title, children, className = "" }: { title?: string; chi
 // Bảng dữ liệu cuộn ngang trong khung riêng khi hẹp
 export function DataTable({ head, children }: { head: ReactNode; children: ReactNode }) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-line bg-surface">
+    <div className="overflow-x-auto rounded-3xl border border-edge bg-surface px-2">
       <table className="w-full text-left text-sm">
         <thead className="border-b border-line text-[13px] text-ink-3">{head}</thead>
         <tbody className="[&>tr]:border-b [&>tr]:border-line [&>tr:last-child]:border-0">{children}</tbody>
@@ -49,13 +49,13 @@ export function Pagination({ page, totalPages, onPage }: PaginationProps) {
   if (totalPages <= 1) return null;
   return (
     <nav aria-label="Phân trang" className="mt-4 flex items-center gap-2 text-sm">
-      <button type="button" disabled={page <= 1} onClick={() => onPage(page - 1)} className="min-h-11 rounded-md px-3 hover:bg-paper-2 disabled:opacity-40">
+      <button type="button" disabled={page <= 1} onClick={() => onPage(page - 1)} className="min-h-11 rounded-full px-3 hover:bg-paper-2 disabled:opacity-40">
         Trang trước
       </button>
       <span className="px-2 text-ink-2">
         Trang {page}/{totalPages}
       </span>
-      <button type="button" disabled={page >= totalPages} onClick={() => onPage(page + 1)} className="min-h-11 rounded-md px-3 hover:bg-paper-2 disabled:opacity-40">
+      <button type="button" disabled={page >= totalPages} onClick={() => onPage(page + 1)} className="min-h-11 rounded-full px-3 hover:bg-paper-2 disabled:opacity-40">
         Trang sau
       </button>
     </nav>

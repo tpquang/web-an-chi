@@ -146,7 +146,7 @@ export async function getCategory(slug: string) {
   return (await get<{ data: Category }>(`/categories/${encodeURIComponent(slug)}`))?.data ?? null;
 }
 
-export function getPosts(params: { page?: number; limit?: number; category?: string; exclude?: string } = {}) {
+export function getPosts(params: { page?: number; limit?: number; category?: string; featured?: boolean; exclude?: string } = {}) {
   return must<Paged<PostSummary>>(`/posts?${query({ limit: POSTS_PER_PAGE, ...params })}`);
 }
 
@@ -164,6 +164,17 @@ export async function getPostCategory(slug: string) {
 
 export async function getStore() {
   return (await must<{ data: Store }>("/settings/store")).data;
+}
+
+export type HomeImage = { id: string; version: number; width: number; height: number; alt: string };
+export type HomeLink = { label: string; href: string };
+export type HomeBanner = { eyebrow: string; title: string; text: string; image: HomeImage | null; primary: HomeLink; secondary: HomeLink | null };
+export type HomeSlide = { eyebrow: string; title: string; text: string; image: HomeImage | null; cta: HomeLink | null };
+export type Home = { banner: HomeBanner; slides: HomeSlide[] };
+
+// Banner và slide trang chủ, cấu hình ở CMS
+export async function getHome() {
+  return (await must<{ data: Home }>("/settings/home")).data;
 }
 
 export async function getOrder(code: string) {

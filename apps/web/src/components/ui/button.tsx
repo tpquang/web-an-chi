@@ -4,7 +4,9 @@ import { Spinner } from "./spinner";
 
 const variants = {
   primary: "bg-wood text-on-wood hover:bg-wood-hover",
-  outline: "border border-wood text-wood hover:bg-wood-soft",
+  outline: "border border-line-strong text-ink hover:border-wood hover:text-wood",
+  // Trên khối tối và ảnh: nền kem, chữ than gỗ
+  light: "bg-on-night text-night hover:opacity-90",
   secondary: "bg-paper-2 text-ink hover:bg-line",
   danger: "bg-err text-surface hover:opacity-90",
   text: "text-wood underline-offset-4 hover:underline",
@@ -30,7 +32,7 @@ type AsLink = Common & { href: string; external?: boolean; prefetch?: boolean };
 export function buttonClass({ variant = "primary", size = "md", block, className = "" }: Omit<Common, "children">) {
   // Nút chữ thẳng mép với chữ xung quanh nên bỏ padding ngang của size
   const sizeClass = variant === "text" ? sizes[size].replace(/\bpx-\d+\s?/, "") : sizes[size];
-  return `relative inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors duration-(--d-fast) disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${sizeClass} ${block ? "w-full" : ""} ${className}`;
+  return `relative inline-flex items-center justify-center gap-2 rounded-full font-medium transition-colors duration-(--d-fast) disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${sizeClass} ${block ? "w-full" : ""} ${className}`;
 }
 
 export function Button(props: AsButton | AsLink) {
@@ -78,7 +80,7 @@ export function IconButton({ label, badge, children, className = "", type = "but
     <button
       type={type}
       aria-label={badge ? `${label}, ${badge}` : label}
-      className={`relative inline-flex size-11 items-center justify-center rounded-md text-ink-2 hover:bg-paper-2 hover:text-wood disabled:opacity-60 ${className}`}
+      className={`relative inline-flex size-11 items-center justify-center rounded-full text-ink-2 hover:bg-paper-2 hover:text-wood disabled:opacity-60 ${className}`}
       {...rest}
     >
       {children}

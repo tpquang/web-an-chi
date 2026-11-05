@@ -36,12 +36,12 @@ export function SiteHeader({ categories }: { categories: NavCategory[] }) {
     <header className="sticky top-0 z-(--z-sticky) border-b border-line bg-paper pt-[env(safe-area-inset-top)]">
       <a
         href="#noi-dung"
-        className="absolute top-2 left-2 z-(--z-dropdown) -translate-y-24 rounded-md bg-wood px-4 py-2 text-on-wood focus:translate-y-0"
+        className="absolute top-2 left-2 z-(--z-dropdown) -translate-y-24 rounded-full bg-wood px-4 py-2 text-on-wood focus:translate-y-0"
       >
         Bỏ qua menu
       </a>
       <nav aria-label="Menu chính" className={`${frameClass} flex h-(--header-h) items-center justify-between gap-2`}>
-        <Link href="/" aria-label={`${site.name}, về trang chủ`} className="flex min-h-11 items-center text-wood">
+        <Link href="/" aria-label={`${site.name}, về trang chủ`} className="flex min-h-11 items-center text-brand">
           <BrandLogo className="text-2xl" />
         </Link>
 
@@ -61,20 +61,20 @@ export function SiteHeader({ categories }: { categories: NavCategory[] }) {
                   </Link>
                   {/* Mở bằng hover hoặc khi focus vào bên trong, đóng nhanh hơn mở */}
                   <div className="invisible absolute top-full left-0 z-(--z-dropdown) -translate-y-1 pt-px opacity-0 transition-[opacity,translate,visibility] duration-(--d-fast) ease-(--ease-exit) group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-focus-within:duration-(--d-base) group-focus-within:ease-(--ease-ios) group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-hover:duration-(--d-base) group-hover:ease-(--ease-ios)">
-                    <ul className="min-w-56 rounded-lg border border-line bg-surface p-2 shadow-e2">
+                    <ul className="min-w-56 rounded-2xl border border-line bg-surface p-2 shadow-e2">
                       {categories.map((c) => (
                         <li key={c.slug}>
                           <Link
                             href={categoryHref(c.slug)}
                             aria-current={pathname === categoryHref(c.slug) ? "page" : undefined}
-                            className="flex min-h-11 items-center rounded-md px-3 text-ink-2 transition-colors duration-(--d-fast) hover:bg-paper-2 hover:text-wood aria-[current=page]:text-wood"
+                            className="flex min-h-11 items-center rounded-lg px-3 text-ink-2 transition-colors duration-(--d-fast) hover:bg-paper-2 hover:text-wood aria-[current=page]:text-wood"
                           >
                             {c.name}
                           </Link>
                         </li>
                       ))}
                       <li className={categories.length ? "mt-1 border-t border-line pt-1" : ""}>
-                        <Link href={productsHref} className="flex min-h-11 items-center rounded-md px-3 font-medium text-wood hover:bg-paper-2">
+                        <Link href={productsHref} className="flex min-h-11 items-center rounded-lg px-3 font-medium text-wood hover:bg-paper-2">
                           Tất cả sản phẩm
                         </Link>
                       </li>

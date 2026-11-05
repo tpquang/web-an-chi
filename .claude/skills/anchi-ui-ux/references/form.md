@@ -13,7 +13,7 @@ Các số dưới đây là bắt buộc. Form nào lệch thì sửa form, khô
 | Padding dọc của `Textarea` | 10px |
 | Có icon hoặc nút trong ô | Chừa 44px ở phía có icon, phía còn lại vẫn 12px |
 | Chữ | 16px, sans 400 |
-| Viền, bo góc, nền | 1px `--line-strong`, `rounded-md`, `--surface` |
+| Viền, bo góc, nền | 1px `--line-strong`, `rounded-xl`, `--surface` |
 
 - Chữ trong mọi ô cùng một form bắt đầu ở cùng một vị trí so với viền.
 - Các ô và nút nằm trên cùng một hàng phải cao bằng nhau.

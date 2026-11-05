@@ -9,6 +9,8 @@ const imageHosts = (process.env.IMAGE_HOSTNAMES ?? "")
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: imageHosts.map((hostname) => ({ protocol: "https", hostname })),
+    // Ảnh trang chủ có ?v= theo lần tải; ảnh tĩnh khác không có query
+    localPatterns: [{ pathname: "/api/site-images/**" }, { pathname: "/**", search: "" }],
   },
   experimental: {
     // Trên ổ ExFAT, macOS sinh file ._* trong thư mục cache và Turbopack không đọc được,

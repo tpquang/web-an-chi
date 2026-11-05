@@ -9,8 +9,9 @@ const resolve = (v) => (v?.startsWith('var(--') ? light[v.slice(6, -1)] : v)
 
 const ramp = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950].map((n) => [n, light[`wood-${n}`]])
 const groups = {
-  'Thương hiệu': ['wood', 'wood-hover', 'wood-soft', 'on-wood', 'brass'],
+  'Thương hiệu': ['brand', 'wood', 'wood-hover', 'wood-soft', 'on-wood', 'brass'],
   'Nền và chữ': ['paper', 'paper-2', 'surface', 'ink', 'ink-2', 'ink-3', 'line', 'line-strong'],
+  'Khối tối': ['night', 'on-night', 'on-night-2'],
   'Trạng thái': ['ok', 'ok-soft', 'warn', 'warn-soft', 'err', 'err-soft', 'info', 'info-soft'],
 }
 const swatch = (name, value) => `<div class="s"><i style="background:${value}"></i><b>${name}</b><code>${value.toUpperCase()}</code></div>`

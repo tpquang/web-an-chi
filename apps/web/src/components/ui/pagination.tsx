@@ -8,7 +8,7 @@ export function Pagination({ page, totalPages, hrefFor, label }: Props) {
   const pages = Array.from({ length: totalPages }, (_, index) => index + 1).filter(
     (p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1,
   );
-  const item = "inline-flex min-h-11 min-w-11 items-center justify-center rounded-md px-3";
+  const item = "inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-3";
 
   return (
     <nav aria-label={label} className="mt-10">

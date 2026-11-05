@@ -18,7 +18,7 @@ export function DevQuickFill({ onFill, disabled }: { onFill: (values: Partial<Ch
 
   if (customers.length === 0) return null;
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-dashed border-line p-4">
+    <div className="flex flex-col gap-2 rounded-2xl border border-dashed border-line p-4">
       <p className="text-sm text-ink-3">Chỉ có khi chạy dev: điền nhanh bằng khách mẫu.</p>
       <div className="flex flex-wrap gap-2">
         {customers.map((customer) => (
@@ -29,7 +29,7 @@ export function DevQuickFill({ onFill, disabled }: { onFill: (values: Partial<Ch
             onClick={() =>
               onFill({ name: customer.name, phone: customer.phone, email: customer.email ?? "", address: customer.address ?? "" })
             }
-            className="inline-flex min-h-11 items-center rounded-md border border-line-strong px-4 text-sm hover:border-wood hover:text-wood disabled:opacity-60"
+            className="inline-flex min-h-11 items-center rounded-full border border-line-strong px-4 text-sm hover:border-wood hover:text-wood disabled:opacity-60"
           >
             {customer.name}
           </button>

@@ -22,7 +22,7 @@ type SampleData = {
       stock: number;
     })[];
   postCategories: { name: string; slug: string; description?: string; position?: number }[];
-  posts: { title: string; slug: string; category: string; authorName: string; publishedAt: string; excerpt?: string; metaDescription?: string; content: string; products?: string[] }[];
+  posts: { title: string; slug: string; featured?: boolean; category: string; authorName: string; publishedAt: string; excerpt?: string; metaDescription?: string; content: string; products?: string[] }[];
   customers: { name: string; phone: string; email?: string; address?: string; marketingConsent?: boolean; password?: string }[];
   orders: {
     code: string;

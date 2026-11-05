@@ -26,7 +26,7 @@ export function RowsEditor({ rows, onChange, columns, addLabel, disabled, max = 
   return (
     <div className="flex flex-col gap-3">
       {rows.map((row, index) => (
-        <div key={index} role="group" aria-label={`Dòng ${index + 1}`} className="flex flex-col gap-2 rounded-md border border-line p-3 md:flex-row md:items-center md:border-0 md:p-0">
+        <div key={index} role="group" aria-label={`Dòng ${index + 1}`} className="flex flex-col gap-2 rounded-xl border border-line p-3 md:flex-row md:items-center md:border-0 md:p-0">
           {columns.map((column) => (
             <Input
               key={column.key}
