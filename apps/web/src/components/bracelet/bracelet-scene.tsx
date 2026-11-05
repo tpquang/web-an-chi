@@ -11,12 +11,17 @@ const beadTextureUrl = (texture: NonNullable<Bead["texture"]>) => `/api/bead-tex
 // key cố định theo từng hạt để hạt giữ mesh và trượt êm khi thứ tự đổi
 export type SceneItem = { key: number; bead: Bead };
 
+// Khoảng cách camera để thấy trọn vòng. Khung hẹp hơn vuông thì lùi thêm, nếu không vòng bị cắt hai bên
+const camDistance = (radius: number, aspect: number) => Math.max(radius * 3.4 + 2.5, 6) * Math.max(1, 1 / aspect);
+
 export type SceneHandle = {
   // Hạt từ kho đang kéo qua cảnh, bead null khi thôi kéo. Trả về true khi con trỏ nằm trong khung 3D.
   // touch: hạt nổi phía trên ngón tay để không bị che
   dragOver(bead: Bead | null, clientX: number, clientY: number, touch?: boolean): boolean;
   // Thả hạt từ kho, trả về vị trí chèn hoặc null khi thả ngoài vòng
   drop(clientX: number, clientY: number, touch?: boolean): number | null;
+  // Bật tắt tự xoay vòng, trả về trạng thái mới
+  spin(): boolean;
 };
 
 type Props = {
@@ -269,6 +274,7 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
       renderer.setSize(width, height, false);
       camera.aspect = width / Math.max(height, 1);
       camera.updateProjectionMatrix();
+      if (api.current) api.current.camGoal = camDistance(api.current.radius, camera.aspect);
     };
     const observer = new ResizeObserver(resize);
     observer.observe(el);
@@ -461,7 +467,7 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
     });
     s.keys = items.map((item) => item.key);
     s.radius = radius;
-    s.camGoal = Math.max(radius * 3.4 + 2.5, 6);
+    s.camGoal = camDistance(radius, s.camera.aspect);
   }, [items]);
 
   useEffect(() => {
@@ -541,6 +547,13 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
       if (s.spawn) retire(s.spawn.entry);
       s.spawn = { entry: ghost, age: 0 };
       return z.insert;
+    },
+    spin() {
+      const s = api.current;
+      if (!s) return false;
+      s.controls.autoRotate = !s.controls.autoRotate;
+      s.controls.autoRotateSpeed = 4;
+      return s.controls.autoRotate;
     },
   }));
 

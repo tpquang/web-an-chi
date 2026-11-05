@@ -117,3 +117,25 @@ export const SendIcon = (p: P) => (
     <path d="M4 12 20 4l-6 16-3-7-7-1Z" />
   </Icon>
 );
+
+export const UndoIcon = (p: P) => (
+  <Icon {...p}>
+    <path d="M9 14 4 9l5-5" />
+    <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+  </Icon>
+);
+
+export const ResetIcon = (p: P) => (
+  <Icon {...p}>
+    <path d="M20 12a8 8 0 1 1-2.3-5.7" />
+    <path d="M20 4v4.5h-4.5" />
+  </Icon>
+);
+
+export const SpinIcon = (p: P) => (
+  <Icon {...p}>
+    <ellipse cx="12" cy="12" rx="9" ry="4" />
+    <path d="m15 6.5 2 1.5-2 1.7" />
+    <circle cx="12" cy="12" r="1" />
+  </Icon>
+);
