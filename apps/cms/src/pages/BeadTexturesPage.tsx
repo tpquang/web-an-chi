@@ -11,7 +11,7 @@ import { useLoad } from "../lib/use-load";
 // three.js chỉ nạp khi mở hộp tải ảnh
 const BeadPreview = lazy(() => import("../components/BeadPreview").then((m) => ({ default: m.BeadPreview })));
 
-type Row = {
+export type TextureRow = {
   material: string;
   finish: string;
   beads: number;
@@ -20,15 +20,15 @@ type Row = {
   texture: { id: string; version: number; roughness: number; updatedAt: string } | null;
 };
 
-const textureUrl = (t: NonNullable<Row["texture"]>) => publicUrl(`/bead-textures/${t.id}?v=${t.version}`);
-const loadRows = () => api.get<Row[]>("/bead-textures");
+export const textureUrl = (t: NonNullable<TextureRow["texture"]>) => publicUrl(`/bead-textures/${t.id}?v=${t.version}`);
+export const loadTextureRows = () => api.get<TextureRow[]>("/bead-textures");
 const date = (iso: string) => new Date(iso).toLocaleDateString("vi-VN");
 
 export function BeadTexturesPage() {
-  const { state, slow, reload } = useLoad(loadRows, []);
-  const [editing, setEditing] = useState<Row | null>(null);
+  const { state, slow, reload } = useLoad(loadTextureRows, []);
+  const [editing, setEditing] = useState<TextureRow | null>(null);
 
-  async function remove(row: Row) {
+  async function remove(row: TextureRow) {
     if (!(await confirmDialog({ title: "Xoá ảnh vân", desc: `Hạt ${row.material} sẽ hiện bằng màu trơn cho tới khi có ảnh mới.`, confirmLabel: "Xoá ảnh vân", danger: true }))) return;
     try {
       await api.delete(`/bead-textures/${encodeURIComponent(row.material)}`);
@@ -83,7 +83,7 @@ export function BeadTexturesPage() {
 
 const SIZES = [6, 8, 10, 12, 14];
 
-function UploadModal({ row, onClose, onSaved }: { row: Row; onClose(): void; onSaved(): void }) {
+export function UploadModal({ row, onClose, onSaved }: { row: TextureRow; onClose(): void; onSaved(): void }) {
   const [image, setImage] = useState<{ bitmap: ImageBitmap; name: string } | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [crop, setCrop] = useState<Crop | null>(null);

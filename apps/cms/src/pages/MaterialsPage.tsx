@@ -1,31 +1,63 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { AdjustModal } from "../components/business/AdjustModal";
+import { ModelModal } from "../components/business/ModelModal";
 import { PlusIcon } from "../components/icons";
 import { Button } from "../components/ui/Button";
 import { Field, Input, NumberInput, Textarea } from "../components/ui/Field";
 import { confirmDialog, Modal } from "../components/ui/Modal";
 import { DataTable, PageHeader, td, tdMoney, th } from "../components/ui/Page";
-import { EmptyState, ErrorState, TableSkeleton } from "../components/ui/States";
+import { Select } from "../components/ui/Select";
+import { EmptyState, ErrorState, TableSkeleton, Tag } from "../components/ui/States";
 import { showToast } from "../components/ui/Toast";
 import { api, errorMessage } from "../lib/api";
 import { formatVnd } from "../lib/format";
-import { formatQty, loadMaterials, type MaterialRow } from "../lib/inventory";
+import type { MaterialKind } from "../lib/batch";
+import { formatQty, loadMaterials, materialKinds, type MaterialRow } from "../lib/inventory";
+import { loadTextureRows, textureUrl, UploadModal, type TextureRow } from "./BeadTexturesPage";
 import { useLoad } from "../lib/use-load";
 import { useSubmit } from "../lib/use-submit";
 
-type Values = { name: string; unit: string; unitsPerKg: number | null; note: string };
+type Values = { name: string; kind: MaterialKind; unit: string; unitsPerKg: number | null; beadMaterial: string | null; note: string };
+
+const kindLabel = (kind: MaterialKind) => materialKinds.find((k) => k.value === kind)?.label ?? kind;
 
 export function MaterialsPage() {
   const { state, slow, reload } = useLoad(loadMaterials, []);
   const [editing, setEditing] = useState<{ id: string | null; values: Values } | null>(null);
   const [adjusting, setAdjusting] = useState<MaterialRow | null>(null);
+  const [modeling, setModeling] = useState<MaterialRow | null>(null);
+  const [texturing, setTexturing] = useState<TextureRow | null>(null);
+  // Loại trầm lấy từ kho hạt của trang thiết kế vòng, kèm ảnh vân đang có
+  const textures = useLoad(loadTextureRows, []);
+  const textureRows = textures.state.status === "ready" ? textures.state.data.filter((t) => t.finish !== "metal") : [];
   const { submitting, errors, setErrors, run } = useSubmit();
   const total = state.status === "ready" ? state.data.reduce((s, m) => s + m.stock * m.avgCostVnd, 0) : 0;
 
   function open(m?: MaterialRow) {
     setErrors({});
-    setEditing({ id: m?.id ?? null, values: m ? { name: m.name, unit: m.unit, unitsPerKg: m.unitsPerKg, note: m.note ?? "" } : { name: "", unit: "viên", unitsPerKg: null, note: "" } });
+    setEditing({
+      id: m?.id ?? null,
+      values: m
+        ? { name: m.name, kind: m.kind, unit: m.unit, unitsPerKg: m.unitsPerKg, beadMaterial: m.beadMaterial, note: m.note ?? "" }
+        : { name: "", kind: "GENERAL", unit: "cái", unitsPerKg: null, beadMaterial: null, note: "" },
+    });
+  }
+
+  // Đổi loại thì đổi luôn đơn vị mặc định; hạt trầm và charm nhập theo số lượng nên bỏ quy đổi kg
+  function setKind(kind: MaterialKind) {
+    setEditing((prev) => {
+      if (!prev) return prev;
+      const defaults = materialKinds.map((k) => k.unit as string);
+      const unit = !prev.values.unit || defaults.includes(prev.values.unit) ? materialKinds.find((k) => k.value === kind)!.unit : prev.values.unit;
+      return { ...prev, values: { ...prev.values, kind, unit, unitsPerKg: kind === "GENERAL" ? prev.values.unitsPerKg : null } };
+    });
+  }
+
+  // Hộp ảnh vân dùng chung với trang Vân vật liệu hạt, loại trầm mới chưa có hạt thì dựng dòng tạm
+  function openTexture(m: MaterialRow) {
+    if (!m.beadMaterial) return;
+    setTexturing(textureRows.find((t) => t.material === m.beadMaterial) ?? { material: m.beadMaterial, finish: "wood", beads: 0, minMm: 8, maxMm: 8, texture: m.texture });
   }
   const set = <K extends keyof Values>(key: K, value: Values[K]) => setEditing((prev) => prev && { ...prev, values: { ...prev.values, [key]: value } });
 
@@ -57,7 +89,7 @@ export function MaterialsPage() {
     <>
       <PageHeader
         title="Nguyên liệu thô"
-        desc={<>Hàng nhập về để tự đóng gói: nụ, hộp, túi, thiệp. Tồn kho tăng khi nhập kho một <Link to="/business" className="text-wood underline-offset-4 hover:underline">đợt nhập</Link>, giảm khi <Link to="/packing" className="text-wood underline-offset-4 hover:underline">đóng gói</Link> hoặc ghi hao hụt.</>}
+        desc={<>Hàng nhập về: hạt trầm, charm để xâu vòng, nụ, hộp, túi, thiệp để đóng gói. Tồn kho tăng khi nhập kho một <Link to="/business" className="text-wood underline-offset-4 hover:underline">đợt nhập</Link>, giảm khi <Link to="/packing" className="text-wood underline-offset-4 hover:underline">đóng gói</Link> hoặc ghi hao hụt.</>}
         actions={<Button onClick={() => open()}><PlusIcon size={18} /> Thêm nguyên liệu</Button>}
       />
       {state.status === "loading" && <div className={slow ? "" : "invisible"}><TableSkeleton rows={4} /></div>}
@@ -73,12 +105,27 @@ export function MaterialsPage() {
               <tr key={m.id}>
                 <td className={td}>
                   <button type="button" onClick={() => open(m)} className="min-h-11 text-left font-medium hover:text-wood">{m.name}</button>
-                  <span className="block text-[13px] text-ink-3">{m.unitsPerKg ? `${m.unitsPerKg} ${m.unit} mỗi kg · ` : ""}dùng trong {m._count.components} công thức</span>
+                  <span className="mt-0.5 flex flex-wrap items-center gap-2 text-[13px] text-ink-3">
+                    {m.kind !== "GENERAL" && <Tag tone="wood">{kindLabel(m.kind)}</Tag>}
+                    {m.kind === "BEAD" && <span>{m.beadMaterial}</span>}
+                    {m.unitsPerKg ? `${m.unitsPerKg} ${m.unit} mỗi kg · ` : ""}dùng trong {m._count.components} công thức
+                  </span>
                 </td>
                 <td className={`${tdMoney} ${m.stock === 0 ? "text-ink-3" : ""}`}>{formatQty(m.stock, m.unit)}</td>
                 <td className={tdMoney}>{formatVnd(m.avgCostVnd)}</td>
                 <td className={tdMoney}>{formatVnd(m.stock * m.avgCostVnd)}</td>
                 <td className={`${td} text-right whitespace-nowrap`}>
+                  {m.kind === "BEAD" && (
+                    <Button variant="secondary" size="sm" className="mr-4" onClick={() => openTexture(m)}>
+                      {m.texture && <img src={textureUrl(m.texture)} alt="" width={20} height={20} className="size-5 rounded-full object-cover" />}
+                      {m.texture ? "Ảnh vân" : "Tải ảnh vân"}
+                    </Button>
+                  )}
+                  {m.kind === "CHARM" && (
+                    <Button variant="secondary" size="sm" className="mr-4" onClick={() => setModeling(m)}>
+                      {m.model ? "File 3D" : "Tải file 3D"}
+                    </Button>
+                  )}
                   <Button variant="text" size="sm" onClick={() => setAdjusting(m)}>Hao hụt, kiểm kê</Button>
                   <Button variant="text" size="sm" className="ml-4 text-err" onClick={() => handleDelete(m)}>Xoá</Button>
                 </td>
@@ -97,15 +144,55 @@ export function MaterialsPage() {
       >
         {v && (
           <form id="material-form" onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-            <Field label="Tên nguyên liệu" error={errors.name}><Input value={v.name} onChange={(e) => set("name", e.target.value)} placeholder="VD: Nụ trầm thô" disabled={submitting} /></Field>
+            <div role="group" aria-labelledby="loai-nguyen-lieu" className="flex flex-col gap-2">
+              <span id="loai-nguyen-lieu" className="text-sm font-medium">Loại</span>
+              <div className="flex gap-1 rounded-lg bg-paper-2 p-1">
+                {materialKinds.map((k) => (
+                  <button
+                    key={k.value}
+                    type="button"
+                    aria-pressed={v.kind === k.value}
+                    onClick={() => setKind(k.value)}
+                    disabled={submitting}
+                    className="min-h-11 flex-1 rounded-md px-2 text-sm font-medium text-ink-2 transition-colors duration-(--d-fast) hover:text-ink aria-pressed:bg-surface aria-pressed:text-ink aria-pressed:shadow-e1"
+                  >
+                    {k.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <Field label="Tên nguyên liệu" error={errors.name}>
+              <Input value={v.name} onChange={(e) => set("name", e.target.value)} placeholder={v.kind === "BEAD" ? "VD: Hạt trầm tốc 8mm" : v.kind === "CHARM" ? "VD: Hoa sen bạc 925" : "VD: Nụ trầm thô"} disabled={submitting} />
+            </Field>
+            {v.kind === "BEAD" && (
+              <Field label="Loại trầm" hint="Hạt cùng loại trầm dùng chung một ảnh vân. Tải ảnh vân ở nút Ảnh vân trong danh sách sau khi lưu." error={errors.beadMaterial}>
+                <Select
+                  value={v.beadMaterial}
+                  onChange={(x) => set("beadMaterial", x)}
+                  options={textureRows.map((t) => ({ value: t.material, label: t.texture ? `${t.material} · có ảnh vân` : t.material }))}
+                  placeholder={textures.state.status === "loading" ? "Đang tải…" : "Chọn loại trầm"}
+                  disabled={submitting}
+                  aria-invalid={Boolean(errors.beadMaterial)}
+                />
+              </Field>
+            )}
+            {v.kind === "CHARM" && <p className="text-sm text-ink-3">Sau khi lưu, bấm Tải file 3D trong danh sách để gắn mô hình .glb cho charm.</p>}
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Đơn vị gốc" hint="Tồn kho và công thức tính theo đơn vị này." error={errors.unit}><Input value={v.unit} onChange={(e) => set("unit", e.target.value)} placeholder="VD: viên, cái" disabled={submitting} /></Field>
-              <Field label="Số đơn vị mỗi kg" optional hint="Điền nếu nhập theo kg, ví dụ 800 viên."><NumberInput value={v.unitsPerKg} onChange={(x) => set("unitsPerKg", x == null ? null : Math.round(x))} decimals={0} disabled={submitting} /></Field>
+              <Field label="Đơn vị gốc" hint={v.kind === "GENERAL" ? "Tồn kho và công thức tính theo đơn vị này." : "Nhập kho theo số lượng, không quy đổi kg."} error={errors.unit}>
+                <Input value={v.unit} onChange={(e) => set("unit", e.target.value)} placeholder="VD: viên, cái" disabled={submitting} />
+              </Field>
+              {v.kind === "GENERAL" && (
+                <Field label="Số đơn vị mỗi kg" optional hint="Điền nếu nhập theo kg, ví dụ 800 viên.">
+                  <NumberInput value={v.unitsPerKg} onChange={(x) => set("unitsPerKg", x == null ? null : Math.round(x))} decimals={0} disabled={submitting} />
+                </Field>
+              )}
             </div>
             <Field label="Ghi chú" optional><Textarea value={v.note} onChange={(e) => set("note", e.target.value)} disabled={submitting} /></Field>
           </form>
         )}
       </Modal>
+      {modeling && <ModelModal row={modeling} onClose={() => setModeling(null)} onSaved={() => (setModeling(null), reload())} />}
+      {texturing && <UploadModal row={texturing} onClose={() => setTexturing(null)} onSaved={() => (setTexturing(null), reload(), textures.reload())} />}
       <AdjustModal
         target={adjusting && { kind: "materials", id: adjusting.id, name: adjusting.name, unit: adjusting.unit, stock: adjusting.stock }}
         onClose={() => setAdjusting(null)}

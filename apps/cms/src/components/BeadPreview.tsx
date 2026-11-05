@@ -13,7 +13,6 @@ type Props = {
 };
 
 const MM = 0.1;
-const COUNT = 7;
 
 // Cách bọc ảnh giống hệt web: hai cực của hạt nằm ở lỗ xâu dây, ảnh lặp gương hai lần quanh hạt
 // nên nối liền mà không cần chỉnh ảnh. Sửa ở đây thì sửa cả apps/web/src/components/bracelet/bracelet-scene.tsx
@@ -49,8 +48,9 @@ export function BeadPreview({ source, version, sizeMm, roughness, finish }: Prop
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.enablePan = false;
-    controls.autoRotate = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    controls.autoRotateSpeed = 1.2;
+    // Xoay bằng tay để soi vân từng góc, không tự quay
+    controls.autoRotate = false;
+    controls.rotateSpeed = 0.8;
 
     const group = new THREE.Group();
     scene.add(group);
@@ -84,7 +84,7 @@ export function BeadPreview({ source, version, sizeMm, roughness, finish }: Prop
     };
   }, []);
 
-  // Một đoạn vòng có hạt to ở giữa để xem cả cận cảnh lẫn lúc xâu thành chuỗi
+  // Đúng một hạt ở giữa khung, lỗ xâu nằm ngang như trên vòng
   useEffect(() => {
     const s = api.current;
     if (!s) return;
@@ -93,21 +93,13 @@ export function BeadPreview({ source, version, sizeMm, roughness, finish }: Prop
       bead.removeFromParent();
     }
     const r = (sizeMm * MM) / 2;
-    const geometry = new THREE.SphereGeometry(r, 64, 48).rotateX(Math.PI / 2);
-    const ring = (COUNT * sizeMm * MM * 2.4) / (2 * Math.PI);
-    const step = (sizeMm * MM) / ring;
-    s.beads = Array.from({ length: COUNT }, (_, i) => {
-      const angle = Math.PI / 2 + (i - (COUNT - 1) / 2) * step;
-      const mesh = new THREE.Mesh(geometry, s.material);
-      mesh.position.set(Math.cos(angle) * ring, 0, Math.sin(angle) * ring - ring);
-      mesh.rotation.y = -angle;
-      s.group.add(mesh);
-      return mesh;
-    });
-    const dist = r * 9 + 0.4;
-    s.camera.position.set(0, dist * 0.55, dist);
-    s.controls.minDistance = r * 3;
-    s.controls.maxDistance = dist * 2;
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(r, 64, 48).rotateX(Math.PI / 2), s.material);
+    s.group.add(mesh);
+    s.beads = [mesh];
+    const dist = r * 4.5;
+    s.camera.position.set(0, dist * 0.35, dist);
+    s.controls.minDistance = r * 2.2;
+    s.controls.maxDistance = r * 8;
     s.controls.target.set(0, 0, 0);
   }, [sizeMm]);
 

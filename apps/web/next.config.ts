@@ -7,6 +7,9 @@ const imageHosts = (process.env.IMAGE_HOSTNAMES ?? "")
   .filter(Boolean);
 
 const nextConfig: NextConfig = {
+  // Mỗi lần build trên VPS có mã riêng (scripts/update.sh đặt). Tab đang mở bản cũ bấm sang trang khác
+  // sẽ tải lại hẳn trang thay vì ghép JS mới với HTML cũ
+  deploymentId: process.env.DEPLOYMENT_ID || undefined,
   images: {
     remotePatterns: imageHosts.map((hostname) => ({ protocol: "https", hostname })),
     // Ảnh trang chủ có ?v= theo lần tải; ảnh tĩnh khác không có query

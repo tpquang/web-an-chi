@@ -108,6 +108,24 @@ server {
     client_max_body_size 10m;
 ${ROBOTS_HEADER}
 
+    # JS, CSS của Next có mã băm trong tên file, đổi mỗi lần build nên cache lâu được
+    location /_next/static/ {
+        proxy_pass http://127.0.0.1:${WEB_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_hide_header Cache-Control;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+${ROBOTS_HEADER}
+    }
+
+    # Ảnh tối ưu để Next tự đặt cache
+    location /_next/image {
+        proxy_pass http://127.0.0.1:${WEB_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+    }
+
+    # HTML không được giữ bản cũ: trình duyệt luôn hỏi lại server, nếu không đổi thì nhận 304
     location / {
         proxy_pass http://127.0.0.1:${WEB_PORT};
         proxy_http_version 1.1;
@@ -115,6 +133,9 @@ ${ROBOTS_HEADER}
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_hide_header Cache-Control;
+        add_header Cache-Control "no-cache" always;
+${ROBOTS_HEADER}
     }
 }
 
@@ -140,13 +161,17 @@ server {
         proxy_read_timeout 1h;
     }
 
+    # add_header trong location thay hẳn add_header của server, nên ghi lại X-Robots-Tag
     location /assets/ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        add_header X-Robots-Tag "noindex, nofollow" always;
     }
 
+    # index.html trỏ tới file JS, CSS mới sau mỗi lần build nên không được cache
     location / {
         try_files \$uri /index.html;
+        add_header Cache-Control "no-cache" always;
+        add_header X-Robots-Tag "noindex, nofollow" always;
     }
 }
 EOF

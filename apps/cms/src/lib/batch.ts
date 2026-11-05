@@ -4,7 +4,8 @@
 
 export type BatchStatus = "PLANNED" | "ORDERED" | "RECEIVED";
 
-export type Material = { id: string; name: string; unit: string; unitsPerKg: number | null; stock: number; avgCostVnd: number };
+export type MaterialKind = "GENERAL" | "BEAD" | "CHARM";
+export type Material = { id: string; name: string; kind: MaterialKind; unit: string; unitsPerKg: number | null; beadMaterial: string | null; stock: number; avgCostVnd: number };
 
 export type Recipe = {
   id: string;

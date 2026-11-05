@@ -33,7 +33,8 @@ adminBraceletRouter.get("/bead-textures", async (_req, res) => {
 });
 
 async function knownMaterial(material: string) {
-  if (!(await prisma.bead.findFirst({ where: { material }, select: { id: true } }))) throw new HttpError(404, "Chưa có hạt nào thuộc chất liệu này.", "NOT_FOUND");
+  const [bead, raw] = await Promise.all([prisma.bead.findFirst({ where: { material }, select: { id: true } }), prisma.material.findFirst({ where: { beadMaterial: material }, select: { id: true } })]);
+  if (!bead && !raw) throw new HttpError(404, "Chưa có hạt nào thuộc chất liệu này.", "NOT_FOUND");
 }
 
 const roughnessQuery = z.coerce.number().min(0).max(1);

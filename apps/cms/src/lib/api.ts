@@ -75,7 +75,25 @@ export const api = {
   patch: <T>(path: string, body: unknown) => request<T>("PATCH", path, body),
   delete: (path: string) => request<void>("DELETE", path),
   upload,
+  download,
 };
+
+// Tải file nhị phân của admin, ví dụ file 3D charm
+async function download(path: string): Promise<ArrayBuffer> {
+  const token = getToken();
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}/api/v1/admin${path}`, { headers: token ? { authorization: `Bearer ${token}` } : {} });
+  } catch {
+    throw new ApiError(0, "Không kết nối được API. Kiểm tra mạng hoặc API đã chạy chưa.");
+  }
+  if (res.status === 401) setToken(null);
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    throw new ApiError(res.status, json.error ?? `Lỗi ${res.status}`, json.code);
+  }
+  return res.arrayBuffer();
+}
 
 // Gửi thẳng file ảnh làm body, không bọc JSON. PUT thay ảnh có sẵn, POST tạo ảnh mới
 async function upload<T>(path: string, file: Blob, method: "PUT" | "POST" = "PUT"): Promise<T> {

@@ -48,9 +48,9 @@ model Category {
 }
 
 model Product {
-  id                String         @id @default(cuid())
+  id                String             @id @default(cuid())
   name              String
-  slug              String         @unique
+  slug              String             @unique
   // Một câu ngắn hiện cạnh giá
   summary           String?
   description       String?
@@ -60,19 +60,19 @@ model Product {
   // Giá lưu bằng số nguyên VND
   priceVnd          Int
   compareAtPriceVnd Int?
-  stock             Int            @default(0)
+  stock             Int                @default(0)
   // Xuất xứ, ví dụ "Khánh Hòa"; để trống khi chưa xác minh được
   origin            String?
   // Hiện ở mục sản phẩm nổi bật trang chủ, tối đa 4 sản phẩm
-  featured          Boolean        @default(false)
+  featured          Boolean            @default(false)
   // Link gian hàng của chính sản phẩm này trên sàn, để trống nếu không bán ở đó
   shopeeUrl         String?
   tiktokUrl         String?
-  status            PublishStatus  @default(DRAFT)
+  status            PublishStatus      @default(DRAFT)
   metaTitle         String?
   metaDescription   String?
   categoryId        String
-  category          Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  category          Category           @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   images            ProductImage[]
   orderItems        OrderItem[]
   posts             Post[]
@@ -82,8 +82,8 @@ model Product {
   packRuns          PackRun[]
   // Giá vốn bình quân mỗi sản phẩm đã đóng gói, cập nhật mỗi lần đóng gói
   unitCostVnd       Float?
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
   @@index([status, createdAt])
   @@index([categoryId])
@@ -140,20 +140,20 @@ model Post {
 }
 
 model Customer {
-  id               String   @id @default(cuid())
+  id               String         @id @default(cuid())
   name             String
   // Khoá nhận diện khách đặt hàng không cần tài khoản
-  phone            String   @unique
+  phone            String         @unique
   email            String?
   address          String?
   // Chỉ true khi khách tự đánh dấu đồng ý nhận tin
-  marketingConsent Boolean  @default(false)
+  marketingConsent Boolean        @default(false)
   conversations    Conversation[]
   // null: khách chỉ đặt hàng, chưa tạo tài khoản. Dạng "scrypt$<salt>$<hash>"
   passwordHash     String?
   orders           Order[]
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 }
 
 model Order {
@@ -211,23 +211,35 @@ model Setting {
 // Nhập nguyên liệu thô (nụ, hộp, túi...), đóng gói theo công thức thành sản phẩm bán (Product.stock).
 // Mọi thay đổi tồn kho ghi vào StockMovement. Số lượng tính theo đơn vị gốc của nguyên liệu.
 
+// Hạt trầm và charm nhập theo số lượng (viên, cái), không quy đổi kg
+enum MaterialKind {
+  GENERAL
+  BEAD
+  CHARM
+}
+
 model Material {
-  id          String              @id @default(cuid())
-  name        String              @unique
+  id           String             @id @default(cuid())
+  name         String             @unique
+  kind         MaterialKind       @default(GENERAL)
+  // Hạt trầm: loại trầm dùng chung ảnh vân, trùng Bead.material và BeadTexture.material
+  beadMaterial String?
+  // Charm: file 3D .glb để dựng charm trên vòng
+  model        MaterialModel?
   // Đơn vị gốc: viên, cái, gam...
-  unit        String
+  unit         String
   // Quy đổi để nhập theo kg, ví dụ 800 viên mỗi kg. Để trống nếu không nhập theo kg
-  unitsPerKg  Int?
-  stock       Int                 @default(0)
+  unitsPerKg   Int?
+  stock        Int                @default(0)
   // Giá vốn bình quân mỗi đơn vị, cập nhật mỗi lần nhập kho
-  avgCostVnd  Float               @default(0)
-  note        String?
-  components  ProductComponent[]
-  lines       PurchaseLine[]
-  writeOffs   BatchWriteOff[]
-  movements   StockMovement[]
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
+  avgCostVnd   Float              @default(0)
+  note         String?
+  components   ProductComponent[]
+  lines        PurchaseLine[]
+  writeOffs    BatchWriteOff[]
+  movements    StockMovement[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
 }
 
 // Công thức đóng gói: một sản phẩm bán gồm bao nhiêu đơn vị của từng nguyên liệu
@@ -250,42 +262,42 @@ enum BatchStatus {
 }
 
 model PurchaseBatch {
-  id          String          @id @default(cuid())
-  name        String
-  supplier    String?
-  orderedAt   DateTime?
-  receivedAt  DateTime?
-  status      BatchStatus     @default(PLANNED)
+  id         String          @id @default(cuid())
+  name       String
+  supplier   String?
+  orderedAt  DateTime?
+  receivedAt DateTime?
+  status     BatchStatus     @default(PLANNED)
   // Vốn đang có cho đợt này, để so với vốn cần
-  capitalVnd  Int?
+  capitalVnd Int?
   // Phí bán ước tính trên doanh thu (sàn, thanh toán), phần trăm
-  feePct      Float           @default(0)
-  note        String?
-  lines       PurchaseLine[]
-  extras      PurchaseExtra[]
-  writeOffs   BatchWriteOff[]
-  plans       BatchPlan[]
-  movements   StockMovement[]
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  feePct     Float           @default(0)
+  note       String?
+  lines      PurchaseLine[]
+  extras     PurchaseExtra[]
+  writeOffs  BatchWriteOff[]
+  plans      BatchPlan[]
+  movements  StockMovement[]
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
 
   @@index([createdAt])
 }
 
 // Một dòng nguyên liệu trong đợt nhập
 model PurchaseLine {
-  id           String        @id @default(cuid())
-  batchId      String
-  batch        PurchaseBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  materialId   String
-  material     Material      @relation(fields: [materialId], references: [id], onDelete: Restrict)
-  position     Int           @default(0)
+  id            String        @id @default(cuid())
+  batchId       String
+  batch         PurchaseBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  materialId    String
+  material      Material      @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  position      Int           @default(0)
   // Số lượng theo đơn vị gốc của nguyên liệu
-  quantity     Int
+  quantity      Int
   // Thành tiền của dòng
-  totalCostVnd Int
+  totalCostVnd  Int
   // Chỉ để hiển thị lại khi nhập theo kg
-  inputKg      Float?
+  inputKg       Float?
   pricePerKgVnd Int?
 
   @@index([batchId, position])
@@ -509,4 +521,16 @@ model SiteImage {
   width     Int
   height    Int
   createdAt DateTime @default(now())
+}
+
+// File 3D .glb của charm. Bảng riêng để danh sách nguyên liệu không phải đọc cả file
+model MaterialModel {
+  id         String   @id @default(cuid())
+  materialId String   @unique
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  data       Bytes
+  fileName   String
+  size       Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

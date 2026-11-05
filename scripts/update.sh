@@ -57,6 +57,9 @@ for _ in $(seq 1 30); do
 done
 curl -s -o /dev/null "http://127.0.0.1:${API_PORT}/health" || { pm2 logs anchi-api --lines 30 --nostream; die "API không khởi động được"; }
 
+# Mã phiên bản cho Next, cùng giá trị lúc build và lúc chạy (pm2 kế thừa biến đã export)
+export DEPLOYMENT_ID="$(git rev-parse --short HEAD 2>/dev/null || echo local)-$(date +%Y%m%d%H%M%S)"
+
 log "Build CMS và web"
 npm run build -w @an-chi/cms
 npm run build -w @an-chi/web

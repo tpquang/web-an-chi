@@ -1,6 +1,6 @@
-import { Router } from "express";
+import express, { Router } from "express";
 import { z } from "zod";
-import { MovementType, type Prisma } from "../../generated/prisma/client.js";
+import { MaterialKind, MovementType, type Prisma } from "../../generated/prisma/client.js";
 import { movingAverage } from "../../lib/inventory.js";
 import { prisma } from "../../lib/prisma.js";
 import { optionalText, pageQuery } from "../../lib/text.js";
@@ -10,18 +10,36 @@ export const adminInventoryRouter = Router();
 
 // ---- Nguyên liệu thô
 
-const materialInput = z.object({
-  name: z.string().trim().min(2, "Nhập tên nguyên liệu, ví dụ Nụ trầm thô.").max(120),
-  unit: z.string().trim().min(1, "Nhập đơn vị, ví dụ viên, cái.").max(20),
-  unitsPerKg: z.number().int().positive().nullish().transform((value) => value ?? null),
-  note: optionalText,
-});
+const materialInput = z
+  .object({
+    name: z.string().trim().min(2, "Nhập tên nguyên liệu, ví dụ Nụ trầm thô.").max(120),
+    kind: z.enum(MaterialKind).default(MaterialKind.GENERAL),
+    unit: z.string().trim().min(1, "Nhập đơn vị, ví dụ viên, cái.").max(20),
+    unitsPerKg: z.number().int().positive().nullish().transform((value) => value ?? null),
+    beadMaterial: z.string().trim().max(60).nullish().transform((value) => value || null),
+    note: optionalText,
+  })
+  .superRefine((value, ctx) => {
+    if (value.kind === MaterialKind.BEAD && !value.beadMaterial) ctx.addIssue({ code: "custom", path: ["beadMaterial"], message: "Chọn loại trầm để dùng ảnh vân." });
+  })
+  // Hạt trầm và charm nhập theo số lượng, chỉ nguyên liệu khác mới quy đổi kg
+  .transform((value) => ({
+    ...value,
+    unitsPerKg: value.kind === MaterialKind.GENERAL ? value.unitsPerKg : null,
+    beadMaterial: value.kind === MaterialKind.BEAD ? value.beadMaterial : null,
+  }));
+
+// File 3D charm: .glb, bắt đầu bằng chữ "glTF"
+export const MODEL_SPEC = { maxBytes: 15_000_000 } as const;
+const modelInfo = { select: { fileName: true, size: true, updatedAt: true } } as const;
 
 adminInventoryRouter.get("/materials", async (_req, res) => {
-  const data = await prisma.material.findMany({
-    orderBy: { name: "asc" },
-    include: { _count: { select: { components: true } } },
-  });
+  const [materials, textures] = await Promise.all([
+    prisma.material.findMany({ orderBy: { name: "asc" }, include: { _count: { select: { components: true } }, model: modelInfo } }),
+    prisma.beadTexture.findMany({ select: { id: true, material: true, roughness: true, updatedAt: true } }),
+  ]);
+  const byMaterial = new Map(textures.map((t) => [t.material, { ...t, version: t.updatedAt.getTime() }]));
+  const data = materials.map((m) => ({ ...m, texture: m.beadMaterial ? (byMaterial.get(m.beadMaterial) ?? null) : null }));
   res.json({ data });
 });
 
@@ -39,6 +57,38 @@ adminInventoryRouter.delete("/materials/:id", async (req, res) => {
     throw new HttpError(409, "Nguyên liệu đang có trong công thức sản phẩm hoặc đợt nhập, không xoá được.", "IN_USE");
   }
   await prisma.material.delete({ where: { id: material.id } });
+  res.status(204).end();
+});
+
+adminInventoryRouter.get("/materials/:id/model", async (req, res) => {
+  const model = await prisma.materialModel.findUnique({ where: { materialId: req.params.id } });
+  if (!model) throw new HttpError(404, "Charm chưa có file 3D.", "NOT_FOUND");
+  res.type("model/gltf-binary").setHeader("cache-control", "private, no-cache").send(Buffer.from(model.data));
+});
+
+adminInventoryRouter.put(
+  "/materials/:id/model",
+  express.raw({ type: ["model/gltf-binary", "application/octet-stream"], limit: MODEL_SPEC.maxBytes }),
+  async (req, res) => {
+    const material = await prisma.material.findUniqueOrThrow({ where: { id: String(req.params.id) }, select: { id: true, kind: true } });
+    if (material.kind !== MaterialKind.CHARM) throw new HttpError(400, "Chỉ charm mới tải được file 3D.", "NOT_CHARM");
+    if (!Buffer.isBuffer(req.body) || req.body.length < 12 || req.body.toString("ascii", 0, 4) !== "glTF") {
+      throw new HttpError(400, "File không phải .glb hợp lệ. Xuất file từ Blender bằng glTF Binary (.glb).", "BAD_MODEL");
+    }
+    const fileName = String(req.query.name ?? "charm.glb").slice(0, 120);
+    const data = new Uint8Array(req.body);
+    const saved = await prisma.materialModel.upsert({
+      where: { materialId: material.id },
+      update: { data, fileName, size: data.length },
+      create: { materialId: material.id, data, fileName, size: data.length },
+      ...modelInfo,
+    });
+    res.json({ data: saved });
+  },
+);
+
+adminInventoryRouter.delete("/materials/:id/model", async (req, res) => {
+  await prisma.materialModel.deleteMany({ where: { materialId: req.params.id } });
   res.status(204).end();
 });
 

@@ -1,7 +1,18 @@
 import { api } from "./api";
 import type { Material, Recipe } from "./batch";
 
-export type MaterialRow = Material & { note: string | null; _count: { components: number } };
+export type MaterialRow = Material & {
+  note: string | null;
+  _count: { components: number };
+  model: { fileName: string; size: number; updatedAt: string } | null;
+  texture: { id: string; version: number; roughness: number; updatedAt: string } | null;
+};
+
+export const materialKinds = [
+  { value: "GENERAL", label: "Nguyên liệu khác", unit: "cái" },
+  { value: "BEAD", label: "Hạt trầm", unit: "viên" },
+  { value: "CHARM", label: "Charm", unit: "cái" },
+] as const;
 export type RecipeRow = Omit<Recipe, "components"> & { unitCostVnd: number | null; canPack: number; materialCostVnd: number; components: { quantity: number; material: Material }[] };
 
 export const loadMaterials = () => api.get<MaterialRow[]>("/materials");
