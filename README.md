@@ -19,6 +19,8 @@ npm start
 
 Hoặc bấm đúp `start.command` trong Finder. Script `scripts/dev.sh` tự cài thư viện và tạo `.env` nếu thiếu, mở Docker nếu đang tắt, bật PostgreSQL, áp migration mới, rồi chạy cả API, web, CMS. Ctrl+C để dừng.
 
+**Windows:** bấm đúp `start.cmd`, chạy `scripts/dev.ps1` với các bước như trên. Lần đầu mở Command Prompt ở thư mục dự án và chạy `start.cmd seed` để nạp thêm dữ liệu mẫu. Cần cài sẵn Node.js 22 và Docker Desktop.
+
 ## Chạy lần đầu
 
 Cần Node.js 22.12 trở lên và PostgreSQL ở cổng 5433 (`npm run db:up` dùng Docker).
