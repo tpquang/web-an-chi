@@ -7,6 +7,8 @@ import {
   PublishStatus,
 } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
+import { sellableProduct } from "../../lib/pricing.js";
+import { applyStock, stockNeeds, unitCosts, withLiveStock, type StockItem } from "../../lib/stock.js";
 import { getStore, shippingFee } from "../../lib/store.js";
 import { HttpError } from "../../middleware/errors.js";
 import {
@@ -79,10 +81,12 @@ export async function quoteCart(items: CartItems) {
   const wanted = mergeItems(items);
   const beadSlugs = [...new Set(wanted.flatMap((item) => item.design?.beads ?? []))];
   const [products, beads, store] = await Promise.all([
-    prisma.product.findMany({
-      where: { slug: { in: wanted.filter((item) => !item.design).map((item) => item.slug) }, status: PublishStatus.PUBLISHED },
-      include: { images: { orderBy: { position: "asc" }, take: 1 }, category: { select: { name: true } } },
-    }),
+    prisma.product
+      .findMany({
+        where: { slug: { in: wanted.filter((item) => !item.design).map((item) => item.slug) }, ...sellableProduct },
+        include: { images: { orderBy: { position: "asc" }, take: 1 }, category: { select: { name: true } } },
+      })
+      .then((rows) => withLiveStock(prisma, rows)),
     beadSlugs.length ? activeBeads(beadSlugs) : Promise.resolve([]),
     getStore(),
   ]);
@@ -154,12 +158,20 @@ export async function quoteCart(items: CartItems) {
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-function orderCode(now = new Date()) {
+export function orderCode(now = new Date()) {
   const yy = String(now.getFullYear()).slice(2);
   const mm = String(now.getMonth() + 1).padStart(2, "0");
   let random = "";
   for (let i = 0; i < 6; i++) random += CODE_ALPHABET[randomInt(CODE_ALPHABET.length)];
   return `AC${yy}${mm}${random}`;
+}
+
+
+// Dòng giỏ đã báo giá quy ra dòng trừ kho
+function orderStockItems(lines: Awaited<ReturnType<typeof quoteCart>>["lines"]): StockItem[] {
+  return lines.flatMap(({ product, quantity, design }) =>
+    !product ? [] : [{ productId: design ? null : product.id, beads: design ? design.beads : null, quantity, label: product.name }],
+  );
 }
 
 export async function placeOrder(input: z.infer<typeof checkoutInput>, accountId: string | null = null) {
@@ -175,33 +187,8 @@ export async function placeOrder(input: z.infer<typeof checkoutInput>, accountId
   const { customer } = input;
   try {
     const order = await prisma.$transaction(async (tx) => {
-      for (const { slug, product, quantity, design } of quote.lines) {
-        if (!product) continue;
-        if (design) {
-          for (const [bead, count] of countBeads(design)) {
-            const { count: updated } = await tx.bead.updateMany({
-              where: { slug: bead, active: true, stock: { gte: count * quantity } },
-              data: { stock: { decrement: count * quantity } },
-            });
-            if (updated === 0) {
-              throw new HttpError(409, `Hạt trong "${product.name}" vừa hết. Vui lòng xem lại giỏ hàng.`, "CART_CHANGED", [
-                { slug, problem: "NOT_ENOUGH" },
-              ]);
-            }
-          }
-          continue;
-        }
-        // Trừ có điều kiện để hai đơn cùng lúc không bán quá tồn kho
-        const { count } = await tx.product.updateMany({
-          where: { id: product.id, stock: { gte: quantity }, status: PublishStatus.PUBLISHED },
-          data: { stock: { decrement: quantity } },
-        });
-        if (count === 0) {
-          throw new HttpError(409, `"${product.name}" vừa hết hàng. Vui lòng xem lại giỏ hàng.`, "CART_CHANGED", [
-            { slug, problem: "NOT_ENOUGH" },
-          ]);
-        }
-      }
+      const stockItems = orderStockItems(quote.lines);
+      const [needs, costs] = await Promise.all([stockNeeds(tx, stockItems), unitCosts(tx, stockItems)]);
 
       // Đã đăng nhập: gắn đơn vào tài khoản, người nhận có thể là người khác nên không dò theo số điện thoại
       const account = accountId ? await tx.customer.findUnique({ where: { id: accountId } }) : null;
@@ -233,7 +220,7 @@ export async function placeOrder(input: z.infer<typeof checkoutInput>, accountId
         },
       });
 
-      return tx.order.create({
+      const created = await tx.order.create({
         data: {
           code: orderCode(),
           idempotencyKey: input.idempotencyKey,
@@ -248,14 +235,21 @@ export async function placeOrder(input: z.infer<typeof checkoutInput>, accountId
           paymentMethod: input.paymentMethod,
           customerId: saved.id,
           items: {
-            create: quote.lines.flatMap(({ product, quantity, design }): Prisma.OrderItemUncheckedCreateWithoutOrderInput[] =>
+            create: quote.lines.filter((l) => l.product).flatMap(({ product, quantity, design }, i): Prisma.OrderItemUncheckedCreateWithoutOrderInput[] =>
               !product ? []
-              : design ? [{ productName: product.name, unitPriceVnd: product.unitPriceVnd, quantity, design: design as Prisma.InputJsonValue }]
-              : [{ productId: product.id, productName: product.name, unitPriceVnd: product.unitPriceVnd, quantity }],
+              : design ? [{ productName: product.name, unitPriceVnd: product.unitPriceVnd, unitCostVnd: costs[i], quantity, design: design as Prisma.InputJsonValue }]
+              : [{ productId: product.id, productName: product.name, unitPriceVnd: product.unitPriceVnd, unitCostVnd: costs[i], quantity }],
             ),
           },
         },
       });
+      try {
+        await applyStock(tx, needs, -1, { orderId: created.id, note: `Đơn ${created.code}` });
+      } catch (err) {
+        if (err instanceof HttpError) throw new HttpError(409, `${err.message} Vui lòng xem lại giỏ hàng.`, "CART_CHANGED", []);
+        throw err;
+      }
+      return created;
     });
     return { order, created: true };
   } catch (err) {
@@ -268,52 +262,38 @@ export async function placeOrder(input: z.infer<typeof checkoutInput>, accountId
   }
 }
 
-// Huỷ đơn thì trả lại tồn kho; mở lại đơn đã huỷ thì trừ lại
+// Huỷ đơn: trả lại đúng số đã trừ theo sổ kho của đơn. Mở lại đơn đã huỷ: trừ lại theo đơn
 export async function changeOrderStatus(id: string, status: OrderStatus) {
   return prisma.$transaction(async (tx) => {
     const order = await tx.order.findUniqueOrThrow({ where: { id }, include: { items: true } });
     const wasCancelled = order.status === OrderStatus.CANCELLED;
     const willCancel = status === OrderStatus.CANCELLED;
 
-    if (wasCancelled !== willCancel) {
-      for (const item of order.items) {
-        const beads = beadsOf(item.design);
-        if (beads) {
-          for (const [slug, count] of beads) {
-            const amount = count * item.quantity;
-            if (willCancel) {
-              await tx.bead.updateMany({ where: { slug }, data: { stock: { increment: amount } } });
-              continue;
-            }
-            const { count: updated } = await tx.bead.updateMany({ where: { slug, stock: { gte: amount } }, data: { stock: { decrement: amount } } });
-            if (updated === 0) throw new HttpError(409, `Không đủ hạt cho "${item.productName}" để mở lại đơn.`, "NOT_ENOUGH_STOCK");
-          }
-          continue;
-        }
-        if (!item.productId) continue;
-        if (willCancel) {
-          await tx.product.update({ where: { id: item.productId }, data: { stock: { increment: item.quantity } } });
-          continue;
-        }
-        const { count } = await tx.product.updateMany({
-          where: { id: item.productId, stock: { gte: item.quantity } },
-          data: { stock: { decrement: item.quantity } },
-        });
-        if (count === 0) {
-          throw new HttpError(409, `Không đủ tồn kho "${item.productName}" để mở lại đơn.`, "NOT_ENOUGH_STOCK");
-        }
-      }
+    if (willCancel && !wasCancelled) await returnOrderStock(tx, order.id, `Huỷ đơn ${order.code}`);
+    if (wasCancelled && !willCancel) {
+      const items = order.items.map((item) => ({ productId: item.productId, beads: beadList(item.design), quantity: item.quantity, label: item.productName }));
+      await applyStock(tx, await stockNeeds(tx, items), -1, { orderId: order.id, note: `Mở lại đơn ${order.code}` });
     }
 
     return tx.order.update({ where: { id }, data: { status } });
   });
 }
 
-// Đọc lại số hạt từ bản lưu trong đơn vòng tự thiết kế
-function beadsOf(design: Prisma.JsonValue | null) {
+// Đọc lại danh sách hạt từ bản lưu trong đơn vòng tự thiết kế
+export function beadList(design: Prisma.JsonValue | null) {
   const list = (design as { beads?: unknown } | null)?.beads;
-  if (!Array.isArray(list)) return null;
-  const counts = new Map<string, number>();
-  for (const slug of list) if (typeof slug === "string") counts.set(slug, (counts.get(slug) ?? 0) + 1);
-  return counts;
+  return Array.isArray(list) ? list.filter((slug): slug is string => typeof slug === "string") : null;
+}
+
+// Cộng lại kho theo các dòng sổ kho của đơn, để trả đúng thứ đã trừ kể cả khi công thức đã đổi
+export async function returnOrderStock(tx: Prisma.TransactionClient, orderId: string, note: string) {
+  const rows = await tx.stockMovement.groupBy({ by: ["materialId", "productId"], where: { orderId }, _sum: { quantity: true } });
+  const needs = { materials: new Map<string, number>(), products: new Map<string, number>() };
+  for (const r of rows) {
+    const out = -(r._sum.quantity ?? 0);
+    if (out <= 0) continue;
+    if (r.materialId) needs.materials.set(r.materialId, out);
+    else if (r.productId) needs.products.set(r.productId, out);
+  }
+  await applyStock(tx, needs, 1, { orderId, note });
 }

@@ -142,7 +142,7 @@ export function Select<T extends string | number>(props: Props<T>) {
         disabled={disabled}
         onClick={() => (open ? close() : openPanel())}
         onKeyDown={onKey}
-        className={`flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-line-strong bg-surface pr-2 pl-3 text-left text-base focus:border-wood focus:shadow-[0_0_0_3px_var(--wood-soft)] focus:outline-none disabled:bg-paper-2 disabled:opacity-60 aria-invalid:border-err ${className}`}
+        className={`flex h-11 w-full items-center justify-between gap-2 rounded-sm border border-line-strong bg-surface pr-2 pl-3 text-left text-base focus:border-wood focus:shadow-[0_0_0_3px_var(--wood-soft)] focus:outline-none disabled:bg-paper-2 disabled:opacity-60 aria-invalid:border-err ${className}`}
       >
         <span className={`truncate ${selected ? "" : "text-ink-3"}`}>{selected?.label ?? placeholder}</span>
         <ChevronDownIcon size={18} className={`flex-none text-ink-3 transition-transform duration-(--d-fast) ${open ? "rotate-180" : ""}`} />
@@ -154,7 +154,7 @@ export function Select<T extends string | number>(props: Props<T>) {
             tabIndex={-1}
             onKeyDown={onKey}
             style={{ left: pos.left, width: Math.max(pos.width, 200), top: pos.top, bottom: pos.bottom }}
-            className="fixed z-(--z-popover) flex max-h-70 flex-col rounded-2xl border border-line bg-surface p-1.5 shadow-e2 focus:outline-none"
+            className="fixed z-(--z-popover) flex max-h-70 flex-col rounded-sm border border-line bg-surface p-1.5 shadow-e2 focus:outline-none"
           >
             {searchable && (
               <input
@@ -168,7 +168,7 @@ export function Select<T extends string | number>(props: Props<T>) {
                 aria-controls={listId}
                 aria-activedescendant={filtered[active] ? `${listId}-${active}` : undefined}
                 placeholder="Gõ để tìm, không cần dấu"
-                className="mb-1.5 h-11 rounded-[10px] border border-line bg-paper px-3 text-base focus:border-wood focus:outline-none"
+                className="mb-1.5 h-11 rounded-sm border border-line bg-paper px-3 text-base focus:border-wood focus:outline-none"
               />
             )}
             <ul id={listId} role="listbox" aria-label={ariaLabel} className="overflow-y-auto">
@@ -185,7 +185,7 @@ export function Select<T extends string | number>(props: Props<T>) {
                     aria-disabled={option.disabled || undefined}
                     onMouseEnter={() => setActive(index)}
                     onClick={() => choose(option)}
-                    className={`flex min-h-11 cursor-pointer items-center justify-between gap-2 rounded-[10px] px-3 text-sm ${index === active ? "bg-paper-2" : ""} ${isSelected ? "font-semibold text-wood" : ""} ${option.disabled ? "cursor-not-allowed opacity-40" : ""}`}
+                    className={`flex min-h-11 cursor-pointer items-center justify-between gap-2 rounded-sm px-3 text-sm ${index === active ? "bg-paper-2" : ""} ${isSelected ? "font-semibold text-wood" : ""} ${option.disabled ? "cursor-not-allowed opacity-40" : ""}`}
                   >
                     <span>{option.label}</span>
                     {isSelected && <CheckIcon size={16} />}

@@ -46,7 +46,7 @@ export function CustomerSide({ conversation, staff, onUpdated }: Props) {
               type="button"
               aria-pressed={conversation.status === s}
               onClick={() => patch({ status: s }, `Đã chuyển sang "${conversationStatus[s].label}".`)}
-              className={`min-h-9 rounded-full border px-3 text-sm ${conversation.status === s ? "border-wood bg-wood-soft text-wood" : "border-line hover:border-wood"}`}
+              className={`min-h-9 rounded-sm border px-3 text-sm ${conversation.status === s ? "border-wood bg-wood-soft text-wood" : "border-line hover:border-wood"}`}
             >
               {conversationStatus[s].label}
             </button>

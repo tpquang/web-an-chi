@@ -3,6 +3,7 @@ import { z } from "zod";
 import { StaffRole } from "../../generated/prisma/client.js";
 import type { StaffContext } from "../../lib/auth.js";
 import { hashPassword } from "../../lib/password.js";
+import { normalize, permissionsInput } from "../../lib/permissions.js";
 import { prisma } from "../../lib/prisma.js";
 import { HttpError } from "../../middleware/errors.js";
 
@@ -14,10 +15,13 @@ const staffInput = z.object({
   name: z.string().trim().min(2, "Nhập tên nhân viên."),
   role: z.enum(StaffRole),
   active: z.boolean().default(true),
+  // Chỉ dùng cho nhân viên, chủ shop luôn đủ quyền
+  permissions: permissionsInput.optional(),
 });
 
 adminStaffRouter.get("/staff", async (_req, res) => {
-  res.json({ data: await prisma.staffUser.findMany({ orderBy: [{ role: "asc" }, { name: "asc" }] }) });
+  const rows = await prisma.staffUser.findMany({ orderBy: [{ role: "asc" }, { name: "asc" }] });
+  res.json({ data: rows.map((s) => ({ ...s, permissions: normalize(s.permissions) })) });
 });
 
 adminStaffRouter.post("/staff", async (req, res) => {

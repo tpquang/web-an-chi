@@ -74,7 +74,7 @@ export function Modal({ open, onClose, title, children, footer, wide, locked }: 
             onClick={onClose}
             disabled={locked}
             aria-label="Đóng"
-            className="-mt-2 -mr-2 inline-flex size-11 flex-none items-center justify-center rounded-full text-ink-3 hover:text-ink disabled:opacity-40"
+            className="-mt-2 -mr-2 inline-flex size-11 flex-none items-center justify-center rounded-sm text-ink-3 hover:text-ink disabled:opacity-40"
           >
             <CloseIcon />
           </button>

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { prisma } from "../../lib/prisma.js";
 
-// Quy cách vòng tự thiết kế. Giá dịch vụ là giá tạm, chốt rồi chuyển vào Setting để sửa trong CMS
+// Quy cách vòng tự thiết kế. Giá vòng chỉ gồm giá hạt và phí công; dây là vật tư tiêu hao, không tính vào giá
 export const braceletRules = {
   wristCm: { min: 15, max: 25 },
   maxLengthMm: 300,
@@ -19,12 +19,6 @@ export const braceletRules = {
     { id: "vua", name: "Vừa tay", easeCm: 1.5 },
     { id: "rong", name: "Rộng", easeCm: 2 },
   ],
-  extras: {
-    engraving: { name: "Khắc chữ lên hạt", priceVnd: 50000, maxLength: 12 },
-    giftBox: { name: "Hộp quà", priceVnd: 60000 },
-    card: { name: "Thiệp viết tay", priceVnd: 20000, maxLength: 200 },
-    giftWrap: { name: "Gói quà", priceVnd: 0 },
-  },
 } as const;
 
 type CordId = (typeof braceletRules.cords)[number]["id"];
@@ -32,23 +26,11 @@ type FitId = (typeof braceletRules.fits)[number]["id"];
 const cordIds = braceletRules.cords.map((c) => c.id) as [CordId, ...CordId[]];
 const fitIds = braceletRules.fits.map((f) => f.id) as [FitId, ...FitId[]];
 
-const optionalText = (max: number) =>
-  z
-    .string()
-    .trim()
-    .max(max)
-    .optional()
-    .transform((value) => value || null);
-
 export const braceletDesign = z.object({
   beads: z.array(z.string().min(1).max(80)).min(braceletRules.minBeads).max(braceletRules.maxBeads),
   cord: z.enum(cordIds),
   fit: z.enum(fitIds),
   wristCm: z.number().min(braceletRules.wristCm.min).max(braceletRules.wristCm.max),
-  engraving: optionalText(braceletRules.extras.engraving.maxLength),
-  giftBox: z.boolean().default(false),
-  card: optionalText(braceletRules.extras.card.maxLength),
-  giftWrap: z.boolean().default(false),
 });
 
 export type BraceletDesign = z.infer<typeof braceletDesign>;
@@ -61,18 +43,20 @@ export const beadSelect = {
   material: true,
   sizeMm: true,
   priceVnd: true,
-  stock: true,
+  stockItem: { select: { stock: true } },
   color: true,
   finish: true,
   note: true,
 } as const;
 
+// Tồn kho hạt là tồn kho nguyên liệu tương ứng trong kho. Hạt chưa gắn nguyên liệu coi như hết
 export async function activeBeads(slugs?: string[]) {
-  return prisma.bead.findMany({
+  const rows = await prisma.bead.findMany({
     where: { active: true, ...(slugs ? { slug: { in: slugs } } : {}) },
     orderBy: [{ position: "asc" }, { sizeMm: "asc" }],
     select: beadSelect,
   });
+  return rows.map(({ stockItem, ...bead }) => ({ ...bead, stock: stockItem?.stock ?? 0 }));
 }
 
 type Bead = Awaited<ReturnType<typeof activeBeads>>[number];
@@ -91,17 +75,7 @@ export function countBeads(design: BraceletDesign) {
   return counts;
 }
 
-export function extrasVnd(design: BraceletDesign) {
-  const { extras } = braceletRules;
-  return (
-    (design.engraving ? extras.engraving.priceVnd : 0) +
-    (design.giftBox ? extras.giftBox.priceVnd : 0) +
-    (design.card ? extras.card.priceVnd : 0) +
-    (design.giftWrap ? extras.giftWrap.priceVnd : 0)
-  );
-}
-
-// Giá một vòng: cộng giá từng hạt, phí công, dịch vụ thêm. Hạt thiếu thì trả null để báo không còn bán
+// Giá một vòng: cộng giá từng hạt và phí công. Hạt thiếu thì trả null để báo không còn bán
 export function priceBracelet(design: BraceletDesign, bySlug: Map<string, Bead>) {
   let beadsVnd = 0;
   let lengthMm = 0;
@@ -111,7 +85,7 @@ export function priceBracelet(design: BraceletDesign, bySlug: Map<string, Bead>)
     beadsVnd += bead.priceVnd;
     lengthMm += bead.sizeMm;
   }
-  return { beadsVnd, lengthMm, unitPriceVnd: beadsVnd + braceletRules.feeVnd + extrasVnd(design) };
+  return { beadsVnd, lengthMm, unitPriceVnd: beadsVnd + braceletRules.feeVnd };
 }
 
 // Số vòng làm được tối đa theo tồn kho từng loại hạt, sau khi trừ phần các vòng khác trong giỏ đã giữ

@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
 import { env } from "../../env.js";
-import { checkCredentials, issueToken, requireAdmin, requireOwner, type StaffContext } from "../../lib/auth.js";
+import { checkCredentials, issueToken, requireAdmin, type StaffContext } from "../../lib/auth.js";
+import { PERMISSION_MODULES, requirePermission } from "../../lib/permissions.js";
 import { hashPassword, verifyPassword } from "../../lib/password.js";
 import { prisma } from "../../lib/prisma.js";
 import { failureLimiter } from "../../lib/rate-limit.js";
@@ -9,10 +10,12 @@ import { HttpError } from "../../middleware/errors.js";
 import { adminBlogRouter } from "./admin.blog.js";
 import { adminBraceletRouter } from "./admin.bracelet.js";
 import { adminBusinessRouter } from "./admin.business.js";
+import { adminFinanceRouter } from "./admin.finance.js";
 import { adminCatalogRouter } from "./admin.catalog.js";
 import { adminHomeRouter } from "./admin.home.js";
 import { adminInboxRouter } from "./admin.inbox.js";
 import { adminInventoryRouter } from "./admin.inventory.js";
+import { adminMediaRouter } from "./admin.media.js";
 import { adminSalesRouter } from "./admin.sales.js";
 import { adminStaffRouter } from "./admin.staff.js";
 
@@ -54,9 +57,11 @@ if (env.DEV_LOGIN === "on" && env.NODE_ENV !== "production") {
 }
 
 adminRouter.use(requireAdmin);
+// Quyền theo ma trận, xét theo đoạn đầu của đường dẫn. Xem lib/permissions.ts
+adminRouter.use(requirePermission);
 
 adminRouter.get("/me", (_req, res) => {
-  res.json({ data: res.locals.staff as StaffContext });
+  res.json({ data: res.locals.staff as StaffContext, meta: { modules: PERMISSION_MODULES.map(({ key, label }) => ({ key, label })) } });
 });
 
 adminRouter.use(adminInboxRouter);
@@ -66,6 +71,8 @@ adminRouter.use(adminBraceletRouter);
 adminRouter.use(adminBlogRouter);
 adminRouter.use(adminSalesRouter);
 // Vốn, kho, nhân viên chỉ chủ shop xem
-adminRouter.use(requireOwner, adminBusinessRouter);
-adminRouter.use(requireOwner, adminInventoryRouter);
-adminRouter.use(requireOwner, adminStaffRouter);
+adminRouter.use(adminMediaRouter);
+adminRouter.use(adminBusinessRouter);
+adminRouter.use(adminInventoryRouter);
+adminRouter.use(adminFinanceRouter);
+adminRouter.use(adminStaffRouter);

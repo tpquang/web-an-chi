@@ -26,7 +26,7 @@ export function ConversationList({ rows, selectedId, view, q, onView, onSearch, 
               role="tab"
               aria-selected={view === v.value}
               onClick={() => onView(v.value)}
-              className={`min-h-9 rounded-full px-3 text-sm whitespace-nowrap ${view === v.value ? "bg-wood text-on-wood" : "text-ink-2 hover:bg-paper-2"}`}
+              className={`min-h-9 rounded-sm px-3 text-sm whitespace-nowrap ${view === v.value ? "bg-wood text-on-wood" : "text-ink-2 hover:bg-paper-2"}`}
             >
               {v.label}
             </button>

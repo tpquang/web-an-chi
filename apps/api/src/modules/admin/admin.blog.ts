@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { PublishStatus, type Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
-import { optionalText, optionalUrl, pageQuery, slugField } from "../../lib/text.js";
+import { optionalImageUrl, optionalText, pageQuery, slugField } from "../../lib/text.js";
 import { HttpError } from "../../middleware/errors.js";
 import { assertFeaturedRoom } from "./admin.home.js";
 
@@ -54,7 +54,12 @@ const postInput = z.object({
   slug: slugField,
   excerpt: optionalText,
   content: z.string().trim().min(1, "Bài viết cần có nội dung."),
-  coverUrl: optionalUrl,
+  coverUrl: optionalImageUrl,
+  coverAlt: optionalText,
+  focusKeyword: optionalText,
+  ogTitle: optionalText,
+  ogDescription: optionalText,
+  ogImageUrl: optionalImageUrl,
   authorName: z.string().trim().min(2).max(80),
   status: z.enum(PublishStatus),
   publishedAt: z.iso.datetime({ offset: true }).nullish(),

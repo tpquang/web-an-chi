@@ -253,7 +253,7 @@ export function UploadModal({ row, onClose, onSaved }: { row: TextureRow; onClos
                 type="button"
                 aria-pressed={sizeMm === s}
                 onClick={() => setSizeMm(s)}
-                className="min-h-9 rounded-full border border-line-strong px-3 text-sm tabular-nums transition-colors duration-(--d-fast) hover:border-wood aria-pressed:border-wood aria-pressed:bg-wood-soft aria-pressed:text-wood"
+                className="min-h-9 rounded-sm border border-line-strong px-3 text-sm tabular-nums transition-colors duration-(--d-fast) hover:border-wood aria-pressed:border-wood aria-pressed:bg-wood-soft aria-pressed:text-wood"
               >
                 {s} mm
               </button>

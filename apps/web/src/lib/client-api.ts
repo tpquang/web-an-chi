@@ -23,10 +23,6 @@ export type QuoteLine = {
     fitName?: string;
     wristCm: number;
     lengthMm: number;
-    engraving: string | null;
-    giftBox: boolean;
-    card: string | null;
-    giftWrap: boolean;
   } | null;
 };
 

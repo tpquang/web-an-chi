@@ -13,12 +13,13 @@ import { showToast } from "../components/ui/Toast";
 import { api, errorMessage } from "../lib/api";
 import { formatVnd } from "../lib/format";
 import type { MaterialKind } from "../lib/batch";
+import { materialGroup, type MaterialGroup } from "../lib/labels";
 import { formatQty, loadMaterials, materialKinds, type MaterialRow } from "../lib/inventory";
 import { loadTextureRows, textureUrl, UploadModal, type TextureRow } from "./BeadTexturesPage";
 import { useLoad } from "../lib/use-load";
 import { useSubmit } from "../lib/use-submit";
 
-type Values = { name: string; kind: MaterialKind; unit: string; unitsPerKg: number | null; beadMaterial: string | null; note: string };
+type Values = { name: string; group: MaterialGroup; markupPct: number | null; kind: MaterialKind; unit: string; unitsPerKg: number | null; beadMaterial: string | null; note: string };
 
 const kindLabel = (kind: MaterialKind) => materialKinds.find((k) => k.value === kind)?.label ?? kind;
 
@@ -39,8 +40,8 @@ export function MaterialsPage() {
     setEditing({
       id: m?.id ?? null,
       values: m
-        ? { name: m.name, kind: m.kind, unit: m.unit, unitsPerKg: m.unitsPerKg, beadMaterial: m.beadMaterial, note: m.note ?? "" }
-        : { name: "", kind: "GENERAL", unit: "cái", unitsPerKg: null, beadMaterial: null, note: "" },
+        ? { name: m.name, group: m.group, markupPct: m.markupPct, kind: m.kind, unit: m.unit, unitsPerKg: m.unitsPerKg, beadMaterial: m.beadMaterial, note: m.note ?? "" }
+        : { name: "", group: "PACKAGING", markupPct: null, kind: "GENERAL", unit: "cái", unitsPerKg: null, beadMaterial: null, note: "" },
     });
   }
 
@@ -106,7 +107,9 @@ export function MaterialsPage() {
                 <td className={td}>
                   <button type="button" onClick={() => open(m)} className="min-h-11 text-left font-medium hover:text-wood">{m.name}</button>
                   <span className="mt-0.5 flex flex-wrap items-center gap-2 text-[13px] text-ink-3">
+                    <Tag tone={materialGroup[m.group].tone}>{materialGroup[m.group].label}</Tag>
                     {m.kind !== "GENERAL" && <Tag tone="wood">{kindLabel(m.kind)}</Tag>}
+                    {m.markupPct !== null && <span>lãi {m.markupPct}%</span>}
                     {m.kind === "BEAD" && <span>{m.beadMaterial}</span>}
                     {m.unitsPerKg ? `${m.unitsPerKg} ${m.unit} mỗi kg · ` : ""}dùng trong {m._count.components} công thức
                   </span>
@@ -174,6 +177,16 @@ export function MaterialsPage() {
                   disabled={submitting}
                   aria-invalid={Boolean(errors.beadMaterial)}
                 />
+              </Field>
+            )}
+            {v.kind === "GENERAL" && (
+              <Field label="Nhóm hàng" hint="Để chia nhóm khi nhập hàng.">
+                <Select value={v.group} onChange={(x) => set("group", x as MaterialGroup)} options={(Object.keys(materialGroup) as MaterialGroup[]).filter((g) => g !== "BEAD").map((g) => ({ value: g, label: materialGroup[g].label }))} disabled={submitting} />
+              </Field>
+            )}
+            {v.kind !== "GENERAL" && (
+              <Field label="Lãi trên giá vốn (%)" optional hint="Có thì giá bán tự cập nhật mỗi lần nhập kho, ví dụ 50. Để trống thì giá sửa tay ở trang hạt.">
+                <NumberInput value={v.markupPct} onChange={(x) => set("markupPct", x ?? null)} decimals={0} disabled={submitting} />
               </Field>
             )}
             {v.kind === "CHARM" && <p className="text-sm text-ink-3">Sau khi lưu, bấm Tải file 3D trong danh sách để gắn mô hình .glb cho charm.</p>}

@@ -8,10 +8,6 @@ export type BraceletDesign = {
   cord: string;
   fit: string;
   wristCm: number;
-  engraving?: string;
-  giftBox: boolean;
-  card?: string;
-  giftWrap: boolean;
 };
 // Vòng tự thiết kế: slug là mã băm của thiết kế, hai vòng giống hệt nhau gộp thành một dòng
 export type CartItem = { slug: string; quantity: number; design?: BraceletDesign };
@@ -19,7 +15,7 @@ export type CartItem = { slug: string; quantity: number; design?: BraceletDesign
 export const BRACELET_PREFIX = "vong-";
 
 function designKey(design: BraceletDesign) {
-  const text = JSON.stringify([design.beads, design.cord, design.fit, design.wristCm, design.engraving ?? "", design.giftBox, design.card ?? "", design.giftWrap]);
+  const text = JSON.stringify([design.beads, design.cord, design.fit, design.wristCm]);
   let hash = 2166136261;
   for (let i = 0; i < text.length; i++) hash = Math.imul(hash ^ text.charCodeAt(i), 16777619);
   return BRACELET_PREFIX + (hash >>> 0).toString(36);

@@ -32,6 +32,7 @@ export type Product = {
   description: string | null;
   usage: string | null;
   specs: { label: string; value: string }[] | null;
+  type: import("./labels").ProductType;
   priceVnd: number;
   compareAtPriceVnd: number | null;
   stock: number;
@@ -65,6 +66,11 @@ export type Post = {
   excerpt: string | null;
   content: string;
   coverUrl: string | null;
+  coverAlt: string | null;
+  focusKeyword: string | null;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImageUrl: string | null;
   authorName: string;
   status: PublishStatus;
   publishedAt: string | null;
@@ -97,6 +103,8 @@ export type OrderRow = {
   status: OrderStatus;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
+  channel: import("./labels").SalesChannel;
+  externalCode: string | null;
   createdAt: string;
   _count: { items: number };
 };
@@ -107,8 +115,11 @@ export type Order = OrderRow & {
   note: string | null;
   subtotalVnd: number;
   shippingVnd: number;
+  shippingCostVnd: number;
+  platformFeeVnd: number;
+  paidAt: string | null;
   customerId: string | null;
-  items: { id: string; productName: string; unitPriceVnd: number; quantity: number; product: { slug: string } | null }[];
+  items: { id: string; productName: string; unitPriceVnd: number; unitCostVnd: number; quantity: number; product: { slug: string } | null }[];
 };
 
 export type Customer = Omit<CustomerRow, "spentVnd" | "lastOrderAt" | "_count"> & { orders: OrderRow[] };

@@ -1,12 +1,18 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { api, getToken, setToken } from "./api";
 
-export type Staff = { id: string; email: string; name: string; role: "OWNER" | "SALES" };
+// Cùng danh sách mục với apps/api/src/lib/permissions.ts
+export type PermissionKey = "dashboard" | "orders" | "products" | "inventory" | "batches" | "finance" | "posts" | "home" | "inbox";
+export type Level = "none" | "view" | "edit";
+export type Permissions = Record<PermissionKey, Level>;
+export type Staff = { id: string; email: string; name: string; role: "OWNER" | "SALES"; permissions: Permissions };
 
 type Auth = {
   signedIn: boolean;
   staff: Staff | null;
   isOwner: boolean;
+  // Xem được mục này không; edit thì có quyền sửa
+  can: (key: PermissionKey, level?: Level) => boolean;
   login: (email: string, password: string) => Promise<void>;
   devLogin: () => Promise<void>;
   logout: () => void;
@@ -39,6 +45,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signedIn,
     staff,
     isOwner: staff?.role === "OWNER",
+    can(key, level = "view") {
+      if (!staff) return false;
+      if (staff.role === "OWNER") return true;
+      const have = staff.permissions?.[key] ?? "none";
+      return level === "view" ? have !== "none" : have === "edit";
+    },
     async login(email, password) {
       const { token } = await api.post<{ token: string }>("/login", { email, password });
       setToken(token);

@@ -24,7 +24,8 @@ export function PackingPage() {
   const [adjusting, setAdjusting] = useState<RecipeRow | null>(null);
   const { submitting, errors, run } = useSubmit();
 
-  const list = recipes.state.status === "ready" ? recipes.state.data : [];
+  // Vòng xâu hạt bán thẳng từ hạt trong kho, không đóng gói
+  const list = recipes.state.status === "ready" ? recipes.state.data.filter((r) => r.type !== "CUSTOM") : [];
   const recipe = list.find((r) => r.id === productId);
   const qty = quantity ?? 0;
   const over = recipe ? qty > recipe.canPack : false;

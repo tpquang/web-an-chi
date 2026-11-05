@@ -16,7 +16,7 @@ type Common = { variant?: keyof typeof variants; size?: keyof typeof sizes; bloc
 export function buttonClass({ variant = "primary", size = "md", block, className = "" }: Omit<Common, "children">) {
   // Nút chữ thẳng mép với chữ xung quanh nên bỏ padding ngang của size
   const sizeClass = variant === "text" ? sizes[size].replace(/\bpx-\d+\s?/, "") : sizes[size];
-  return `relative inline-flex items-center justify-center gap-2 rounded-full font-medium whitespace-nowrap transition-colors duration-(--d-fast) disabled:cursor-not-allowed disabled:opacity-60 ${sizeClass} ${variants[variant]} ${block ? "w-full" : ""} ${className}`;
+  return `relative inline-flex items-center justify-center gap-2 rounded-sm font-medium whitespace-nowrap transition-colors duration-(--d-fast) disabled:cursor-not-allowed disabled:opacity-60 ${sizeClass} ${variants[variant]} ${block ? "w-full" : ""} ${className}`;
 }
 
 export function Spinner({ size = 16 }: { size?: 16 | 20 | 32 }) {
@@ -66,7 +66,7 @@ export function IconButton({ label, children, className = "", type = "button", .
       type={type}
       aria-label={label}
       title={label}
-      className={`inline-flex size-11 items-center justify-center rounded-full text-ink-2 hover:bg-paper-2 hover:text-wood disabled:opacity-40 ${className}`}
+      className={`inline-flex size-11 items-center justify-center rounded-sm text-ink-2 hover:bg-paper-2 hover:text-wood disabled:opacity-40 ${className}`}
       {...rest}
     >
       {children}

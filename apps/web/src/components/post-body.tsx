@@ -17,6 +17,15 @@ export function PostBody({ blocks }: { blocks: Block[] }) {
                 {block.text}
               </h3>
             );
+          case "img":
+            return (
+              <figure key={index} className="my-8">
+                {/* Ảnh trong bài có kích thước tuỳ ý nên dùng img thường, tải lười */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={block.src} alt={block.alt} loading="lazy" decoding="async" className="h-auto w-full rounded-2xl" />
+                {block.caption && <figcaption className="mt-2 text-sm text-ink-3">{block.caption}</figcaption>}
+              </figure>
+            );
           case "ul":
             return (
               <ul key={index} className="mb-4 list-disc space-y-1 pl-5">

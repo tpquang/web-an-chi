@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { z } from "zod";
-import { PublishStatus, type Prisma } from "../../generated/prisma/client.js";
+import { MovementType, ProductType, PublishStatus, type Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
-import { optionalText, optionalUrl, pageQuery, slugField } from "../../lib/text.js";
+import { withLiveStock } from "../../lib/stock.js";
+import { imageUrl, optionalText, optionalUrl, pageQuery, slugField } from "../../lib/text.js";
 import { HttpError } from "../../middleware/errors.js";
 import { assertFeaturedRoom } from "./admin.home.js";
 
@@ -56,6 +57,8 @@ const productInput = z
   .object({
     name: z.string().trim().min(2).max(160),
     slug: slugField,
+    // Kinh doanh, phát sinh (hộp ship, không bán) hoặc vòng xâu hạt
+    type: z.enum(ProductType).default(ProductType.RETAIL),
     summary: optionalText,
     description: optionalText,
     usage: optionalText,
@@ -75,7 +78,7 @@ const productInput = z
     metaDescription: optionalText,
     categoryId: z.string().min(1),
     images: z
-      .array(z.object({ url: z.url(), alt: optionalText }))
+      .array(z.object({ url: imageUrl, alt: optionalText }))
       .max(12)
       .default([]),
   })
@@ -83,6 +86,9 @@ const productInput = z
     path: ["compareAtPriceVnd"],
     message: "Giá gốc phải cao hơn giá bán, hoặc để trống.",
   });
+
+// Giai đoạn đầu cho sửa thẳng tồn kho ở form, nhưng vẫn ghi sổ kho để biết số đổi lúc nào
+const STOCK_NOTE = "Sửa tồn kho ở form sản phẩm";
 
 function productData(input: z.infer<typeof productInput>) {
   const { images, ...rest } = input;
@@ -116,7 +122,7 @@ adminCatalogRouter.get("/products", async (req, res) => {
     }),
     prisma.product.count({ where }),
   ]);
-  res.json({ data, meta: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) } });
+  res.json({ data: await withLiveStock(prisma, data), meta: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) } });
 });
 
 adminCatalogRouter.get("/products/:id", async (req, res) => {
@@ -124,23 +130,31 @@ adminCatalogRouter.get("/products/:id", async (req, res) => {
     where: { id: req.params.id },
     include: { images: { orderBy: { position: "asc" } } },
   });
-  res.json({ data });
+  res.json({ data: (await withLiveStock(prisma, [data]))[0] });
 });
 
 adminCatalogRouter.post("/products", async (req, res) => {
   const { data, images } = productData(productInput.parse(req.body));
   if (data.featured) await assertFeaturedRoom("products");
-  const created = await prisma.product.create({ data: { ...data, images: { create: images } } });
+  const created = await prisma.$transaction(async (tx) => {
+    const product = await tx.product.create({ data: { ...data, stock: data.type === ProductType.CUSTOM ? 0 : data.stock, images: { create: images } } });
+    if (product.stock > 0) await tx.stockMovement.create({ data: { type: MovementType.ADJUST, productId: product.id, quantity: product.stock, note: STOCK_NOTE } });
+    return product;
+  });
   res.status(201).json({ data: created });
 });
 
 adminCatalogRouter.put("/products/:id", async (req, res) => {
   const { data, images } = productData(productInput.parse(req.body));
   if (data.featured) await assertFeaturedRoom("products", req.params.id);
-  // Ảnh gửi lên là danh sách đầy đủ theo thứ tự mới, nên thay toàn bộ
-  const updated = await prisma.product.update({
-    where: { id: req.params.id },
-    data: { ...data, images: { deleteMany: {}, create: images } },
+  const updated = await prisma.$transaction(async (tx) => {
+    const before = await tx.product.findUniqueOrThrow({ where: { id: req.params.id }, select: { stock: true, unitCostVnd: true } });
+    // Vòng xâu hạt không có tồn kho riêng, số bán được tính từ hạt
+    const stock = data.type === ProductType.CUSTOM ? 0 : data.stock;
+    const diff = stock - before.stock;
+    if (diff !== 0) await tx.stockMovement.create({ data: { type: MovementType.ADJUST, productId: req.params.id, quantity: diff, unitCostVnd: before.unitCostVnd ?? 0, note: STOCK_NOTE } });
+    // Ảnh gửi lên là danh sách đầy đủ theo thứ tự mới, nên thay toàn bộ
+    return tx.product.update({ where: { id: req.params.id }, data: { ...data, stock, images: { deleteMany: {}, create: images } } });
   });
   res.json({ data: updated });
 });

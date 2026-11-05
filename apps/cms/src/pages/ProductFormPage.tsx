@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { RecipePanel } from "../components/business/RecipePanel";
+import { ImageList } from "../components/media/ImageList";
 import { RowsEditor } from "../components/RowsEditor";
 import { Button } from "../components/ui/Button";
 import { Field, Input, MoneyInput, Switch, Textarea } from "../components/ui/Field";
@@ -11,7 +12,7 @@ import { ErrorState, Skeleton } from "../components/ui/States";
 import { showToast } from "../components/ui/Toast";
 import { api, errorMessage } from "../lib/api";
 import { slugify } from "../lib/format";
-import { options, publishStatus, type PublishStatus } from "../lib/labels";
+import { options, productType, publishStatus, type ProductType, type PublishStatus } from "../lib/labels";
 import type { Category, Product } from "../lib/types";
 import { useLoad } from "../lib/use-load";
 import { useSubmit } from "../lib/use-submit";
@@ -24,7 +25,7 @@ type Values = Omit<Product, "id" | "specs" | "images" | "priceVnd"> & {
 
 const empty: Values = {
   name: "", slug: "", summary: "", description: "", usage: "", specs: [], priceVnd: null, compareAtPriceVnd: null,
-  stock: 0, origin: "", featured: false, shopeeUrl: "", tiktokUrl: "", status: "DRAFT", metaTitle: "", metaDescription: "",
+  type: "RETAIL", stock: 0, origin: "", featured: false, shopeeUrl: "", tiktokUrl: "", status: "DRAFT", metaTitle: "", metaDescription: "",
   categoryId: "", images: [],
 };
 
@@ -121,8 +122,8 @@ export function ProductFormPage() {
           </Panel>
           <Panel title="Ảnh">
             <p className="mb-3 text-sm text-ink-2">Ảnh thật của đúng sản phẩm, tỉ lệ 1:1. Ảnh đầu tiên là ảnh chính. Sản phẩm chưa có ảnh sẽ không được Google index.</p>
-            <RowsEditor rows={values.images} onChange={(rows) => set("images", rows as Values["images"])} columns={[{ key: "url", label: "Link ảnh", placeholder: "https://...", wide: true }, { key: "alt", label: "Mô tả ảnh (alt)" }]} addLabel="Thêm ảnh" disabled={submitting} max={12} />
-            {errors.images && <p role="alert" className="mt-2 text-sm text-err">Link ảnh cần là địa chỉ https đầy đủ.</p>}
+            <ImageList images={values.images} onChange={(images) => set("images", images)} disabled={submitting} />
+            {errors.images && <p role="alert" className="mt-2 text-sm text-err">{errors.images}</p>}
           </Panel>
           {!isNew && id && <RecipePanel productId={id} priceVnd={values.priceVnd ?? 0} />}
           <Panel title="SEO">
@@ -136,11 +137,20 @@ export function ProductFormPage() {
         <div className="flex flex-col gap-6 xl:col-span-4">
           <Panel title="Bán hàng">
             <div className="flex flex-col gap-4">
+              <div data-field="type"><Field label="Loại sản phẩm" hint={values.type === "SUPPLY" ? "Dùng nội bộ như hộp ship, không hiện trên web." : values.type === "CUSTOM" ? "Giá tự tính theo bảng giá hạt khi đóng gói xong." : "Để giá 0 nếu chưa định giá, sản phẩm sẽ chưa hiện trên web."}><Select value={values.type} onChange={(v) => set("type", v as ProductType)} options={options(productType)} disabled={submitting} /></Field></div>
               <div data-field="status"><Field label="Trạng thái"><Select value={values.status} onChange={(v) => set("status", v as PublishStatus)} options={options(publishStatus)} disabled={submitting} /></Field></div>
               <div data-field="categoryId"><Field label="Danh mục" error={errors.categoryId ? "Bạn chọn một danh mục." : undefined}><Select value={values.categoryId || null} onChange={(v) => set("categoryId", v)} options={categoryOptions} placeholder="Chọn danh mục" disabled={submitting} /></Field></div>
               <div data-field="priceVnd"><Field label="Giá bán" error={errors.priceVnd ? "Bạn nhập giá bán." : undefined}><MoneyInput value={values.priceVnd} onChange={(v) => set("priceVnd", v)} disabled={submitting} /></Field></div>
               <div data-field="compareAtPriceVnd"><Field label="Giá trước đây" optional hint="Chỉ nhập khi đã thực sự bán ở giá này." error={errors.compareAtPriceVnd}><MoneyInput value={values.compareAtPriceVnd} onChange={(v) => set("compareAtPriceVnd", v)} disabled={submitting} /></Field></div>
-              <div data-field="stock"><Field label="Tồn kho" error={errors.stock}><Input inputMode="numeric" value={String(values.stock)} onChange={(e) => set("stock", Number(e.target.value.replace(/\D/g, "")) || 0)} disabled={submitting} className="text-right tabular-nums" /></Field></div>
+              {values.type === "CUSTOM" ? (
+                <p className="text-sm text-ink-2">Tồn kho tính từ số hạt trong kho: còn bán được {values.stock} vòng.</p>
+              ) : (
+                <div data-field="stock">
+                  <Field label="Tồn kho" hint="Sửa thẳng ở đây cũng được ghi vào sổ kho. Nên đóng gói hoặc dùng Kiểm kho để biết lý do." error={errors.stock}>
+                    <Input inputMode="numeric" value={String(values.stock)} onChange={(e) => set("stock", Number(e.target.value.replace(/\D/g, "")) || 0)} disabled={submitting} className="text-right tabular-nums" />
+                  </Field>
+                </div>
+              )}
               <Switch checked={values.featured} onChange={(v) => set("featured", v)} label="Nổi bật ở trang chủ, tối đa 4 sản phẩm" disabled={submitting} />
             </div>
           </Panel>

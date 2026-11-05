@@ -4,23 +4,34 @@ import { Select } from "../components/ui/Select";
 import { EmptyState, ErrorState, TableSkeleton, Tag } from "../components/ui/States";
 import { api } from "../lib/api";
 import { formatDateTime, formatVnd } from "../lib/format";
-import { options, orderStatus, paymentMethod, paymentStatus } from "../lib/labels";
+import { PlusIcon } from "../components/icons";
+import { ButtonLink } from "../components/ui/Button";
+import { useAuth } from "../lib/auth";
+import { options, orderStatus, paymentMethod, paymentStatus, salesChannel } from "../lib/labels";
 import type { OrderRow } from "../lib/types";
 import { useLoad } from "../lib/use-load";
 import { useQueryState } from "../lib/use-query-state";
 import { SearchBox } from "./ProductsPage";
 
 export function OrdersPage() {
-  const query = useQueryState(["q", "status"] as const);
+  const { can } = useAuth();
+  const query = useQueryState(["q", "status", "channel"] as const);
   const { state, slow, reload } = useLoad(() => api.list<OrderRow>(`/orders?${query.toQuery({ limit: 20 })}`), [query.toQuery()]);
 
   return (
     <>
-      <PageHeader title="Đơn hàng" />
+      <PageHeader
+        title="Đơn hàng"
+        desc="Đơn Shopee, TikTok, khách giới thiệu nhập tay để trừ kho và tính lợi nhuận."
+        actions={can("orders", "edit") && <ButtonLink to="/orders/new"><PlusIcon size={18} /> Nhập đơn</ButtonLink>}
+      />
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         <SearchBox label="Tìm mã đơn, tên, số điện thoại" value={query.values.q} onSearch={(q) => query.set({ q })} />
         <div className="sm:w-52">
           <Select ariaLabel="Lọc theo trạng thái" value={query.values.status} onChange={(status) => query.set({ status })} options={[{ value: "", label: "Mọi trạng thái" }, ...options(orderStatus)]} />
+        </div>
+        <div className="sm:w-44">
+          <Select ariaLabel="Lọc theo kênh" value={query.values.channel} onChange={(channel) => query.set({ channel })} options={[{ value: "", label: "Mọi kênh" }, ...options(salesChannel)]} />
         </div>
       </div>
       {state.status === "loading" && <div className={slow ? "" : "invisible"}><TableSkeleton /></div>}
@@ -43,7 +54,7 @@ export function OrdersPage() {
               <tr key={order.id} className="hover:bg-paper">
                 <td className={td}>
                   <Link to={`/orders/${order.id}`} className="font-medium hover:text-wood">{order.code}</Link>
-                  <span className="block text-[13px] whitespace-nowrap text-ink-3">{formatDateTime(order.createdAt)}</span>
+                  <span className="block text-xs whitespace-nowrap text-ink-3">{formatDateTime(order.createdAt)} · {salesChannel[order.channel].label}{order.externalCode ? ` · ${order.externalCode}` : ""}</span>
                 </td>
                 <td className={td}>
                   {order.customerName}

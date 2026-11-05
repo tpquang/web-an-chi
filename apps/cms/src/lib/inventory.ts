@@ -13,7 +13,7 @@ export const materialKinds = [
   { value: "BEAD", label: "Hạt trầm", unit: "viên" },
   { value: "CHARM", label: "Charm", unit: "cái" },
 ] as const;
-export type RecipeRow = Omit<Recipe, "components"> & { unitCostVnd: number | null; canPack: number; materialCostVnd: number; components: { quantity: number; material: Material }[] };
+export type RecipeRow = Omit<Recipe, "components"> & { type: import("./labels").ProductType; customPriceVnd: number | null; unitCostVnd: number | null; canPack: number; materialCostVnd: number; components: { quantity: number; material: Material }[] };
 
 export const loadMaterials = () => api.get<MaterialRow[]>("/materials");
 export const loadRecipes = () => api.get<RecipeRow[]>("/recipes");

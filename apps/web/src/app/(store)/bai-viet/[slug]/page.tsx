@@ -27,12 +27,24 @@ const loadPost = cache(async (slug: string) => {
 
 export async function generateMetadata({ params }: Props) {
   const post = await loadPost((await params).slug);
-  return pageMeta({
+  const meta = pageMeta({
     title: post.metaTitle ?? post.title,
     description: post.metaDescription ?? post.excerpt,
     path: postHref(post.slug),
-    image: post.coverUrl ?? undefined,
+    image: post.ogImageUrl ?? post.coverUrl ?? undefined,
   });
+  // Chữ khi chia sẻ mạng xã hội đặt riêng ở tab SEO, trống thì dùng tiêu đề và mô tả
+  return {
+    ...meta,
+    openGraph: {
+      ...meta.openGraph,
+      type: "article",
+      ...(post.ogTitle ? { title: post.ogTitle } : {}),
+      ...(post.ogDescription ? { description: post.ogDescription } : {}),
+      publishedTime: post.publishedAt,
+      modifiedTime: post.updatedAt,
+    },
+  };
 }
 
 export default async function PostPage({ params }: Props) {

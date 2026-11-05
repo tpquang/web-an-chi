@@ -43,8 +43,8 @@ npm run build -w @an-chi/api
 log "Chạy migration database"
 npm run db:deploy -w @an-chi/api
 if [ "${SEED:-0}" = "1" ]; then
-  log "Nạp dữ liệu mẫu"
-  npm run db:seed -w @an-chi/api
+  log "Nạp dữ liệu ban đầu"
+  npm run db:seed:initial -w @an-chi/api
 fi
 
 # Next prerender trang lúc build nên API phải chạy trước khi build web

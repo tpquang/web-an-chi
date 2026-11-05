@@ -5,7 +5,7 @@ import { BatchPlan } from "../components/business/BatchPlan";
 import { BatchSummary } from "../components/business/BatchSummary";
 import { PlusIcon, TrashIcon } from "../components/icons";
 import { Button, IconButton } from "../components/ui/Button";
-import { Field, Input, MoneyInput, NumberInput, Textarea } from "../components/ui/Field";
+import { Checkbox, Field, Input, MoneyInput, NumberInput, Textarea } from "../components/ui/Field";
 import { confirmDialog } from "../components/ui/Modal";
 import { PageHeader, Panel } from "../components/ui/Page";
 import { Select } from "../components/ui/Select";
@@ -24,7 +24,7 @@ type Saved = BatchInput & { id: string; receivedAt: string | null };
 const empty: BatchInput = {
   name: "", supplier: null, orderedAt: null, status: "PLANNED", capitalVnd: null, feePct: 0, note: null,
   lines: [{ materialId: "", quantity: null, totalCostVnd: null, inputKg: null, pricePerKgVnd: null }],
-  extras: [{ label: "Phí vận chuyển nhập hàng", amountVnd: 0 }],
+  extras: [{ label: "Phí vận chuyển nhập hàng", amountVnd: 0, allocate: true, note: null }],
   writeOffs: [],
   plans: [],
 };
@@ -62,6 +62,8 @@ export function BatchFormPage() {
   }, [loaded.state]);
 
   const set = <K extends keyof BatchInput>(key: K, value: BatchInput[K]) => setValues((prev) => ({ ...prev, [key]: value }));
+  const setExtra = (i: number, patch: Partial<BatchInput["extras"][number]>) =>
+    setValues((prev) => ({ ...prev, extras: prev.extras.map((x, j) => (j === i ? { ...x, ...patch } : x)) }));
   const busy = submitting || locked;
 
   function body() {
@@ -146,16 +148,22 @@ export function BatchFormPage() {
             <BatchLines lines={values.lines} costs={result.costs} materials={mats} errors={errors} disabled={busy} onChange={(lines) => set("lines", lines)} />
           </Panel>
           <Panel title="Chi phí phát sinh">
-            <p className="mb-3 text-sm text-ink-2">Ship nhập, thuế, thuê đóng gói... Chia vào giá vốn từng nguyên liệu theo tỉ lệ tiền hàng.</p>
+            <p className="mb-3 text-sm text-ink-2">Ship nhập, thuế: chọn Chia vào giá vốn, chia theo tỉ lệ tiền hàng. Khấu hao và chi phí khác: bỏ chọn, không vào giá vốn mà tính tỉ lệ % riêng trong báo cáo lợi nhuận.</p>
             <div className="flex flex-col gap-3">
               {values.extras.map((extra, i) => (
-                <div key={i} role="group" aria-label={`Chi phí ${i + 1}`} className="grid gap-2 sm:grid-cols-[1fr_200px_44px]">
-                  <Input aria-label={`Tên khoản chi ${i + 1}`} value={extra.label} onChange={(e) => set("extras", values.extras.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} />
-                  <MoneyInput aria-label={`Số tiền ${i + 1}`} value={extra.amountVnd} onChange={(v) => set("extras", values.extras.map((x, j) => (j === i ? { ...x, amountVnd: v ?? 0 } : x)))} />
-                  <IconButton label={`Bỏ khoản chi ${i + 1}`} onClick={() => set("extras", values.extras.filter((_, j) => j !== i))}><TrashIcon size={18} /></IconButton>
+                <div key={i} role="group" aria-label={`Chi phí ${i + 1}`} className="flex flex-col gap-2 rounded-lg border border-line p-2">
+                  <div className="grid gap-2 sm:grid-cols-[1fr_180px_44px]">
+                    <Input aria-label={`Tên khoản chi ${i + 1}`} value={extra.label} onChange={(e) => setExtra(i, { label: e.target.value })} placeholder="VD: Khấu hao máy khoan" />
+                    <MoneyInput aria-label={`Số tiền ${i + 1}`} value={extra.amountVnd} onChange={(v) => setExtra(i, { amountVnd: v ?? 0 })} />
+                    <IconButton label={`Bỏ khoản chi ${i + 1}`} onClick={() => set("extras", values.extras.filter((_, j) => j !== i))}><TrashIcon size={18} /></IconButton>
+                  </div>
+                  <div className="grid items-center gap-2 sm:grid-cols-[220px_1fr]">
+                    <Checkbox label="Chia vào giá vốn" checked={extra.allocate !== false} onChange={(e) => setExtra(i, { allocate: e.target.checked })} />
+                    <Input aria-label={`Ghi chú khoản chi ${i + 1}`} value={extra.note ?? ""} onChange={(e) => setExtra(i, { note: e.target.value || null })} placeholder="Ghi chú, VD: chia 24 tháng" />
+                  </div>
                 </div>
               ))}
-              <div><Button variant="outline" size="sm" onClick={() => set("extras", [...values.extras, { label: "", amountVnd: 0 }])}><PlusIcon size={16} /> Thêm khoản chi</Button></div>
+              <div><Button variant="outline" size="sm" onClick={() => set("extras", [...values.extras, { label: "", amountVnd: 0, allocate: true, note: null }])}><PlusIcon size={16} /> Thêm khoản chi</Button></div>
             </div>
           </Panel>
           <Panel title="Hao hụt khi nhận hàng">

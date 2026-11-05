@@ -5,7 +5,7 @@
 export type BatchStatus = "PLANNED" | "ORDERED" | "RECEIVED";
 
 export type MaterialKind = "GENERAL" | "BEAD" | "CHARM";
-export type Material = { id: string; name: string; kind: MaterialKind; unit: string; unitsPerKg: number | null; beadMaterial: string | null; stock: number; avgCostVnd: number };
+export type Material = { id: string; name: string; group: import("./labels").MaterialGroup; kind: MaterialKind; markupPct: number | null; unit: string; unitsPerKg: number | null; beadMaterial: string | null; stock: number; avgCostVnd: number };
 
 export type Recipe = {
   id: string;
@@ -28,7 +28,8 @@ export type BatchInput = {
   feePct: number;
   note: string | null;
   lines: LineInput[];
-  extras: { label: string; amountVnd: number }[];
+  // allocate: chia vào giá vốn. Khấu hao, chi phí khác bỏ chọn: không vào giá vốn, báo cáo tính tỉ lệ riêng
+  extras: { label: string; amountVnd: number; allocate: boolean; note: string | null }[];
   writeOffs: WriteOffInput[];
   plans: PlanInput[];
 };
@@ -40,7 +41,7 @@ const num = (value: number | null | undefined) => (Number.isFinite(value) ? (val
 export function materialCosts(batch: BatchInput): MaterialCost[] {
   const lines = batch.lines.filter((l) => l.materialId);
   const goods = lines.reduce((sum, l) => sum + num(l.totalCostVnd), 0);
-  const extras = batch.extras.reduce((sum, e) => sum + num(e.amountVnd), 0);
+  const extras = batch.extras.filter((e) => e.allocate !== false).reduce((sum, e) => sum + num(e.amountVnd), 0);
   const map = new Map<string, MaterialCost>();
   for (const line of lines) {
     const share = goods > 0 ? num(line.totalCostVnd) / goods : 1 / lines.length;

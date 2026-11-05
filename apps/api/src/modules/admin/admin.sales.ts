@@ -1,9 +1,13 @@
 import { Router } from "express";
 import { z } from "zod";
-import { OrderStatus, PaymentStatus, type Prisma } from "../../generated/prisma/client.js";
+import { OrderStatus, PaymentMethod, PaymentStatus, ProductType, SalesChannel, type Prisma } from "../../generated/prisma/client.js";
+import type { StaffContext } from "../../lib/auth.js";
+import { applyStock, stockNeeds, unitCosts, withLiveStock } from "../../lib/stock.js";
+import { optionalText } from "../../lib/text.js";
+import { HttpError } from "../../middleware/errors.js";
 import { prisma } from "../../lib/prisma.js";
 import { pageQuery } from "../../lib/text.js";
-import { changeOrderStatus } from "../orders/orders.service.js";
+import { changeOrderStatus, orderCode, phoneField } from "../orders/orders.service.js";
 
 export const adminSalesRouter = Router();
 
@@ -52,18 +56,21 @@ const orderQuery = z.object({
   ...pageQuery,
   q: z.string().trim().optional(),
   status: z.enum(OrderStatus).optional(),
+  channel: z.enum(SalesChannel).optional(),
 });
 
 adminSalesRouter.get("/orders", async (req, res) => {
-  const { page, limit, q, status } = orderQuery.parse(req.query);
+  const { page, limit, q, status, channel } = orderQuery.parse(req.query);
   const where: Prisma.OrderWhereInput = {
     ...(status ? { status } : {}),
+    ...(channel ? { channel } : {}),
     ...(q
       ? {
           OR: [
             { code: { contains: q.toUpperCase() } },
             { customerPhone: { contains: q.replace(/\s/g, "") } },
             { customerName: { contains: q, mode: "insensitive" } },
+            { externalCode: { contains: q, mode: "insensitive" } },
           ],
         }
       : {}),
@@ -89,51 +96,148 @@ adminSalesRouter.get("/orders/:id", async (req, res) => {
   res.json({ data });
 });
 
+const vnd = z.number().int().min(0).max(2_000_000_000);
+const day = z.iso.date().transform((value) => new Date(`${value}T12:00:00+07:00`));
+
+// Đối soát nhập tay: phí sàn, tiền ship thực trả, ngày nhận tiền
 const orderPatch = z.object({
   status: z.enum(OrderStatus).optional(),
   paymentStatus: z.enum(PaymentStatus).optional(),
+  paidAt: day.nullish(),
+  platformFeeVnd: vnd.optional(),
+  shippingCostVnd: vnd.optional(),
+  externalCode: optionalText,
+  note: optionalText,
 });
 
 adminSalesRouter.patch("/orders/:id", async (req, res) => {
-  const { status, paymentStatus } = orderPatch.parse(req.body);
+  const { status, paymentStatus, paidAt, ...rest } = orderPatch.parse(req.body);
   if (status) await changeOrderStatus(req.params.id, status);
-  if (paymentStatus) await prisma.order.update({ where: { id: req.params.id }, data: { paymentStatus } });
+  const fields = Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== undefined));
+  await prisma.order.update({
+    where: { id: req.params.id },
+    data: {
+      ...fields,
+      ...(paymentStatus ? { paymentStatus } : {}),
+      // Đánh dấu đã thu mà chưa ghi ngày thì lấy hôm nay
+      ...(paidAt !== undefined ? { paidAt } : paymentStatus === PaymentStatus.PAID ? { paidAt: new Date() } : {}),
+    },
+  });
   res.json({ data: await prisma.order.findUniqueOrThrow({ where: { id: req.params.id } }) });
+});
+
+// ---- Nhập đơn tay: đơn Shopee, TikTok, khách giới thiệu. Trừ kho như đơn web
+
+const manualOrderInput = z.object({
+  channel: z.enum(SalesChannel).default(SalesChannel.REFERRAL),
+  externalCode: optionalText,
+  createdAt: day.optional(),
+  customer: z.object({
+    name: z.string().trim().min(1, "Nhập tên khách.").max(80),
+    phone: z.union([z.literal(""), phoneField]).optional().transform((value) => value || null),
+    address: optionalText,
+  }),
+  items: z
+    .array(
+      z.object({
+        productId: z.string().min(1, "Chọn sản phẩm."),
+        quantity: z.number().int().min(1, "Số lượng ít nhất 1.").max(999),
+        // Giá bán thật của đơn, có thể khác giá niêm yết (giảm giá trên sàn)
+        unitPriceVnd: vnd,
+      }),
+    )
+    .min(1, "Thêm ít nhất một sản phẩm.")
+    .max(50),
+  shippingVnd: vnd.default(0),
+  shippingCostVnd: vnd.default(0),
+  platformFeeVnd: vnd.default(0),
+  paymentMethod: z.enum(PaymentMethod).default(PaymentMethod.BANK_TRANSFER),
+  paymentStatus: z.enum(PaymentStatus).default(PaymentStatus.UNPAID),
+  paidAt: day.nullish(),
+  status: z.enum([OrderStatus.CONFIRMED, OrderStatus.SHIPPING, OrderStatus.COMPLETED]).default(OrderStatus.COMPLETED),
+  note: optionalText,
+});
+
+adminSalesRouter.post("/orders", async (req, res) => {
+  const input = manualOrderInput.parse(req.body);
+  const staff = res.locals.staff as StaffContext;
+  const products = await prisma.product.findMany({ where: { id: { in: input.items.map((i) => i.productId) } }, select: { id: true, name: true, type: true } });
+  const byId = new Map(products.map((p) => [p.id, p]));
+  for (const item of input.items) {
+    const p = byId.get(item.productId);
+    if (!p) throw new HttpError(400, "Có sản phẩm không còn tồn tại.", "UNKNOWN_PRODUCT");
+    if (p.type === ProductType.SUPPLY) throw new HttpError(400, `"${p.name}" là hàng phát sinh, không bán.`, "NOT_FOR_SALE");
+  }
+  const stockItems = input.items.map((i) => ({ productId: i.productId, quantity: i.quantity, label: byId.get(i.productId)!.name }));
+  const subtotalVnd = input.items.reduce((sum, i) => sum + i.unitPriceVnd * i.quantity, 0);
+
+  const order = await prisma.$transaction(async (tx) => {
+    const [needs, costs] = await Promise.all([stockNeeds(tx, stockItems), unitCosts(tx, stockItems)]);
+    const customer = input.customer.phone
+      ? await tx.customer.upsert({
+          where: { phone: input.customer.phone },
+          create: { name: input.customer.name, phone: input.customer.phone, address: input.customer.address },
+          update: { name: input.customer.name, ...(input.customer.address ? { address: input.customer.address } : {}) },
+        })
+      : null;
+    const created = await tx.order.create({
+      data: {
+        code: orderCode(input.createdAt),
+        channel: input.channel,
+        externalCode: input.externalCode,
+        customerName: input.customer.name,
+        customerPhone: input.customer.phone ?? "",
+        address: input.customer.address ?? "",
+        note: input.note,
+        subtotalVnd,
+        shippingVnd: input.shippingVnd,
+        totalVnd: subtotalVnd + input.shippingVnd,
+        shippingCostVnd: input.shippingCostVnd,
+        platformFeeVnd: input.platformFeeVnd,
+        paymentMethod: input.paymentMethod,
+        paymentStatus: input.paymentStatus,
+        paidAt: input.paidAt ?? (input.paymentStatus === PaymentStatus.PAID ? (input.createdAt ?? new Date()) : null),
+        status: input.status,
+        customerId: customer?.id ?? null,
+        createdById: staff.id,
+        ...(input.createdAt ? { createdAt: input.createdAt } : {}),
+        items: {
+          create: input.items.map((i, n) => ({ productId: i.productId, productName: byId.get(i.productId)!.name, unitPriceVnd: i.unitPriceVnd, unitCostVnd: costs[n], quantity: i.quantity })),
+        },
+      },
+    });
+    await applyStock(tx, needs, -1, { orderId: created.id, note: `Đơn ${created.code}` });
+    return created;
+  });
+  res.status(201).json({ data: order });
 });
 
 // ---- Tổng quan
 
 adminSalesRouter.get("/dashboard", async (_req, res) => {
-  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const [byStatus, revenue, lowStock, recentOrders, customers] = await prisma.$transaction([
+  const [byStatus, products, lowMaterials, recentOrders] = await prisma.$transaction([
     prisma.order.groupBy({ by: ["status"], _count: { _all: true }, orderBy: { status: "asc" } }),
-    prisma.order.aggregate({
-      where: { status: OrderStatus.COMPLETED, createdAt: { gte: since } },
-      _sum: { totalVnd: true },
-      _count: { _all: true },
-    }),
-    prisma.product.findMany({
-      where: { status: "PUBLISHED", stock: { lte: 3 } },
-      select: { id: true, name: true, stock: true },
-      orderBy: { stock: "asc" },
-      take: 8,
-    }),
+    // Vòng xâu hạt có tồn kho tính từ hạt nên lấy hết sản phẩm đang bán rồi lọc sau
+    prisma.product.findMany({ where: { status: "PUBLISHED", type: { not: ProductType.SUPPLY } }, select: { id: true, name: true, stock: true, type: true } }),
+    prisma.material.findMany({ where: { stock: { lte: 10 } }, select: { id: true, name: true, stock: true, unit: true }, orderBy: { stock: "asc" }, take: 8 }),
     prisma.order.findMany({
       orderBy: { createdAt: "desc" },
-      take: 6,
-      select: { id: true, code: true, customerName: true, totalVnd: true, status: true, createdAt: true },
+      take: 8,
+      select: { id: true, code: true, customerName: true, totalVnd: true, status: true, channel: true, createdAt: true },
     }),
-    prisma.customer.count(),
   ]);
+  const lowStock = (await withLiveStock(prisma, products))
+    .filter((p) => p.stock <= 3)
+    .sort((a, b) => a.stock - b.stock)
+    .slice(0, 8)
+    .map(({ id, name, stock }) => ({ id, name, stock }));
 
   res.json({
     data: {
       ordersByStatus: Object.fromEntries(byStatus.map((row) => [row.status, (row._count as { _all: number })._all])),
-      revenue30dVnd: revenue._sum.totalVnd ?? 0,
-      completed30d: revenue._count._all,
       lowStock,
+      lowMaterials,
       recentOrders,
-      customers,
     },
   });
 });

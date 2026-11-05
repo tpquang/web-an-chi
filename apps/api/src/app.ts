@@ -12,6 +12,7 @@ import { catalogRouter } from "./modules/catalog/catalog.routes.js";
 import { chatRouter } from "./modules/chat/chat.routes.js";
 import { ordersRouter } from "./modules/orders/orders.routes.js";
 import { settingsRouter } from "./modules/settings/settings.routes.js";
+import { mediaRouter } from "./modules/settings/media.routes.js";
 
 export const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api/v1", blogRouter);
 app.use("/api/v1", ordersRouter);
 app.use("/api/v1", braceletRouter);
 app.use("/api/v1/settings", settingsRouter);
+app.use("/api/v1/media", mediaRouter);
 app.use("/api/v1/account", accountRouter);
 app.use("/api/v1/chat", chatRouter);
 app.use("/api/v1/admin", adminRouter);

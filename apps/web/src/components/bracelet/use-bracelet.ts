@@ -18,8 +18,6 @@ type RingItem = { key: number; slug: string };
 let nextKey = 0;
 const ringItem = (slug: string): RingItem => ({ key: ++nextKey, slug });
 
-export type Extras = { engraving: string; giftBox: boolean; cardOn: boolean; card: string; giftWrap: boolean };
-
 export function useBracelet(rules: BraceletRules, beads: Bead[]) {
   const bySlug = useMemo(() => new Map(beads.map((bead) => [bead.slug, bead])), [beads]);
   const firstBead = beads.find((bead) => bead.kind === "BEAD" && bead.sizeMm === 8 && bead.stock > 0) ?? beads.find((bead) => bead.kind === "BEAD");
@@ -35,7 +33,6 @@ export function useBracelet(rules: BraceletRules, beads: Bead[]) {
   const [wristCm, setWristCmState] = useState(startWristCm);
   const [fit, setFitState] = useState(startFit.id);
   const [cord, setCord] = useState(rules.cords[0].id);
-  const [extras, setExtras] = useState<Extras>({ engraving: "", giftBox: false, cardOn: false, card: "", giftWrap: false });
 
   // Mọi thay đổi vòng đi qua đây để hoàn tác được
   function setRing(next: RingItem[]) {
@@ -61,16 +58,9 @@ export function useBracelet(rules: BraceletRules, beads: Bead[]) {
   // Hạt chính là hạt trầm dùng nhiều nhất, để tự lấp đầy và ước số hạt
   const mainBead = ringBeads.filter((bead) => bead.kind === "BEAD").sort((a, b) => (counts.get(b.slug) ?? 0) - (counts.get(a.slug) ?? 0))[0] ?? firstBead;
 
-  const { extras: prices } = rules;
   const beadsVnd = ringBeads.reduce((sum, bead) => sum + bead.priceVnd, 0);
-  const extrasVnd =
-    (extras.engraving.trim() ? prices.engraving.priceVnd : 0) +
-    (extras.giftBox ? prices.giftBox.priceVnd : 0) +
-    (extras.cardOn && extras.card.trim() ? prices.card.priceVnd : 0) +
-    (extras.giftWrap ? prices.giftWrap.priceVnd : 0);
-  const totalVnd = beadsVnd + rules.feeVnd + extrasVnd;
+  const totalVnd = beadsVnd + rules.feeVnd;
 
-  const needsEngraving = ringBeads.some((bead) => bead.slug.startsWith("hat-chu"));
   const outOfStock = [...counts].find(([slug, count]) => (bySlug.get(slug)?.stock ?? 0) < count);
   const problem =
     ring.length < rules.minBeads ? `Vòng cần ít nhất ${rules.minBeads} hạt.`
@@ -78,7 +68,6 @@ export function useBracelet(rules: BraceletRules, beads: Bead[]) {
     : diff < -FIT_TOLERANCE_MM ? `Còn thiếu ${cm(-diff)} cm để vừa cổ tay ${wristCm.toLocaleString("vi-VN")} cm.`
     : diff > FIT_TOLERANCE_MM ? `Vòng đang dư ${cm(diff)} cm. Bạn bớt hạt hoặc đổi kiểu đeo.`
     : outOfStock ? `Shop chỉ còn ${bySlug.get(outOfStock[0])?.stock} hạt ${bySlug.get(outOfStock[0])?.name}.`
-    : needsEngraving && !extras.engraving.trim() ? "Vòng có hạt chữ, bạn nhập chữ cần khắc ở phần tuỳ chọn."
     : null;
 
   // Dòng tóm tắt: gộp hạt trùng loại, giữ thứ tự xuất hiện trên vòng
@@ -181,17 +170,13 @@ export function useBracelet(rules: BraceletRules, beads: Bead[]) {
       cord,
       fit,
       wristCm,
-      engraving: extras.engraving.trim() || undefined,
-      giftBox: extras.giftBox,
-      card: extras.cardOn ? extras.card.trim() || undefined : undefined,
-      giftWrap: extras.giftWrap,
     });
     showToast({ title: "Đã thêm vòng vào giỏ", desc: "Bạn có thể đặt hàng hoặc thiết kế thêm vòng khác.", action: { href: cartHref, label: "Xem giỏ hàng" } });
   }
 
   return {
     rules, beads, ring, sceneItems, ringBeads, counts, lines, selected, setSelected,
-    wristCm, setWristCm, fit, setFit, cord, setCord, extras, setExtras, needsEngraving,
+    wristCm, setWristCm, fit, setFit, cord, setCord,
     lengthMm, targetMm, easeCm, mainBead, totalVnd, problem, canUndo: history.length > 0,
     insert, move, removeAt, autoFill, swapMain, undo, reset, addToCart,
   };

@@ -1,7 +1,8 @@
 import express, { Router } from "express";
 import { z } from "zod";
-import { MaterialKind, MovementType, type Prisma } from "../../generated/prisma/client.js";
+import { MaterialGroup, MaterialKind, MovementType, ProductType, type Prisma } from "../../generated/prisma/client.js";
 import { movingAverage } from "../../lib/inventory.js";
+import { customBraceletPrice } from "../../lib/pricing.js";
 import { prisma } from "../../lib/prisma.js";
 import { optionalText, pageQuery } from "../../lib/text.js";
 import { HttpError } from "../../middleware/errors.js";
@@ -14,9 +15,13 @@ const materialInput = z
   .object({
     name: z.string().trim().min(2, "Nhập tên nguyên liệu, ví dụ Nụ trầm thô.").max(120),
     kind: z.enum(MaterialKind).default(MaterialKind.GENERAL),
+    // Hạt và charm luôn thuộc nhóm vòng hạt
+    group: z.enum(MaterialGroup).default(MaterialGroup.PACKAGING),
     unit: z.string().trim().min(1, "Nhập đơn vị, ví dụ viên, cái.").max(20),
     unitsPerKg: z.number().int().positive().nullish().transform((value) => value ?? null),
     beadMaterial: z.string().trim().max(60).nullish().transform((value) => value || null),
+    // Lãi trên giá vốn để tự tính giá bán hạt, charm khi nhập kho. Để trống thì giá nhập tay
+    markupPct: z.number().min(0).max(1000).nullish().transform((value) => value ?? null),
     note: optionalText,
   })
   .superRefine((value, ctx) => {
@@ -25,6 +30,7 @@ const materialInput = z
   // Hạt trầm và charm nhập theo số lượng, chỉ nguyên liệu khác mới quy đổi kg
   .transform((value) => ({
     ...value,
+    group: value.kind === MaterialKind.GENERAL ? value.group : MaterialGroup.BEAD,
     unitsPerKg: value.kind === MaterialKind.GENERAL ? value.unitsPerKg : null,
     beadMaterial: value.kind === MaterialKind.BEAD ? value.beadMaterial : null,
   }));
@@ -35,7 +41,7 @@ const modelInfo = { select: { fileName: true, size: true, updatedAt: true } } as
 
 adminInventoryRouter.get("/materials", async (_req, res) => {
   const [materials, textures] = await Promise.all([
-    prisma.material.findMany({ orderBy: { name: "asc" }, include: { _count: { select: { components: true } }, model: modelInfo } }),
+    prisma.material.findMany({ orderBy: [{ group: "asc" }, { name: "asc" }], include: { _count: { select: { components: true } }, model: modelInfo } }),
     prisma.beadTexture.findMany({ select: { id: true, material: true, roughness: true, updatedAt: true } }),
   ]);
   const byMaterial = new Map(textures.map((t) => [t.material, { ...t, version: t.updatedAt.getTime() }]));
@@ -153,16 +159,19 @@ adminInventoryRouter.get("/recipes", async (_req, res) => {
     select: {
       id: true,
       name: true,
+      type: true,
       priceVnd: true,
       stock: true,
       unitCostVnd: true,
-      components: { orderBy: { position: "asc" }, select: { quantity: true, material: { select: { id: true, name: true, unit: true, stock: true, avgCostVnd: true } } } },
+      components: { orderBy: { position: "asc" }, select: { quantity: true, material: { select: { id: true, name: true, unit: true, stock: true, avgCostVnd: true, beads: { select: { priceVnd: true }, take: 1 } } } } },
     },
   });
   const data = products.map((p) => ({
     ...p,
     canPack: Math.min(...p.components.map((c) => Math.floor(c.material.stock / c.quantity))),
     materialCostVnd: p.components.reduce((sum, c) => sum + c.quantity * c.material.avgCostVnd, 0),
+    // Vòng xâu hạt: giá theo bảng giá hạt, bán thẳng từ hạt nên canPack là số vòng còn bán được
+    customPriceVnd: p.type === ProductType.CUSTOM ? customBraceletPrice(p.components) : null,
   }));
   res.json({ data });
 });
@@ -185,6 +194,7 @@ adminInventoryRouter.post("/pack", async (req, res) => {
   const data = await prisma.$transaction(async (tx) => {
     const product = await tx.product.findUniqueOrThrow({ where: { id: productId }, include: { components: { include: { material: true } } } });
     if (product.components.length === 0) throw new HttpError(400, "Sản phẩm chưa có công thức đóng gói.", "NO_RECIPE");
+    if (product.type === ProductType.CUSTOM) throw new HttpError(400, "Vòng xâu hạt bán thẳng từ hạt trong kho, không cần đóng gói.", "CUSTOM_NO_PACK");
 
     let unitCostVnd = 0;
     for (const c of product.components) {

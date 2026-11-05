@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
 import { PublishStatus, type Prisma } from "../../generated/prisma/client.js";
+import { sellableProduct as sellable } from "../../lib/pricing.js";
+import { withLiveStock } from "../../lib/stock.js";
 import { pageQuery } from "../../lib/text.js";
 import { prisma } from "../../lib/prisma.js";
 import { HttpError } from "../../middleware/errors.js";
@@ -17,7 +19,7 @@ export const productInclude = {
 catalogRouter.get("/categories", async (_req, res) => {
   const data = await prisma.category.findMany({
     orderBy: [{ position: "asc" }, { name: "asc" }],
-    include: { _count: { select: { products: { where: published } } } },
+    include: { _count: { select: { products: { where: sellable } } } },
   });
   res.json({ data });
 });
@@ -40,7 +42,7 @@ const listQuery = z.object({
 catalogRouter.get("/products", async (req, res) => {
   const { page, limit, category, featured, slugs, exclude } = listQuery.parse(req.query);
   const where: Prisma.ProductWhereInput = {
-    ...published,
+    ...sellable,
     ...(category ? { category: { slug: category } } : {}),
     ...(featured !== undefined ? { featured } : {}),
     ...(slugs ? { slug: { in: slugs.split(",") } } : {}),
@@ -59,12 +61,12 @@ catalogRouter.get("/products", async (req, res) => {
     prisma.product.count({ where }),
   ]);
 
-  res.json({ data, meta: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) } });
+  res.json({ data: await withLiveStock(prisma, data), meta: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) } });
 });
 
 catalogRouter.get("/products/:slug", async (req, res) => {
   const data = await prisma.product.findFirst({
-    where: { slug: req.params.slug, ...published },
+    where: { slug: req.params.slug, ...sellable },
     include: {
       ...productInclude,
       posts: {
@@ -76,5 +78,5 @@ catalogRouter.get("/products/:slug", async (req, res) => {
     },
   });
   if (!data) throw new HttpError(404, "Không tìm thấy sản phẩm");
-  res.json({ data });
+  res.json({ data: (await withLiveStock(prisma, [data]))[0] });
 });

@@ -1,40 +1,37 @@
 import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { PrismaPg } from "@prisma/adapter-pg";
-import {
-  OrderStatus,
-  PaymentMethod,
-  PaymentStatus,
-  PrismaClient,
-  PublishStatus,
-} from "../src/generated/prisma/client.js";
-import { hashPassword } from "../src/lib/password.js";
+import { syncCustomPrices } from "../src/lib/stock.js";
+import { MaterialGroup, MaterialKind, PrismaClient, ProductType, PublishStatus } from "../src/generated/prisma/client.js";
 
-// Toàn bộ dữ liệu giả nằm trong sample-data.json, file này chỉ nạp vào database.
-// Chạy lại nhiều lần được: bản ghi tìm theo slug, số điện thoại, mã đơn.
+// Dữ liệu ban đầu (mặc định khi cài server lần đầu) nằm trong sample-data.json, file này chỉ nạp vào database.
+// Chạy lại nhiều lần được: bản ghi tìm theo slug hoặc tên.
+//
+// Luồng hàng: đợt nhập đưa nguyên liệu (bao bì, vòng hạt, nụ) vào kho, đóng gói theo công thức
+// (ProductComponent) mới ra thành phẩm. Vì vậy sản phẩm seed với tồn kho 0.
+//
+// `npm run db:seed:initial` (deploy lần đầu) chỉ nạp khi database chưa có nguyên liệu, sản phẩm.
+// `npm run db:seed:reset` xoá sạch sản phẩm, đơn hàng, kho, đợt nhập, hạt trước khi seed.
+// Bài viết, chủ đề bài viết, danh mục, nhân viên giữ nguyên.
 type SampleData = {
   store: Record<string, unknown>;
   categories: { name: string; slug: string; description?: string; guide?: string; position?: number; metaTitle?: string; metaDescription?: string }[];
-  products: ({ category: string; specs?: { label: string; value: string }[] } & Record<string, unknown> & {
-      name: string;
-      slug: string;
-      priceVnd: number;
-      stock: number;
-    })[];
-  postCategories: { name: string; slug: string; description?: string; position?: number }[];
-  posts: { title: string; slug: string; featured?: boolean; category: string; authorName: string; publishedAt: string; excerpt?: string; metaDescription?: string; content: string; products?: string[] }[];
-  customers: { name: string; phone: string; email?: string; address?: string; marketingConsent?: boolean; password?: string }[];
-  orders: {
-    code: string;
-    customerPhone: string;
-    createdAt: string;
-    paymentMethod: keyof typeof PaymentMethod;
-    paymentStatus: keyof typeof PaymentStatus;
-    status: keyof typeof OrderStatus;
-    note?: string;
-    items: { product: string; quantity: number }[];
+  materials: { name: string; group: keyof typeof MaterialGroup; kind?: keyof typeof MaterialKind; beadMaterial?: string; unit: string; unitsPerKg?: number; markupPct?: number; note?: string }[];
+  products: {
+    name: string;
+    slug: string;
+    category: string;
+    type: keyof typeof ProductType;
+    status?: keyof typeof PublishStatus;
+    summary?: string;
+    priceVnd: number;
+    stock: number;
+    specs?: { label: string; value: string }[];
+    components: { material: string; quantity: number }[];
   }[];
-  beads: { name: string; slug: string; kind: "BEAD" | "CHARM"; material: string; sizeMm: number; priceVnd: number; stock: number; color: string; finish: string; note?: string; position: number }[];
+  postCategories: { name: string; slug: string; description?: string; position?: number }[];
+  posts: { title: string; slug: string; featured?: boolean; category: string; authorName: string; publishedAt: string; excerpt?: string; metaDescription?: string; content: string }[];
+  beads: { name: string; slug: string; kind: "BEAD" | "CHARM"; material: string; sizeMm: number; priceVnd: number; color: string; finish: string; note?: string; position: number; active?: boolean; stockItem: string }[];
 };
 
 const sample: SampleData = JSON.parse(readFileSync(new URL("./sample-data.json", import.meta.url), "utf8"));
@@ -43,15 +40,37 @@ const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
 });
 
-function shippingFee(subtotal: number) {
-  const { flatFeeVnd, freeFromVnd } = (sample.store as { shipping: { flatFeeVnd: number; freeFromVnd: number | null } }).shipping;
-  return freeFromVnd !== null && subtotal >= freeFromVnd ? 0 : flatFeeVnd;
+// Thứ tự xoá theo khoá ngoại: sổ kho và đóng gói trước, sản phẩm và nguyên liệu sau
+async function resetCatalog() {
+  await prisma.$transaction([
+    prisma.stockMovement.deleteMany(),
+    prisma.packRun.deleteMany(),
+    prisma.purchaseBatch.deleteMany(),
+    prisma.orderItem.deleteMany(),
+    prisma.order.deleteMany(),
+    prisma.productComponent.deleteMany(),
+    prisma.product.deleteMany(),
+    prisma.material.deleteMany(),
+    prisma.bead.deleteMany(),
+    // Dữ liệu khách: hội thoại (tin nhắn xoá theo) và hồ sơ khách
+    prisma.conversation.deleteMany(),
+    prisma.customer.deleteMany(),
+  ]);
+  console.log("Đã xoá sản phẩm, đơn hàng, nguyên liệu, đợt nhập, đóng gói, sổ kho, hạt, khách hàng, hội thoại.");
 }
 
 async function main() {
+  if (process.argv.includes("--reset")) await resetCatalog();
+  // Cài server lần đầu: chỉ nạp khi chưa có nguyên liệu và sản phẩm, để chạy lại deploy không ghi đè dữ liệu thật
+  if (process.argv.includes("--initial") && ((await prisma.material.count()) > 0 || (await prisma.product.count()) > 0)) {
+    console.log("Database đã có dữ liệu, bỏ qua dữ liệu ban đầu.");
+    return;
+  }
+
+  // Thông tin cửa hàng chỉ tạo lần đầu, seed lại không ghi đè thông tin thật đã sửa
   await prisma.setting.upsert({
     where: { key: "store" },
-    update: { value: sample.store as object },
+    update: {},
     create: { key: "store", value: sample.store as object },
   });
 
@@ -61,11 +80,26 @@ async function main() {
     categoryIds.set(category.slug, id);
   }
 
-  const products = new Map<string, { id: string; name: string; priceVnd: number }>();
-  for (const { category, ...product } of sample.products) {
-    const data = { ...product, categoryId: categoryIds.get(category)!, status: PublishStatus.PUBLISHED };
-    const saved = await prisma.product.upsert({ where: { slug: product.slug }, update: data, create: data });
-    products.set(saved.slug, saved);
+  const materialIds = new Map<string, string>();
+  for (const { group, kind = "GENERAL", ...material } of sample.materials) {
+    const data = { ...material, group: MaterialGroup[group], kind: MaterialKind[kind] };
+    const { id } = await prisma.material.upsert({ where: { name: material.name }, update: data, create: data });
+    materialIds.set(material.name, id);
+  }
+
+  for (const { category, components, type, status = "PUBLISHED", ...product } of sample.products) {
+    const recipe = components.map(({ material, quantity }, position) => {
+      const materialId = materialIds.get(material);
+      if (!materialId) throw new Error(`Sản phẩm ${product.slug} dùng nguyên liệu chưa khai báo: ${material}`);
+      return { materialId, quantity, position };
+    });
+    // Tồn kho chỉ tăng qua đóng gói, seed lại không ghi đè tồn kho đang có
+    const { stock, ...data } = { ...product, type: ProductType[type], categoryId: categoryIds.get(category)!, status: PublishStatus[status] };
+    await prisma.product.upsert({
+      where: { slug: product.slug },
+      update: { ...data, components: { deleteMany: {}, create: recipe } },
+      create: { ...data, stock, components: { create: recipe } },
+    });
   }
 
   const postCategoryIds = new Map<string, string>();
@@ -74,67 +108,21 @@ async function main() {
     postCategoryIds.set(category.slug, id);
   }
 
-  for (const { category, products: related = [], publishedAt, ...post } of sample.posts) {
-    const data = {
-      ...post,
-      publishedAt: new Date(publishedAt),
-      status: PublishStatus.PUBLISHED,
-      categoryId: postCategoryIds.get(category)!,
-      products: { set: related.map((slug) => ({ id: products.get(slug)!.id })) },
-    };
-    await prisma.post.upsert({
-      where: { slug: post.slug },
-      update: data,
-      create: { ...data, products: { connect: data.products.set } },
-    });
+  for (const { category, publishedAt, ...post } of sample.posts) {
+    const data = { ...post, publishedAt: new Date(publishedAt), status: PublishStatus.PUBLISHED, categoryId: postCategoryIds.get(category)! };
+    await prisma.post.upsert({ where: { slug: post.slug }, update: data, create: data });
   }
 
-  const customerIds = new Map<string, { id: string; name: string; email: string | null; address: string | null }>();
-  for (const { password, ...customer } of sample.customers) {
-    const data = { ...customer, passwordHash: password ? await hashPassword(password) : null };
-    const saved = await prisma.customer.upsert({ where: { phone: customer.phone }, update: data, create: data });
-    customerIds.set(saved.phone, saved);
-  }
-
-  // Đơn mẫu không trừ tồn kho: tồn kho trong JSON đã là số sau khi bán
-  for (const order of sample.orders) {
-    const customer = customerIds.get(order.customerPhone)!;
-    const items = order.items.map(({ product, quantity }) => {
-      const found = products.get(product)!;
-      return { productId: found.id, productName: found.name, unitPriceVnd: found.priceVnd, quantity };
-    });
-    const subtotalVnd = items.reduce((sum, item) => sum + item.unitPriceVnd * item.quantity, 0);
-    const shippingVnd = shippingFee(subtotalVnd);
-    const data = {
-      customerName: customer.name,
-      customerPhone: order.customerPhone,
-      customerEmail: customer.email,
-      address: customer.address ?? "",
-      note: order.note ?? null,
-      subtotalVnd,
-      shippingVnd,
-      totalVnd: subtotalVnd + shippingVnd,
-      paymentMethod: PaymentMethod[order.paymentMethod],
-      paymentStatus: PaymentStatus[order.paymentStatus],
-      status: OrderStatus[order.status],
-      customerId: customer.id,
-      createdAt: new Date(order.createdAt),
-    };
-    await prisma.order.upsert({
-      where: { code: order.code },
-      update: { ...data, items: { deleteMany: {}, create: items } },
-      create: { ...data, code: order.code, items: { create: items } },
-    });
-  }
-
-  for (const bead of sample.beads) {
+  // Hạt không có tồn kho riêng: tồn kho là của nguyên liệu gắn kèm
+  for (const { stockItem, ...rest } of sample.beads) {
+    const bead = { ...rest, materialId: materialIds.get(stockItem) ?? null };
     await prisma.bead.upsert({ where: { slug: bead.slug }, update: bead, create: bead });
   }
+  await syncCustomPrices(prisma);
 
   console.log(
-    `Seed xong: ${sample.beads.length} loại hạt, ${sample.categories.length} danh mục, ${sample.products.length} sản phẩm, ` +
-      `${sample.postCategories.length} chủ đề, ${sample.posts.length} bài viết, ` +
-      `${sample.customers.length} khách hàng, ${sample.orders.length} đơn hàng.`,
+    `Seed xong: ${sample.materials.length} nguyên liệu, ${sample.products.length} sản phẩm, ${sample.beads.length} loại hạt và charm, ` +
+      `${sample.categories.length} danh mục, ${sample.postCategories.length} chủ đề, ${sample.posts.length} bài viết.`,
   );
 }
 

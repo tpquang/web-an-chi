@@ -14,7 +14,10 @@ import { StaffPage } from "./pages/StaffPage";
 import { MaterialsPage } from "./pages/MaterialsPage";
 import { MovementsPage } from "./pages/MovementsPage";
 import { PackingPage } from "./pages/PackingPage";
-import { DashboardPage } from "./pages/DashboardPage";
+import { DashboardPage, ReportsPage } from "./pages/DashboardPage";
+import { ExpensesPage } from "./pages/ExpensesPage";
+import { OrderCreatePage } from "./pages/OrderCreatePage";
+import { StocktakePage } from "./pages/StocktakePage";
 import { LoginPage } from "./pages/LoginPage";
 import { OrderDetailPage } from "./pages/OrderDetailPage";
 import { OrdersPage } from "./pages/OrdersPage";
@@ -49,6 +52,7 @@ function App() {
         <Route path="posts/:id" element={<PostFormPage />} />
         <Route path="post-categories" element={<TaxonomyPage kind="post-categories" />} />
         <Route path="orders" element={<OrdersPage />} />
+        <Route path="orders/new" element={<OrderCreatePage />} />
         <Route path="orders/:id" element={<OrderDetailPage />} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="customers/:id" element={<CustomerDetailPage />} />
@@ -58,6 +62,9 @@ function App() {
         <Route path="materials" element={<MaterialsPage />} />
         <Route path="packing" element={<PackingPage />} />
         <Route path="stock" element={<MovementsPage />} />
+        <Route path="stocktake" element={<StocktakePage />} />
+        <Route path="reports" element={<ReportsPage />} />
+        <Route path="expenses" element={<ExpensesPage />} />
         <Route path="login" element={<Navigate to="/" replace />} />
         <Route path="*" element={<PlaceholderPage title="Không tìm thấy trang" />} />
       </Route>

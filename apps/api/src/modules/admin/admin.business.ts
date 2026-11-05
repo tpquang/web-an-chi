@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
 import { BatchStatus, MovementType } from "../../generated/prisma/client.js";
+import { markupPrice } from "../../lib/pricing.js";
+import { syncCustomPrices } from "../../lib/stock.js";
 import { batchMaterialCosts, movingAverage } from "../../lib/inventory.js";
 import { prisma } from "../../lib/prisma.js";
 import { optionalText } from "../../lib/text.js";
@@ -32,7 +34,11 @@ const batchInput = z
       )
       .max(50)
       .default([]),
-    extras: z.array(z.object({ label: z.string().trim().min(1, "Nhập tên khoản chi."), amountVnd: vnd })).max(50).default([]),
+    // allocate: chia vào giá vốn (ship nhập, thuế). Khấu hao và chi phí khác bỏ chọn, tính tỉ lệ riêng
+    extras: z
+      .array(z.object({ label: z.string().trim().min(1, "Nhập tên khoản chi."), amountVnd: vnd, allocate: z.boolean().default(true), note: optionalText }))
+      .max(50)
+      .default([]),
     writeOffs: z
       .array(z.object({ materialId: z.string().min(1, "Chọn nguyên liệu."), quantity: qty, reason: z.string().trim().min(1, "Ghi lý do, ví dụ móp méo.") }))
       .max(50)
@@ -121,17 +127,15 @@ adminBusinessRouter.post("/batches/:id/receive", async (req, res) => {
     if (batch.status === BatchStatus.RECEIVED) throw new HttpError(409, "Đợt này đã nhập kho rồi.", "ALREADY_RECEIVED");
     if (batch.lines.length === 0) throw new HttpError(400, "Đợt nhập chưa có nguyên liệu nào.", "EMPTY");
 
-    const extrasVnd = batch.extras.reduce((sum, e) => sum + e.amountVnd, 0);
+    const extrasVnd = batch.extras.filter((e) => e.allocate).reduce((sum, e) => sum + e.amountVnd, 0);
     const costs = batchMaterialCosts(batch.lines, extrasVnd, batch.writeOffs);
     for (const cost of costs) {
       const material = await tx.material.findUniqueOrThrow({ where: { id: cost.materialId } });
-      await tx.material.update({
-        where: { id: material.id },
-        data: {
-          stock: { increment: cost.received },
-          avgCostVnd: movingAverage(material.stock, material.avgCostVnd, cost.received, cost.unitCostVnd),
-        },
-      });
+      const avgCostVnd = movingAverage(material.stock, material.avgCostVnd, cost.received, cost.unitCostVnd);
+      await tx.material.update({ where: { id: material.id }, data: { stock: { increment: cost.received }, avgCostVnd } });
+      // Hạt, charm có % lãi: giá bán theo giá vốn mới, có giá rồi mới hiện ở trang thiết kế vòng
+      const priceVnd = material.markupPct === null ? 0 : markupPrice(avgCostVnd, material.markupPct);
+      if (priceVnd > 0) await tx.bead.updateMany({ where: { materialId: material.id }, data: { priceVnd, active: true } });
       await tx.stockMovement.create({
         data: { type: MovementType.PURCHASE, materialId: material.id, quantity: cost.quantityIn, unitCostVnd: cost.unitCostVnd, batchId: batch.id, note: batch.name },
       });
@@ -141,6 +145,7 @@ adminBusinessRouter.post("/batches/:id/receive", async (req, res) => {
         data: { type: MovementType.WRITE_OFF, materialId: wo.materialId, quantity: -wo.quantity, batchId: batch.id, note: `${wo.reason} (khi nhận ${batch.name})` },
       });
     }
+    await syncCustomPrices(tx);
     return tx.purchaseBatch.update({ where: { id: batch.id }, data: { status: BatchStatus.RECEIVED, receivedAt: new Date() }, include });
   });
   res.json({ data });

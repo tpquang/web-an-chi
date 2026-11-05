@@ -49,13 +49,13 @@ export function Pagination({ page, totalPages, onPage }: PaginationProps) {
   if (totalPages <= 1) return null;
   return (
     <nav aria-label="Phân trang" className="mt-4 flex items-center gap-2 text-sm">
-      <button type="button" disabled={page <= 1} onClick={() => onPage(page - 1)} className="min-h-11 rounded-full px-3 hover:bg-paper-2 disabled:opacity-40">
+      <button type="button" disabled={page <= 1} onClick={() => onPage(page - 1)} className="min-h-11 rounded-sm px-3 hover:bg-paper-2 disabled:opacity-40">
         Trang trước
       </button>
       <span className="px-2 text-ink-2">
         Trang {page}/{totalPages}
       </span>
-      <button type="button" disabled={page >= totalPages} onClick={() => onPage(page + 1)} className="min-h-11 rounded-full px-3 hover:bg-paper-2 disabled:opacity-40">
+      <button type="button" disabled={page >= totalPages} onClick={() => onPage(page + 1)} className="min-h-11 rounded-sm px-3 hover:bg-paper-2 disabled:opacity-40">
         Trang sau
       </button>
     </nav>

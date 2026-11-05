@@ -7,7 +7,7 @@
 #   https://DOMAIN        → web (Next.js)
 #   https://mun.DOMAIN    → CMS (file tĩnh), /api/ trên cùng tên miền → API
 #
-# Biến tuỳ chọn: DOMAIN, CMS_DOMAIN, EMAIL (cho Let's Encrypt), SEED=1 (nạp dữ liệu mẫu), SKIP_SSL=1,
+# Biến tuỳ chọn: DOMAIN, CMS_DOMAIN, EMAIL (cho Let's Encrypt), SEED=0 (không nạp dữ liệu ban đầu; mặc định nạp), SKIP_SSL=1,
 #   INDEXING=on (cho Google index; mặc định off vì đang là web demo),
 #   WEB_PORT, API_PORT, DB_PORT (đổi khi VPS mới có dịch vụ khác chiếm cổng)
 set -euo pipefail
@@ -94,7 +94,9 @@ CMS_ROOT=${CMS_ROOT}
 INDEXING=${INDEXING}
 EOF
 
-NO_PULL=1 SEED="${SEED:-0}" bash "$APP_DIR/scripts/update.sh"
+# Cài lần đầu nạp dữ liệu ban đầu: danh mục, nguyên liệu, công thức sản phẩm, hạt, bài viết.
+# Database đã có nguyên liệu hoặc sản phẩm thì bỏ qua, nên chạy lại script trên server cũ không ghi đè dữ liệu thật
+NO_PULL=1 SEED="${SEED:-1}" bash "$APP_DIR/scripts/update.sh"
 pm2 startup systemd -u root --hp /root >/dev/null
 
 ROBOTS_HEADER=""

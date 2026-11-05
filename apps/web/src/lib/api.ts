@@ -56,6 +56,10 @@ export type PostSummary = {
 
 export type Post = PostSummary & {
   content: string;
+  coverAlt: string | null;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImageUrl: string | null;
   metaTitle: string | null;
   metaDescription: string | null;
   products: Product[];
@@ -243,12 +247,6 @@ export type BraceletRules = {
   leadTime: string;
   cords: { id: string; name: string }[];
   fits: { id: string; name: string; easeCm: number }[];
-  extras: {
-    engraving: { name: string; priceVnd: number; maxLength: number };
-    giftBox: { name: string; priceVnd: number };
-    card: { name: string; priceVnd: number; maxLength: number };
-    giftWrap: { name: string; priceVnd: number };
-  };
 };
 
 export async function getBracelet() {

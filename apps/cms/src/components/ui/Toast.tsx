@@ -50,7 +50,7 @@ export function Toaster() {
             type="button"
             onClick={() => dismiss(toast.id)}
             aria-label="Đóng thông báo"
-            className="-m-2 inline-flex size-11 flex-none items-center justify-center rounded-full text-ink-3 hover:text-ink"
+            className="-m-2 inline-flex size-11 flex-none items-center justify-center rounded-sm text-ink-3 hover:text-ink"
           >
             <CloseIcon size={18} />
           </button>

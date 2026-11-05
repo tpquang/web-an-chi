@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import type { Request, RequestHandler } from "express";
 import { env } from "../env.js";
 import { HttpError } from "../middleware/errors.js";
+import { effectivePermissions, type Permissions } from "./permissions.js";
 import { prisma } from "./prisma.js";
 
 const TOKEN_TTL_SECONDS = 60 * 60 * 12;
@@ -44,15 +45,15 @@ function verifyToken(token: string, kind: TokenKind): { sub: string } | null {
   }
 }
 
-export type StaffContext = { id: string; email: string; name: string; role: "OWNER" | "SALES" };
+export type StaffContext = { id: string; email: string; name: string; role: "OWNER" | "SALES"; permissions: Permissions };
 
 // Token quản trị mang id nhân viên. Nhân viên bị khoá thì token cũ hết hiệu lực ngay
 export const requireAdmin: RequestHandler = async (req, res, next) => {
   const header = req.get("authorization") ?? "";
   const token = header.startsWith("Bearer ") ? verifyToken(header.slice(7), "admin") : null;
-  const staff = token ? await prisma.staffUser.findUnique({ where: { id: token.sub }, select: { id: true, email: true, name: true, role: true, active: true } }) : null;
+  const staff = token ? await prisma.staffUser.findUnique({ where: { id: token.sub }, select: { id: true, email: true, name: true, role: true, active: true, permissions: true } }) : null;
   if (!staff?.active) throw new HttpError(401, "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", "UNAUTHORIZED");
-  res.locals.staff = staff satisfies StaffContext;
+  res.locals.staff = { id: staff.id, email: staff.email, name: staff.name, role: staff.role, permissions: effectivePermissions(staff) } satisfies StaffContext;
   next();
 };
 
