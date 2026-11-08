@@ -31,7 +31,6 @@ adminHomeRouter.post("/site-images", express.raw({ type: ["image/webp", "image/p
   if (!Buffer.isBuffer(req.body) || !req.body.length) throw new HttpError(400, "Chưa nhận được ảnh. Ảnh cần là WebP hoặc PNG.", "BAD_IMAGE");
   const info = imageInfo(req.body);
   if (!info) throw new HttpError(400, "File không phải ảnh WebP hoặc PNG hợp lệ.", "BAD_IMAGE");
-  if (info.width < HOME_IMAGE.minWidth) throw new HttpError(400, `Ảnh cần rộng ít nhất ${HOME_IMAGE.minWidth} px để rõ nét trên màn lớn.`, "BAD_IMAGE_SIZE");
   const saved = await prisma.siteImage.create({
     data: { image: new Uint8Array(req.body), mime: info.mime, width: info.width, height: info.height },
     select: { id: true, width: true, height: true },

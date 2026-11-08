@@ -55,7 +55,7 @@ export default async function HomePage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <PageFrame>
-        <HomeBanner banner={home.banner} store={store} />
+        <HomeBanner banner={home.banner} />
 
         {featured.data.length > 0 && (
           <Section eyebrow="Sản phẩm nổi bật" title="Gợi ý từ An Chi" id="noi-bat" action={seeAll(productsHref, "Xem tất cả sản phẩm")}>

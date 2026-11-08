@@ -234,7 +234,7 @@ export type Bead = {
   finish: string;
   note: string | null;
   // Ảnh vân chất liệu tải ở CMS, null thì hạt dùng màu trơn
-  texture: { id: string; version: number; roughness: number } | null;
+  texture: { id: string; version: number; roughness: number; brightness: number; thumb: boolean } | null;
 };
 
 

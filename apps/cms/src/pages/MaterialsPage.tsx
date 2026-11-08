@@ -168,7 +168,7 @@ export function MaterialsPage() {
               <Input value={v.name} onChange={(e) => set("name", e.target.value)} placeholder={v.kind === "BEAD" ? "VD: Hạt trầm tốc 8mm" : v.kind === "CHARM" ? "VD: Hoa sen bạc 925" : "VD: Nụ trầm thô"} disabled={submitting} />
             </Field>
             {v.kind === "BEAD" && (
-              <Field label="Loại trầm" hint="Hạt cùng loại trầm dùng chung một ảnh vân. Tải ảnh vân ở nút Ảnh vân trong danh sách sau khi lưu." error={errors.beadMaterial}>
+              <Field label="Loại trầm" hint="Hạt cùng loại trầm dùng chung một ảnh vân, cỡ nào cũng vậy." error={errors.beadMaterial}>
                 <Select
                   value={v.beadMaterial}
                   onChange={(x) => set("beadMaterial", x)}
@@ -179,6 +179,18 @@ export function MaterialsPage() {
                 />
               </Field>
             )}
+            {v.kind === "BEAD" && v.beadMaterial && (() => {
+              // Ảnh vân dùng chung theo loại trầm: loại đã có ảnh thì hạt mới tự dùng ảnh đó, không cần tải lại
+              const shared = textureRows.find((t) => t.material === v.beadMaterial)?.texture;
+              return shared ? (
+                <p className="flex items-center gap-2 rounded-lg bg-ok-soft px-3 py-2 text-sm" role="status">
+                  <img src={textureUrl(shared)} alt="" width={28} height={28} className="size-7 rounded-full object-cover" />
+                  Loại {v.beadMaterial} đã có ảnh vân, hạt này dùng chung luôn, không cần tải lại.
+                </p>
+              ) : (
+                <p className="rounded-lg bg-warn-soft px-3 py-2 text-sm" role="status">Loại {v.beadMaterial} chưa có ảnh vân. Sau khi lưu, bấm Tải ảnh vân trong danh sách.</p>
+              );
+            })()}
             {v.kind === "GENERAL" && (
               <Field label="Nhóm hàng" hint="Để chia nhóm khi nhập hàng.">
                 <Select value={v.group} onChange={(x) => set("group", x as MaterialGroup)} options={(Object.keys(materialGroup) as MaterialGroup[]).filter((g) => g !== "BEAD").map((g) => ({ value: g, label: materialGroup[g].label }))} disabled={submitting} />

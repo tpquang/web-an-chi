@@ -4,7 +4,7 @@ import { prisma } from "./prisma.js";
 // Cấu hình trang chủ lưu ở Setting "home": banner và slide giới thiệu. Ảnh lưu ở SiteImage, ở đây chỉ giữ id.
 
 export const FEATURED_LIMIT = { products: 4, posts: 3 } as const;
-export const HOME_IMAGE = { maxBytes: 3_000_000, minWidth: 1200, maxSlides: 6 } as const;
+export const HOME_IMAGE = { maxBytes: 3_000_000, maxSlides: 6 } as const;
 
 const text = (max: number) => z.string().trim().max(max);
 // Link trong trang bắt đầu bằng "/", link ngoài phải là https

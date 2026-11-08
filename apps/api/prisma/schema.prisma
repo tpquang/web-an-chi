@@ -564,14 +564,19 @@ model Bead {
 // Ảnh vân vật liệu cho hạt 3D, dùng chung cho mọi hạt cùng chất liệu (trùng Bead.material).
 // Ảnh vuông 1024px đã cắt và nén ở CMS, nhỏ nên lưu thẳng trong database cho khỏi lo chỗ chứa file.
 model BeadTexture {
-  id        String   @id @default(cuid())
-  material  String   @unique
-  image     Bytes
-  mime      String
+  id         String   @id @default(cuid())
+  material   String   @unique
+  image      Bytes
+  mime       String
   // 0 là bóng như gương, 1 là mờ hẳn
-  roughness Float    @default(0.5)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  roughness  Float    @default(0.5)
+  // Hệ số sáng tối nhân vào màu ảnh khi dựng 3D: 1 giữ nguyên, nhỏ hơn là tối đi, lớn hơn là sáng lên
+  brightness Float    @default(1)
+  // Ảnh chụp chính hạt 3D (nền trong, 256px) lúc lưu ảnh vân ở CMS, hiện ở danh sách chọn loại trầm
+  thumb      Bytes?
+  thumbMime  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 // Ảnh banner và slide trang chủ, tải lên từ CMS. Đã nén ở CMS, lưu thẳng trong database như ảnh vân hạt.

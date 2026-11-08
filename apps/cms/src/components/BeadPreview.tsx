@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type MutableRefObject } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
@@ -9,8 +9,14 @@ type Props = {
   version: number;
   sizeMm: number;
   roughness: number;
+  // Hệ số nhân vào màu ảnh, giống web: 1 giữ nguyên
+  brightness?: number;
   finish: string;
+  // Gắn hàm chụp chính hạt đang dựng thành ảnh vuông nền trong, dùng làm ảnh hạt ở trang thiết kế vòng
+  captureRef?: MutableRefObject<(() => Promise<Blob | null>) | null>;
 };
+
+export const THUMB_SIDE = 256;
 
 const MM = 0.1;
 
@@ -25,9 +31,9 @@ export function wrapTexture<T extends THREE.Texture>(texture: T): T {
   return texture;
 }
 
-export function BeadPreview({ source, version, sizeMm, roughness, finish }: Props) {
+export function BeadPreview({ source, version, sizeMm, roughness, brightness = 1, finish, captureRef }: Props) {
   const host = useRef<HTMLDivElement>(null);
-  const api = useRef<{ texture: THREE.CanvasTexture | null; material: THREE.MeshPhysicalMaterial; beads: THREE.Mesh[]; group: THREE.Group; camera: THREE.PerspectiveCamera; controls: OrbitControls } | null>(null);
+  const api = useRef<{ texture: THREE.CanvasTexture | null; material: THREE.MeshPhysicalMaterial; beads: THREE.Mesh[]; group: THREE.Group; camera: THREE.PerspectiveCamera; controls: OrbitControls; scene: THREE.Scene } | null>(null);
 
   useEffect(() => {
     const el = host.current!;
@@ -55,7 +61,7 @@ export function BeadPreview({ source, version, sizeMm, roughness, finish }: Prop
     const group = new THREE.Group();
     scene.add(group);
     const material = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.5 });
-    api.current = { texture: null, material, beads: [], group, camera, controls };
+    api.current = { texture: null, material, beads: [], group, camera, controls, scene };
 
     const resize = () => {
       const { width, height } = el.getBoundingClientRect();
@@ -70,7 +76,35 @@ export function BeadPreview({ source, version, sizeMm, roughness, finish }: Prop
       controls.update();
       renderer.render(scene, camera);
     });
+    // Chụp hạt bằng renderer riêng, góc nhìn cố định và nền trong suốt, để mọi loại trầm có ảnh cùng khung
+    // dù người dùng đang xoay hạt hay chọn cỡ nào. Hạt chiếm khoảng 80% khung, lỗ xâu nằm ngang như trên vòng
+    if (captureRef) {
+      captureRef.current = async () => {
+        const s = api.current;
+        const bead = s?.beads[0];
+        if (!s || !bead) return null;
+        const shot = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+        shot.setPixelRatio(1);
+        shot.setSize(THUMB_SIDE, THUMB_SIDE, false);
+        shot.toneMapping = renderer.toneMapping;
+        shot.setClearColor(0x000000, 0);
+        const r = (bead.geometry as THREE.SphereGeometry).parameters.radius;
+        const cam = new THREE.PerspectiveCamera(30, 1, 0.01, 50);
+        const dist = r / Math.sin(THREE.MathUtils.degToRad(15)) / 0.8;
+        cam.position.set(0, dist * 0.32, dist * 0.95);
+        cam.lookAt(0, 0, 0);
+        const rotation = s.group.rotation.clone();
+        s.group.rotation.set(0, 0, 0);
+        shot.render(s.scene, cam);
+        s.group.rotation.copy(rotation);
+        const blob = await new Promise<Blob | null>((resolve) => shot.domElement.toBlob(resolve, "image/webp", 0.9));
+        const out = blob && blob.type === "image/webp" ? blob : await new Promise<Blob | null>((resolve) => shot.domElement.toBlob(resolve, "image/png"));
+        shot.dispose();
+        return out;
+      };
+    }
     return () => {
+      if (captureRef) captureRef.current = null;
       observer.disconnect();
       renderer.setAnimationLoop(null);
       for (const bead of api.current?.beads ?? []) bead.geometry.dispose();
@@ -124,7 +158,8 @@ export function BeadPreview({ source, version, sizeMm, roughness, finish }: Prop
     s.material.roughness = roughness;
     s.material.metalness = finish === "metal" ? 1 : 0;
     s.material.clearcoat = finish === "stone" ? 1 : 0;
-  }, [roughness, finish]);
+    s.material.color.setScalar(brightness);
+  }, [roughness, brightness, finish]);
 
   return <div ref={host} className="size-full touch-none [&>canvas]:size-full" />;
 }

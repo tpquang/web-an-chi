@@ -61,12 +61,14 @@ export async function activeBeads(slugs?: string[]) {
 
 type Bead = Awaited<ReturnType<typeof activeBeads>>[number];
 
-export type TextureRef = { id: string; version: number; roughness: number };
+export type TextureRef = { id: string; version: number; roughness: number; brightness: number; thumb: boolean };
 
 // Ảnh vân theo chất liệu, không kèm dữ liệu ảnh. version đổi mỗi lần thay ảnh để web tải lại
 export async function beadTextures() {
-  const rows = await prisma.beadTexture.findMany({ select: { id: true, material: true, roughness: true, updatedAt: true } });
-  return new Map<string, TextureRef>(rows.map((row) => [row.material, { id: row.id, version: row.updatedAt.getTime(), roughness: row.roughness }]));
+  const rows = await prisma.beadTexture.findMany({ select: { id: true, material: true, roughness: true, brightness: true, thumbMime: true, updatedAt: true } });
+  return new Map<string, TextureRef>(
+    rows.map((row) => [row.material, { id: row.id, version: row.updatedAt.getTime(), roughness: row.roughness, brightness: row.brightness, thumb: Boolean(row.thumbMime) }]),
+  );
 }
 
 export function countBeads(design: BraceletDesign) {

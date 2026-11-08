@@ -11,7 +11,8 @@ export type BeadTab = (typeof beadTabs)[number]["id"];
 
 export function beadTab(bead: Bead): BeadTab {
   if (bead.kind === "CHARM") return "charm";
-  return bead.material.startsWith("Trầm") ? "tram" : "da";
+  // Phân theo bề mặt hạt: đá bóng là "stone", còn lại là gỗ trầm. Không dò theo tên chất liệu vì tên do shop tự đặt
+  return bead.finish === "stone" ? "da" : "tram";
 }
 
 export const cm = (mm: number) => (mm / 10).toLocaleString("vi-VN", { maximumFractionDigits: 1 });

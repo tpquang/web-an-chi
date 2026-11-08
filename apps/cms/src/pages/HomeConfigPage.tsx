@@ -87,7 +87,7 @@ export function HomeConfigPage() {
                 <Field label="Lời dẫn" optional><Textarea value={banner.text} maxLength={240} onChange={(e) => setBanner("text", e.target.value)} disabled={submitting} /></Field>
               </div>
               <div className="flex flex-col gap-4">
-                <ImageField label="Ảnh banner" hint="Ảnh dọc gần vuông (5:6), rộng từ 1200 px. Trên điện thoại ảnh được cắt ngang 4:3." ratio="aspect-[5/6] max-h-80" imageId={banner.imageId} disabled={submitting} onChange={(id) => setBanner("imageId", id)} />
+                <ImageField label="Ảnh banner" hint="Ảnh dọc gần vuông (5:6), nên rộng từ 1200 px cho rõ nét. Trên điện thoại ảnh được cắt ngang 4:3." ratio="aspect-[5/6] max-h-80" imageId={banner.imageId} disabled={submitting} onChange={(id) => setBanner("imageId", id)} />
                 {banner.imageId && <Field label="Mô tả ảnh" hint="Ví dụ: Vòng tay trầm hương 12mm đặt trên khay gỗ." optional><Input value={banner.imageAlt} maxLength={160} onChange={(e) => setBanner("imageAlt", e.target.value)} disabled={submitting} /></Field>}
               </div>
             </div>

@@ -100,16 +100,17 @@ function grain(color: string) {
 // hai cực của hạt nằm ở lỗ xâu dây, ảnh lặp gương hai lần quanh hạt nên nối liền mà không cần chỉnh ảnh
 const photoCache = new Map<string, THREE.Texture>();
 const loader = typeof window === "undefined" ? null : new THREE.TextureLoader();
-function photo(texture: NonNullable<Bead["texture"]>, onLoad: () => void) {
+// onLoad nhận ảnh qua tham số: ảnh đã có trong cache thì onLoad chạy ngay, trước cả khi photo() trả về
+function photo(texture: NonNullable<Bead["texture"]>, onLoad: (tex: THREE.Texture) => void) {
   const url = beadTextureUrl(texture);
   const cached = photoCache.get(url);
   if (cached) {
-    if (cached.image) onLoad();
+    if (cached.image) onLoad(cached);
     else cached.userData.waiting.push(onLoad);
     return cached;
   }
   const tex = loader!.load(url, () => {
-    for (const fn of tex.userData.waiting as (() => void)[]) fn();
+    for (const fn of tex.userData.waiting as ((t: THREE.Texture) => void)[]) fn(tex);
     tex.userData.waiting = [];
   });
   tex.userData.waiting = [onLoad];
@@ -130,9 +131,10 @@ function material(bead: Bead): THREE.MeshStandardMaterial {
     : new THREE.MeshStandardMaterial({ map: grain(bead.color), roughness: roughness ?? 0.5, metalness: 0 });
   // Có ảnh vân thì hiện vân giả trước, ảnh tải xong mới thay để hạt không trắng trơn lúc chờ
   if (bead.texture) {
-    const tex = photo(bead.texture, () => {
+    photo(bead.texture, (tex) => {
       mat.map = tex;
-      mat.color.set(0xffffff);
+      // Ảnh nhân với màu vật liệu: hệ số sáng tối chỉnh ở CMS, 1 là giữ nguyên ảnh
+      mat.color.setScalar(bead.texture?.brightness ?? 1);
       mat.needsUpdate = true;
     });
   }

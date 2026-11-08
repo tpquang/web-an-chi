@@ -5,7 +5,7 @@ import { DataTable, PageHeader, td, th } from "../components/ui/Page";
 import { EmptyState, ErrorState, TableSkeleton, Tag } from "../components/ui/States";
 import { showToast } from "../components/ui/Toast";
 import { api, errorMessage, publicUrl } from "../lib/api";
-import { ACCEPT, centerCrop, checkTexture, clampCrop, exportTexture, MAX_INPUT_MB, renderCrop, TEXTURE_SIDE, type CheckResult, type Crop } from "../lib/bead-texture";
+import { ACCEPT, centerCrop, checkTexture, clampCrop, exportTexture, MAX_INPUT_MB, MIN_CROP, renderCrop, TEXTURE_SIDE, type CheckResult, type Crop } from "../lib/bead-texture";
 import { useLoad } from "../lib/use-load";
 
 // three.js chỉ nạp khi mở hộp tải ảnh
@@ -17,7 +17,7 @@ export type TextureRow = {
   beads: number;
   minMm: number;
   maxMm: number;
-  texture: { id: string; version: number; roughness: number; updatedAt: string } | null;
+  texture: { id: string; version: number; roughness: number; brightness: number; thumb: boolean; updatedAt: string } | null;
 };
 
 export const textureUrl = (t: NonNullable<TextureRow["texture"]>) => publicUrl(`/bead-textures/${t.id}?v=${t.version}`);
@@ -90,9 +90,12 @@ export function UploadModal({ row, onClose, onSaved }: { row: TextureRow; onClos
   const [checks, setChecks] = useState<CheckResult[]>([]);
   const [version, setVersion] = useState(0);
   const [roughness, setRoughness] = useState(row.texture?.roughness ?? (row.finish === "stone" ? 0.15 : 0.5));
+  const [brightness, setBrightness] = useState(row.texture?.brightness ?? 1);
+  const [outSize, setOutSize] = useState<number | null>(null);
   const [sizeMm, setSizeMm] = useState(() => SIZES.find((s) => s >= row.minMm) ?? 8);
   const [saving, setSaving] = useState(false);
   const output = useRef<HTMLCanvasElement | null>(null);
+  const capture = useRef<(() => Promise<Blob | null>) | null>(null);
   if (!output.current && typeof document !== "undefined") output.current = document.createElement("canvas");
 
   // Ảnh đang dùng hiện sẵn trên hạt để so với ảnh mới
@@ -111,6 +114,13 @@ export function UploadModal({ row, onClose, onSaved }: { row: TextureRow; onClos
       live = false;
     };
   }, [row.texture]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Ước dung lượng sau nén để thấy ảnh lưu nhẹ bao nhiêu
+  useEffect(() => {
+    if (!image || !version) return;
+    const timer = setTimeout(() => exportTexture(output.current!).then((b) => setOutSize(b.size)).catch(() => setOutSize(null)), 400);
+    return () => clearTimeout(timer);
+  }, [image, version]);
 
   // Vẽ lại ảnh cắt và kiểm chất lượng mỗi khi khung cắt đổi, gộp theo khung hình
   useEffect(() => {
@@ -134,9 +144,9 @@ export function UploadModal({ row, onClose, onSaved }: { row: TextureRow; onClos
     try {
       const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
       const short = Math.min(bitmap.width, bitmap.height);
-      if (short < TEXTURE_SIDE) {
+      if (short < MIN_CROP) {
         bitmap.close();
-        return setFileError(`Ảnh chỉ ${bitmap.width}×${bitmap.height} px. Cạnh ngắn cần ít nhất ${TEXTURE_SIDE} px, bạn chụp lại bằng camera điện thoại ở chất lượng cao nhất.`);
+        return setFileError(`Ảnh chỉ ${bitmap.width}×${bitmap.height} px. Cạnh ngắn cần ít nhất ${MIN_CROP} px (tốt nhất từ ${TEXTURE_SIDE} px), bạn chụp lại bằng camera điện thoại ở chất lượng cao nhất.`);
       }
       image?.bitmap.close();
       setImage({ bitmap, name: file.name });
@@ -154,7 +164,8 @@ export function UploadModal({ row, onClose, onSaved }: { row: TextureRow; onClos
     setSaving(true);
     try {
       const blob = await exportTexture(output.current!);
-      await api.upload(`/bead-textures/${encodeURIComponent(row.material)}?roughness=${roughness}`, blob);
+      await api.upload(`/bead-textures/${encodeURIComponent(row.material)}?roughness=${roughness}&brightness=${brightness}`, blob);
+      await saveThumb();
       showToast(`Đã lưu ảnh vân ${row.material}.`);
       onSaved();
     } catch (err) {
@@ -164,11 +175,23 @@ export function UploadModal({ row, onClose, onSaved }: { row: TextureRow; onClos
     }
   }
 
+  // Chụp chính hạt đang xem trước (đúng ảnh vân, độ bóng, độ sáng vừa lưu) làm ảnh hạt ở trang thiết kế vòng.
+  // Lỗi chụp không chặn việc lưu ảnh vân; web hiện chấm màu cho tới lần lưu sau
+  async function saveThumb() {
+    try {
+      const thumb = await capture.current?.();
+      if (thumb) await api.upload(`/bead-textures/${encodeURIComponent(row.material)}/thumb`, thumb);
+    } catch (err) {
+      showToast("Chưa lưu được ảnh hạt", { type: "error", desc: errorMessage(err) });
+    }
+  }
+
   async function saveRoughness() {
     setSaving(true);
     try {
-      await api.patch(`/bead-textures/${encodeURIComponent(row.material)}`, { roughness });
-      showToast("Đã lưu độ bóng.");
+      await api.patch(`/bead-textures/${encodeURIComponent(row.material)}`, { roughness, brightness });
+      await saveThumb();
+      showToast("Đã lưu độ bóng và độ sáng.");
       onSaved();
     } catch (err) {
       showToast("Chưa lưu được", { type: "error", desc: errorMessage(err) });
@@ -188,7 +211,7 @@ export function UploadModal({ row, onClose, onSaved }: { row: TextureRow; onClos
         <>
           <Button variant="secondary" onClick={onClose} disabled={saving}>Huỷ</Button>
           {!image && row.texture ? (
-            <Button onClick={saveRoughness} loading={saving}>Lưu độ bóng</Button>
+            <Button onClick={saveRoughness} loading={saving}>Lưu chỉnh sửa</Button>
           ) : (
             <Button onClick={save} loading={saving} disabled={!ready}>Lưu ảnh vân</Button>
           )}
@@ -209,13 +232,13 @@ export function UploadModal({ row, onClose, onSaved }: { row: TextureRow; onClos
                 <span className="font-medium">Phóng to khung cắt</span>
                 <input
                   type="range"
-                  min={TEXTURE_SIDE}
+                  min={MIN_CROP}
                   max={Math.min(image.bitmap.width, image.bitmap.height)}
                   step={1}
-                  // Kéo sang phải là khung nhỏ lại, tức phóng to vân
-                  value={Math.min(image.bitmap.width, image.bitmap.height) + TEXTURE_SIDE - crop!.side}
+                  // Kéo sang phải là khung nhỏ lại, tức phóng to vân. Ảnh vuông sẵn vẫn phóng được tới gấp đôi
+                  value={Math.min(image.bitmap.width, image.bitmap.height) + MIN_CROP - crop!.side}
                   onChange={(e) => {
-                    const side = Math.min(image.bitmap.width, image.bitmap.height) + TEXTURE_SIDE - Number(e.target.value);
+                    const side = Math.min(image.bitmap.width, image.bitmap.height) + MIN_CROP - Number(e.target.value);
                     const cx = crop!.x + crop!.side / 2;
                     const cy = crop!.y + crop!.side / 2;
                     setCrop(clampCrop({ side, x: cx - side / 2, y: cy - side / 2 }, image.bitmap.width, image.bitmap.height));
@@ -225,7 +248,10 @@ export function UploadModal({ row, onClose, onSaved }: { row: TextureRow; onClos
                 <span className="text-ink-3">Vân to hay nhỏ trên hạt tuỳ khung cắt. Khung nhỏ thì vân to. So với hạt thật để chọn cho đúng.</span>
               </label>
               <div className="flex flex-wrap items-center gap-3 text-sm">
-                <span className="min-w-0 flex-1 truncate text-ink-2">{image.name}</span>
+                <span className="min-w-0 flex-1 truncate text-ink-2">
+                  {image.name} · {image.bitmap.width}×{image.bitmap.height}
+                  {outSize !== null && <span className="text-ink-3"> → lưu {TEXTURE_SIDE}×{TEXTURE_SIDE} WebP, khoảng {Math.round(outSize / 1000)} KB</span>}
+                </span>
                 <label className="cursor-pointer text-wood underline-offset-4 hover:underline">
                   Chọn ảnh khác
                   <input type="file" accept={ACCEPT} className="sr-only" onChange={(e) => pick(e.target.files?.[0])} />
@@ -240,7 +266,7 @@ export function UploadModal({ row, onClose, onSaved }: { row: TextureRow; onClos
         <div className="flex flex-col gap-4">
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-line bg-paper-2">
             <Suspense fallback={<p className="flex size-full items-center justify-center text-sm text-ink-3">Đang dựng hạt 3D…</p>}>
-              <BeadPreview source={version ? output.current : null} version={version} sizeMm={sizeMm} roughness={roughness} finish={row.finish} />
+              <BeadPreview source={version ? output.current : null} version={version} sizeMm={sizeMm} roughness={roughness} brightness={brightness} finish={row.finish} captureRef={capture} />
             </Suspense>
             <p className="pointer-events-none absolute top-2 left-2 rounded-full bg-surface/90 px-3 py-1 text-xs shadow-e1">
               {image ? "Xem trước ảnh mới" : row.texture ? "Ảnh đang dùng" : "Chưa có ảnh"} · kéo để xoay
@@ -265,6 +291,16 @@ export function UploadModal({ row, onClose, onSaved }: { row: TextureRow; onClos
             </span>
             <input type="range" min={0.05} max={0.95} step={0.05} value={1 - roughness} onChange={(e) => setRoughness(Math.round((1 - Number(e.target.value)) * 100) / 100)} className="accent-(--wood)" />
             <span className="text-ink-3">Hạt trầm đánh bóng thì kéo sang phải, hạt để mộc thì kéo sang trái.</span>
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="flex justify-between font-medium">
+              Màu sáng tối <span className="font-normal text-ink-3 tabular-nums">{brightness === 1 ? "Giữ nguyên ảnh" : `${brightness > 1 ? "Sáng" : "Tối"} hơn ${Math.round(Math.abs(brightness - 1) * 100)}%`}</span>
+            </span>
+            <input type="range" min={0.5} max={1.5} step={0.05} value={brightness} onChange={(e) => setBrightness(Math.round(Number(e.target.value) * 100) / 100)} className="accent-(--wood)" />
+            <span className="flex flex-wrap justify-between gap-2 text-ink-3">
+              <span>Chỉnh cho hạt 3D giống màu hạt thật. Không cần tải lại ảnh.</span>
+              {brightness !== 1 && <button type="button" onClick={() => setBrightness(1)} className="text-wood underline-offset-4 hover:underline">Về mặc định</button>}
+            </span>
           </label>
         </div>
       </div>

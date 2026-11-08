@@ -1,5 +1,5 @@
 {
-  "_note": "Dữ liệu giả cho môi trường dev. Giá mỗi hạt theo bảng giá của shop. Sản phẩm kinh doanh chưa có giá (priceVnd 0) nên chưa hiện trên web cho tới khi định giá. Vòng xâu hạt không cần đóng gói: giá theo bảng giá hạt, số vòng còn bán tính từ số hạt trong kho, charm có giá sau lần nhập kho đầu (lãi 50% trên giá vốn). Tồn kho bắt đầu từ 0: nhập qua đợt nhập, đóng gói ở CMS mới có thành phẩm.",
+  "_note": "Dữ liệu giả cho môi trường dev. Giá mỗi hạt theo bảng giá của shop. Sản phẩm kinh doanh chưa có giá (priceVnd 0) nên chưa hiện trên web cho tới khi định giá. Vòng xâu hạt không cần đóng gói: giá theo bảng giá hạt, số vòng còn bán tính từ số hạt trong kho, charm có giá sau lần nhập kho đầu (lãi 50% trên giá vốn). Hàng vào kho chỉ qua đợt nhập: seed có Đợt nhập đầu 50 hạt mỗi loại hạt trầm, đã nhập kho; hàng khác tồn kho bắt đầu từ 0: nhập qua đợt nhập, đóng gói ở CMS mới có thành phẩm.",
   "store": {
     "name": "An Chi Trầm Hương",
     "phone": "0900 000 000",
@@ -133,7 +133,7 @@
       "name": "Hạt trầm 6mm loại 1",
       "group": "BEAD",
       "kind": "BEAD",
-      "beadMaterial": "Loại 1",
+      "beadMaterial": "Trầm loại 1",
       "unit": "viên",
       "note": "Giá bán 10.000đ mỗi hạt."
     },
@@ -141,7 +141,7 @@
       "name": "Hạt trầm 8mm loại 1",
       "group": "BEAD",
       "kind": "BEAD",
-      "beadMaterial": "Loại 1",
+      "beadMaterial": "Trầm loại 1",
       "unit": "viên",
       "note": "Giá bán 15.000đ mỗi hạt."
     },
@@ -149,7 +149,7 @@
       "name": "Hạt trầm 8mm loại 2",
       "group": "BEAD",
       "kind": "BEAD",
-      "beadMaterial": "Loại 2",
+      "beadMaterial": "Trầm loại 2",
       "unit": "viên",
       "note": "Giá bán 23.000đ mỗi hạt."
     },
@@ -157,7 +157,7 @@
       "name": "Hạt trầm 8mm loại 3",
       "group": "BEAD",
       "kind": "BEAD",
-      "beadMaterial": "Loại 3",
+      "beadMaterial": "Trầm loại 3",
       "unit": "viên",
       "note": "Giá bán 30.000đ mỗi hạt."
     },
@@ -165,7 +165,7 @@
       "name": "Hạt trầm 8mm loại 4",
       "group": "BEAD",
       "kind": "BEAD",
-      "beadMaterial": "Loại 4",
+      "beadMaterial": "Trầm loại 4",
       "unit": "viên",
       "note": "Giá bán 40.000đ mỗi hạt."
     },
@@ -173,7 +173,7 @@
       "name": "Hạt trầm 10mm loại 1",
       "group": "BEAD",
       "kind": "BEAD",
-      "beadMaterial": "Loại 1",
+      "beadMaterial": "Trầm loại 1",
       "unit": "viên",
       "note": "Giá bán 25.000đ mỗi hạt."
     },
@@ -181,7 +181,7 @@
       "name": "Hạt trầm 10mm loại 2",
       "group": "BEAD",
       "kind": "BEAD",
-      "beadMaterial": "Loại 2",
+      "beadMaterial": "Trầm loại 2",
       "unit": "viên",
       "note": "Giá bán 35.000đ mỗi hạt."
     },
@@ -189,7 +189,7 @@
       "name": "Hạt trầm 10mm loại 3",
       "group": "BEAD",
       "kind": "BEAD",
-      "beadMaterial": "Loại 3",
+      "beadMaterial": "Trầm loại 3",
       "unit": "viên",
       "note": "Giá bán 45.000đ mỗi hạt."
     },
@@ -197,7 +197,7 @@
       "name": "Hạt trầm 10mm loại 4",
       "group": "BEAD",
       "kind": "BEAD",
-      "beadMaterial": "Loại 4",
+      "beadMaterial": "Trầm loại 4",
       "unit": "viên",
       "note": "Giá bán 55.000đ mỗi hạt."
     },
@@ -491,6 +491,61 @@
       "type": "CUSTOM"
     }
   ],
+  "batches": [
+    {
+      "name": "Đợt nhập đầu: hạt trầm",
+      "orderedAt": "2026-11-06",
+      "receive": true,
+      "note": "Đợt nhập khởi tạo kho hạt, 50 hạt mỗi loại. Chưa có giá vốn thật nên tiền hàng để 0.",
+      "lines": [
+        {
+          "material": "Hạt trầm 6mm loại 1",
+          "quantity": 50,
+          "totalCostVnd": 0
+        },
+        {
+          "material": "Hạt trầm 8mm loại 1",
+          "quantity": 50,
+          "totalCostVnd": 0
+        },
+        {
+          "material": "Hạt trầm 8mm loại 2",
+          "quantity": 50,
+          "totalCostVnd": 0
+        },
+        {
+          "material": "Hạt trầm 8mm loại 3",
+          "quantity": 50,
+          "totalCostVnd": 0
+        },
+        {
+          "material": "Hạt trầm 8mm loại 4",
+          "quantity": 50,
+          "totalCostVnd": 0
+        },
+        {
+          "material": "Hạt trầm 10mm loại 1",
+          "quantity": 50,
+          "totalCostVnd": 0
+        },
+        {
+          "material": "Hạt trầm 10mm loại 2",
+          "quantity": 50,
+          "totalCostVnd": 0
+        },
+        {
+          "material": "Hạt trầm 10mm loại 3",
+          "quantity": 50,
+          "totalCostVnd": 0
+        },
+        {
+          "material": "Hạt trầm 10mm loại 4",
+          "quantity": 50,
+          "totalCostVnd": 0
+        }
+      ]
+    }
+  ],
   "postCategories": [
     {
       "name": "Kiến thức trầm hương",
@@ -591,7 +646,7 @@
       "name": "Hạt trầm 6mm loại 1",
       "slug": "hat-tram-6mm-loai-1",
       "kind": "BEAD",
-      "material": "Loại 1",
+      "material": "Trầm loại 1",
       "sizeMm": 6,
       "priceVnd": 10000,
       "color": "#6B4428",
@@ -603,7 +658,7 @@
       "name": "Hạt trầm 8mm loại 1",
       "slug": "hat-tram-8mm-loai-1",
       "kind": "BEAD",
-      "material": "Loại 1",
+      "material": "Trầm loại 1",
       "sizeMm": 8,
       "priceVnd": 15000,
       "color": "#6B4428",
@@ -615,7 +670,7 @@
       "name": "Hạt trầm 8mm loại 2",
       "slug": "hat-tram-8mm-loai-2",
       "kind": "BEAD",
-      "material": "Loại 2",
+      "material": "Trầm loại 2",
       "sizeMm": 8,
       "priceVnd": 23000,
       "color": "#5A3820",
@@ -627,7 +682,7 @@
       "name": "Hạt trầm 8mm loại 3",
       "slug": "hat-tram-8mm-loai-3",
       "kind": "BEAD",
-      "material": "Loại 3",
+      "material": "Trầm loại 3",
       "sizeMm": 8,
       "priceVnd": 30000,
       "color": "#4A2E1A",
@@ -639,7 +694,7 @@
       "name": "Hạt trầm 8mm loại 4",
       "slug": "hat-tram-8mm-loai-4",
       "kind": "BEAD",
-      "material": "Loại 4",
+      "material": "Trầm loại 4",
       "sizeMm": 8,
       "priceVnd": 40000,
       "color": "#3A2414",
@@ -651,7 +706,7 @@
       "name": "Hạt trầm 10mm loại 1",
       "slug": "hat-tram-10mm-loai-1",
       "kind": "BEAD",
-      "material": "Loại 1",
+      "material": "Trầm loại 1",
       "sizeMm": 10,
       "priceVnd": 25000,
       "color": "#6B4428",
@@ -663,7 +718,7 @@
       "name": "Hạt trầm 10mm loại 2",
       "slug": "hat-tram-10mm-loai-2",
       "kind": "BEAD",
-      "material": "Loại 2",
+      "material": "Trầm loại 2",
       "sizeMm": 10,
       "priceVnd": 35000,
       "color": "#5A3820",
@@ -675,7 +730,7 @@
       "name": "Hạt trầm 10mm loại 3",
       "slug": "hat-tram-10mm-loai-3",
       "kind": "BEAD",
-      "material": "Loại 3",
+      "material": "Trầm loại 3",
       "sizeMm": 10,
       "priceVnd": 45000,
       "color": "#4A2E1A",
@@ -687,7 +742,7 @@
       "name": "Hạt trầm 10mm loại 4",
       "slug": "hat-tram-10mm-loai-4",
       "kind": "BEAD",
-      "material": "Loại 4",
+      "material": "Trầm loại 4",
       "sizeMm": 10,
       "priceVnd": 55000,
       "color": "#3A2414",

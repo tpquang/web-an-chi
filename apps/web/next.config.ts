@@ -9,6 +9,8 @@ const imageHosts = (process.env.IMAGE_HOSTNAMES ?? "")
 const nextConfig: NextConfig = {
   // Mỗi lần build trên VPS có mã riêng (scripts/update.sh đặt). Tab đang mở bản cũ bấm sang trang khác
   // sẽ tải lại hẳn trang thay vì ghép JS mới với HTML cũ
+  // start.cmd lan đặt LAN_HOST để máy khác trong mạng tải được JS lúc chạy dev
+  allowedDevOrigins: process.env.LAN_HOST ? [process.env.LAN_HOST] : undefined,
   deploymentId: process.env.DEPLOYMENT_ID || undefined,
   images: {
     remotePatterns: imageHosts.map((hostname) => ({ protocol: "https", hostname })),

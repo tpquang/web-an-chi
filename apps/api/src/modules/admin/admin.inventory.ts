@@ -42,7 +42,7 @@ const modelInfo = { select: { fileName: true, size: true, updatedAt: true } } as
 adminInventoryRouter.get("/materials", async (_req, res) => {
   const [materials, textures] = await Promise.all([
     prisma.material.findMany({ orderBy: [{ group: "asc" }, { name: "asc" }], include: { _count: { select: { components: true } }, model: modelInfo } }),
-    prisma.beadTexture.findMany({ select: { id: true, material: true, roughness: true, updatedAt: true } }),
+    prisma.beadTexture.findMany({ select: { id: true, material: true, roughness: true, brightness: true, updatedAt: true } }),
   ]);
   const byMaterial = new Map(textures.map((t) => [t.material, { ...t, version: t.updatedAt.getTime() }]));
   const data = materials.map((m) => ({ ...m, texture: m.beadMaterial ? (byMaterial.get(m.beadMaterial) ?? null) : null }));

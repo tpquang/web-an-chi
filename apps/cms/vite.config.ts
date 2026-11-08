@@ -4,5 +4,6 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  server: { port: 3001, strictPort: true },
+  // start.cmd lan đặt LAN_HOST để máy khác trong mạng mở được CMS
+  server: { port: 3001, strictPort: true, host: process.env.LAN_HOST ? true : undefined },
 });

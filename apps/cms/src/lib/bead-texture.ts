@@ -1,6 +1,11 @@
 // Quy cách ảnh vân vật liệu cho hạt 3D. API kiểm lại cạnh ảnh và dung lượng.
 export const TEXTURE_SIDE = 1024;
+// Khung cắt nhỏ nhất: cho phóng vân to gấp đôi kể cả khi ảnh gốc vuông đúng 1024px.
+// Dưới 1024 thì ảnh được phóng lên nên báo nhắc, dưới mức này thì vân nhoè rõ nên không cho
+export const MIN_CROP = 512;
 export const MAX_INPUT_MB = 20;
+// Ảnh lưu nén WebP về khoảng này cho nhẹ trang thiết kế vòng
+export const TARGET_BYTES = 350_000;
 // iPhone tự đổi ảnh HEIC sang JPEG khi chọn file trên web
 export const ACCEPT = "image/jpeg,image/png,image/webp";
 
@@ -15,7 +20,7 @@ export function centerCrop(width: number, height: number): Crop {
 }
 
 export function clampCrop(crop: Crop, width: number, height: number): Crop {
-  const side = Math.min(Math.max(crop.side, TEXTURE_SIDE), width, height);
+  const side = Math.min(Math.max(crop.side, MIN_CROP), width, height);
   return { side, x: Math.min(Math.max(crop.x, 0), width - side), y: Math.min(Math.max(crop.y, 0), height - side) };
 }
 
@@ -65,7 +70,9 @@ export function checkTexture(canvas: HTMLCanvasElement, sourceShort: number): Ch
   results.push(
     sourceShort >= TEXTURE_SIDE
       ? { level: "ok", label: "Độ phân giải", detail: `Phần cắt rộng ${Math.round(sourceShort)} px, đủ ${TEXTURE_SIDE} px.` }
-      : { level: "error", label: "Độ phân giải", detail: `Phần cắt chỉ rộng ${Math.round(sourceShort)} px, cần ít nhất ${TEXTURE_SIDE} px. Thu nhỏ khung cắt ít lại hoặc chụp gần hơn.` },
+      : sourceShort >= MIN_CROP
+        ? { level: "warn", label: "Độ phân giải", detail: `Phần cắt rộng ${Math.round(sourceShort)} px, được phóng lên ${TEXTURE_SIDE} px nên vân hơi mềm. Xem hạt bên cạnh, vẫn rõ thì dùng được.` }
+        : { level: "error", label: "Độ phân giải", detail: `Phần cắt chỉ rộng ${Math.round(sourceShort)} px, vân sẽ nhoè. Phóng ít lại hoặc chụp gần hơn.` },
   );
   results.push(
     mean < 0.12 ? { level: "error", label: "Độ sáng", detail: "Ảnh quá tối, vân không rõ. Chụp ở chỗ sáng hơn." }
@@ -89,9 +96,13 @@ export function checkTexture(canvas: HTMLCanvasElement, sourceShort: number): Ch
   return results;
 }
 
-// Lưu WebP; trình duyệt không hỗ trợ thì lưu PNG
+// Lưu WebP vuông 1024px, giảm dần chất lượng tới khi dưới TARGET_BYTES cho nhẹ; trình duyệt không hỗ trợ WebP thì lưu PNG
 export async function exportTexture(canvas: HTMLCanvasElement): Promise<Blob> {
-  const webp = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.88));
+  let webp: Blob | null = null;
+  for (const quality of [0.86, 0.8, 0.72, 0.64]) {
+    webp = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", quality));
+    if (!webp || webp.type !== "image/webp" || webp.size <= TARGET_BYTES) break;
+  }
   if (webp && webp.type === "image/webp") return webp;
   const png = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
   if (!png) throw new Error("Trình duyệt không xuất được ảnh. Bạn thử Chrome hoặc Safari bản mới.");

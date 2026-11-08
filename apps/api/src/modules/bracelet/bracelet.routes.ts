@@ -11,6 +11,14 @@ braceletRouter.get("/bracelet", async (_req, res) => {
   res.json({ data: { rules: braceletRules, beads: beads.map((bead) => ({ ...bead, texture: textures.get(bead.material) ?? null })) } });
 });
 
+// Ảnh chụp hạt 3D cho danh sách chọn loại trầm
+braceletRouter.get("/bead-textures/:id/thumb", async (req, res) => {
+  const texture = await prisma.beadTexture.findUnique({ where: { id: req.params.id }, select: { thumb: true, thumbMime: true } });
+  if (!texture?.thumb || !texture.thumbMime) throw new HttpError(404, "Chưa có ảnh hạt.", "NOT_FOUND");
+  res.set({ "content-type": texture.thumbMime, "cache-control": "public, max-age=31536000, immutable", "cross-origin-resource-policy": "cross-origin" });
+  res.send(Buffer.from(texture.thumb));
+});
+
 // Ảnh vân vật liệu. Link có ?v= theo lần sửa nên cache được lâu
 braceletRouter.get("/bead-textures/:id", async (req, res) => {
   const texture = await prisma.beadTexture.findUnique({ where: { id: req.params.id }, select: { image: true, mime: true } });

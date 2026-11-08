@@ -67,7 +67,7 @@ export function SlideFields({ slide, index, count, errors, disabled, onChange, o
           <Field label="Nội dung" optional hint="Hai, ba câu. Chỉ nêu điều shop kiểm chứng được."><Textarea value={slide.text} maxLength={240} onChange={(e) => set("text", e.target.value)} disabled={disabled} /></Field>
         </div>
         <div className="flex flex-col gap-4">
-          <ImageField label="Ảnh nền" hint="Ảnh ngang, rộng từ 1200 px. Chữ nằm bên trái nên để chủ thể lệch phải." ratio="aspect-[5/2]" imageId={slide.imageId} disabled={disabled} onChange={(id) => set("imageId", id)} />
+          <ImageField label="Ảnh nền" hint="Ảnh ngang, nên rộng từ 1200 px cho rõ nét. Chữ nằm bên trái nên để chủ thể lệch phải." ratio="aspect-[5/2]" imageId={slide.imageId} disabled={disabled} onChange={(id) => set("imageId", id)} />
           {slide.imageId && <Field label="Mô tả ảnh" hint="Cho người dùng trình đọc màn hình. Để trống nếu ảnh chỉ để trang trí." optional><Input value={slide.imageAlt} maxLength={160} onChange={(e) => set("imageAlt", e.target.value)} disabled={disabled} /></Field>}
         </div>
       </div>

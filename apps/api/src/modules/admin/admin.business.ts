@@ -1,9 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
-import { BatchStatus, MovementType } from "../../generated/prisma/client.js";
-import { markupPrice } from "../../lib/pricing.js";
-import { syncCustomPrices } from "../../lib/stock.js";
-import { batchMaterialCosts, movingAverage } from "../../lib/inventory.js";
+import { BatchStatus } from "../../generated/prisma/client.js";
+import { batchInclude, receiveBatch } from "../../lib/receive.js";
 import { prisma } from "../../lib/prisma.js";
 import { optionalText } from "../../lib/text.js";
 import { HttpError } from "../../middleware/errors.js";
@@ -57,12 +55,7 @@ const batchInput = z
     });
   });
 
-const include = {
-  lines: { orderBy: { position: "asc" } },
-  extras: { orderBy: { position: "asc" } },
-  writeOffs: { orderBy: { position: "asc" } },
-  plans: true,
-} as const;
+const include = batchInclude;
 
 function children(input: z.infer<typeof batchInput>) {
   const { lines, extras, writeOffs, plans, ...batch } = input;
@@ -120,33 +113,7 @@ adminBusinessRouter.delete("/batches/:id", async (req, res) => {
   res.status(204).end();
 });
 
-// Nhập kho: cộng nguyên liệu đã trừ hao hụt, cập nhật giá vốn bình quân, ghi sổ kho. Chỉ làm được một lần
+// Nhập kho: logic ở lib/receive.ts, seed đợt nhập đầu cũng dùng chung
 adminBusinessRouter.post("/batches/:id/receive", async (req, res) => {
-  const data = await prisma.$transaction(async (tx) => {
-    const batch = await tx.purchaseBatch.findUniqueOrThrow({ where: { id: req.params.id }, include });
-    if (batch.status === BatchStatus.RECEIVED) throw new HttpError(409, "Đợt này đã nhập kho rồi.", "ALREADY_RECEIVED");
-    if (batch.lines.length === 0) throw new HttpError(400, "Đợt nhập chưa có nguyên liệu nào.", "EMPTY");
-
-    const extrasVnd = batch.extras.filter((e) => e.allocate).reduce((sum, e) => sum + e.amountVnd, 0);
-    const costs = batchMaterialCosts(batch.lines, extrasVnd, batch.writeOffs);
-    for (const cost of costs) {
-      const material = await tx.material.findUniqueOrThrow({ where: { id: cost.materialId } });
-      const avgCostVnd = movingAverage(material.stock, material.avgCostVnd, cost.received, cost.unitCostVnd);
-      await tx.material.update({ where: { id: material.id }, data: { stock: { increment: cost.received }, avgCostVnd } });
-      // Hạt, charm có % lãi: giá bán theo giá vốn mới, có giá rồi mới hiện ở trang thiết kế vòng
-      const priceVnd = material.markupPct === null ? 0 : markupPrice(avgCostVnd, material.markupPct);
-      if (priceVnd > 0) await tx.bead.updateMany({ where: { materialId: material.id }, data: { priceVnd, active: true } });
-      await tx.stockMovement.create({
-        data: { type: MovementType.PURCHASE, materialId: material.id, quantity: cost.quantityIn, unitCostVnd: cost.unitCostVnd, batchId: batch.id, note: batch.name },
-      });
-    }
-    for (const wo of batch.writeOffs) {
-      await tx.stockMovement.create({
-        data: { type: MovementType.WRITE_OFF, materialId: wo.materialId, quantity: -wo.quantity, batchId: batch.id, note: `${wo.reason} (khi nhận ${batch.name})` },
-      });
-    }
-    await syncCustomPrices(tx);
-    return tx.purchaseBatch.update({ where: { id: batch.id }, data: { status: BatchStatus.RECEIVED, receivedAt: new Date() }, include });
-  });
-  res.json({ data });
+  res.json({ data: await prisma.$transaction((tx) => receiveBatch(tx, req.params.id)) });
 });

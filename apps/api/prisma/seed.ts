@@ -1,8 +1,9 @@
 import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { receiveBatch } from "../src/lib/receive.js";
 import { syncCustomPrices } from "../src/lib/stock.js";
-import { MaterialGroup, MaterialKind, PrismaClient, ProductType, PublishStatus } from "../src/generated/prisma/client.js";
+import { BatchStatus, MaterialGroup, MaterialKind, PrismaClient, ProductType, PublishStatus } from "../src/generated/prisma/client.js";
 
 // Dữ liệu ban đầu (mặc định khi cài server lần đầu) nằm trong sample-data.json, file này chỉ nạp vào database.
 // Chạy lại nhiều lần được: bản ghi tìm theo slug hoặc tên.
@@ -31,6 +32,7 @@ type SampleData = {
   }[];
   postCategories: { name: string; slug: string; description?: string; position?: number }[];
   posts: { title: string; slug: string; featured?: boolean; category: string; authorName: string; publishedAt: string; excerpt?: string; metaDescription?: string; content: string }[];
+  batches: { name: string; supplier?: string; orderedAt?: string; note?: string; receive?: boolean; lines: { material: string; quantity: number; totalCostVnd: number }[] }[];
   beads: { name: string; slug: string; kind: "BEAD" | "CHARM"; material: string; sizeMm: number; priceVnd: number; color: string; finish: string; note?: string; position: number; active?: boolean; stockItem: string }[];
 };
 
@@ -120,8 +122,29 @@ async function main() {
   }
   await syncCustomPrices(prisma);
 
+  // Hàng vào kho chỉ qua đợt nhập, nhập kho bằng đúng hàm CMS dùng. Đợt đã có (theo tên) thì bỏ qua,
+  // nên seed lại không nhập kho hai lần
+  for (const { lines, receive, orderedAt, ...batch } of sample.batches) {
+    if (await prisma.purchaseBatch.findFirst({ where: { name: batch.name }, select: { id: true } })) continue;
+    const created = await prisma.purchaseBatch.create({
+      data: {
+        ...batch,
+        orderedAt: orderedAt ? new Date(`${orderedAt}T12:00:00+07:00`) : null,
+        status: BatchStatus.ORDERED,
+        lines: {
+          create: lines.map(({ material, ...line }, position) => {
+            const materialId = materialIds.get(material);
+            if (!materialId) throw new Error(`Đợt nhập ${batch.name} có nguyên liệu chưa khai báo: ${material}`);
+            return { ...line, materialId, position };
+          }),
+        },
+      },
+    });
+    if (receive) await prisma.$transaction((tx) => receiveBatch(tx, created.id));
+  }
+
   console.log(
-    `Seed xong: ${sample.materials.length} nguyên liệu, ${sample.products.length} sản phẩm, ${sample.beads.length} loại hạt và charm, ` +
+    `Seed xong: ${sample.materials.length} nguyên liệu, ${sample.products.length} sản phẩm, ${sample.beads.length} loại hạt và charm, ${sample.batches.length} đợt nhập, ` +
       `${sample.categories.length} danh mục, ${sample.postCategories.length} chủ đề, ${sample.posts.length} bài viết.`,
   );
 }

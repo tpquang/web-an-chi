@@ -5,7 +5,7 @@ export type MaterialRow = Material & {
   note: string | null;
   _count: { components: number };
   model: { fileName: string; size: number; updatedAt: string } | null;
-  texture: { id: string; version: number; roughness: number; updatedAt: string } | null;
+  texture: { id: string; version: number; roughness: number; brightness: number; thumb: boolean; updatedAt: string } | null;
 };
 
 export const materialKinds = [

@@ -87,7 +87,13 @@ export function BeadPicker({ state, onBeadPointer, options }: Props) {
                       disabled={bead.stock === 0}
                       className="flex h-full w-full touch-pan-x flex-col items-center gap-1.5 rounded-lg border border-line bg-surface p-2.5 text-center transition-colors duration-(--d-fast) select-none [-webkit-touch-callout:none] hover:border-wood disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:border-wood aria-pressed:bg-wood-soft lg:touch-none lg:flex-row lg:gap-3 lg:p-3 lg:text-left"
                     >
-                      <span aria-hidden className="size-9 flex-none rounded-full shadow-e1 lg:size-11" style={{ background: bead.color }} />
+                      {bead.texture?.thumb ? (
+                        // Ảnh chụp chính hạt 3D lúc lưu ảnh vân ở CMS; chưa có thì hiện chấm màu
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={`/api/bead-textures/${bead.texture.id}/thumb?v=${bead.texture.version}`} alt="" width={44} height={44} loading="lazy" decoding="async" className="size-9 flex-none lg:size-11" />
+                      ) : (
+                        <span aria-hidden className="size-9 flex-none rounded-full shadow-e1 lg:size-11" style={{ background: bead.color }} />
+                      )}
                       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                         <span className="line-clamp-2 text-sm leading-tight font-medium">{tab === "tram" ? bead.material : beadTitle(bead)}</span>
                         {bead.note && <span className="hidden text-xs text-ink-3 lg:line-clamp-2">{bead.note}</span>}
