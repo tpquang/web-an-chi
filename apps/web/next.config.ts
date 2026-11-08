@@ -6,7 +6,19 @@ const imageHosts = (process.env.IMAGE_HOSTNAMES ?? "")
   .map((host) => host.trim())
   .filter(Boolean);
 
+// HSTS chỉ khi site chạy https, để bản LAN, dev qua http không bị trình duyệt ép sang https
+const https = (process.env.NEXT_PUBLIC_SITE_URL ?? "").startsWith("https://");
+const securityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  ...(https ? [{ key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" }] : []),
+];
+
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  headers: async () => [{ source: "/:path*", headers: securityHeaders }],
   // Mỗi lần build trên VPS có mã riêng (scripts/update.sh đặt). Tab đang mở bản cũ bấm sang trang khác
   // sẽ tải lại hẳn trang thay vì ghép JS mới với HTML cũ
   // start.cmd lan đặt LAN_HOST để máy khác trong mạng tải được JS lúc chạy dev

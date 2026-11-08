@@ -9,6 +9,7 @@
 #
 # Biến tuỳ chọn: DOMAIN, CMS_DOMAIN, EMAIL (cho Let's Encrypt), SEED=0 (không nạp dữ liệu ban đầu; mặc định nạp), SKIP_SSL=1,
 #   INDEXING=on (cho Google index; mặc định off vì đang là web demo),
+#   GA_ID=G-XXXX (mã đo GA4, chỉ nạp khi INDEXING=on), GOOGLE_SITE_VERIFICATION (mã thẻ meta Search Console),
 #   WEB_PORT, API_PORT, DB_PORT (đổi khi VPS mới có dịch vụ khác chiếm cổng)
 set -euo pipefail
 
@@ -20,6 +21,8 @@ WEB_PORT="${WEB_PORT:-3100}"
 API_PORT="${API_PORT:-4100}"
 DB_PORT="${DB_PORT:-5433}"
 INDEXING="${INDEXING:-off}"
+GA_ID="${GA_ID:-}"
+GOOGLE_SITE_VERIFICATION="${GOOGLE_SITE_VERIFICATION:-}"
 
 APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CMS_ROOT="/var/www/anchi-cms"
@@ -67,6 +70,8 @@ cat > apps/web/.env <<EOF
 API_URL=http://127.0.0.1:${API_PORT}
 NEXT_PUBLIC_SITE_URL=https://${DOMAIN}
 SITE_INDEXING=${INDEXING}
+NEXT_PUBLIC_GA_ID=${GA_ID}
+GOOGLE_SITE_VERIFICATION=${GOOGLE_SITE_VERIFICATION}
 IMAGE_HOSTNAMES=
 EOF
 echo "VITE_API_URL=https://${CMS_DOMAIN}" > apps/cms/.env

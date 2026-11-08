@@ -58,6 +58,8 @@ export const requirePermission: RequestHandler = (req, res, next) => {
   const segment = req.path.split("/")[1] ?? "";
   const need: Level = req.method === "GET" || req.method === "HEAD" ? "view" : "edit";
   // Tài khoản nhân viên và phân quyền: chỉ chủ shop, để nhân viên không tự nâng quyền
+  // Thông tin cửa hàng có tài khoản ngân hàng nhận tiền: chỉ chủ shop
+  if (segment === "store") throw new HttpError(403, "Chỉ chủ shop sửa thông tin cửa hàng.", "FORBIDDEN");
   if (segment === "staff") throw new HttpError(403, "Chỉ chủ shop quản lý tài khoản nhân viên.", "FORBIDDEN");
   if (segment === "media") {
     if (MEDIA.some((k) => rank[staff.permissions[k]] >= rank[need])) return next();

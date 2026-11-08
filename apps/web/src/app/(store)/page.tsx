@@ -39,7 +39,11 @@ export default async function HomePage() {
       ...(store.phone ? { telephone: store.phone } : {}),
       ...(store.email ? { email: store.email } : {}),
       ...(store.address ? { address: store.address } : {}),
-      sameAs: [store.shopeeUrl, store.tiktokUrl].filter((url) => url && !url.includes("/search")),
+      logo: absoluteUrl("/brand/logo-square.svg"),
+      // Link tìm kiếm trên sàn không phải trang của shop nên bỏ
+      sameAs: [store.facebookUrl, store.zaloUrl, store.youtubeUrl, store.tiktokUrl, store.shopeeUrl].filter(
+        (url) => url && !url.includes("/search"),
+      ),
     },
     { "@context": "https://schema.org", "@type": "WebSite", name: site.name, url: absoluteUrl("/") },
   ];

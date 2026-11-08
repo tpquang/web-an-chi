@@ -66,6 +66,7 @@ Tình trạng hiện tại của website ghi ở [docs/web/seo/checklist.md](../
 
 - JSON-LD đi qua một helper `safeJsonLd` để escape `<`: tên sản phẩm chứa `</script>` có thể thành XSS.
 - Dùng đúng loại: Organization, WebSite, Product kèm Offer, BreadcrumbList, Article.
+- Product chỉ xuất khi trang được index (có ảnh và mô tả): Google báo lỗi Product thiếu ảnh. `sameAs` của Organization lấy từ CMS > Thông tin cửa hàng, bỏ link tìm kiếm trên sàn.
 - `price`, `priceCurrency`, `availability` khớp đúng thứ hiển thị. Chỉ thêm `aggregateRating`, `review` khi có đánh giá thật hiển thị trên trang.
 - FAQPage và SearchAction không còn đem lại rich result cho site thường. Chỉ giữ khi nội dung hiển thị thật và có ích.
 

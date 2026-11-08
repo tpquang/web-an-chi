@@ -13,7 +13,7 @@ import { getProduct, getProducts, getStore } from "@/lib/api";
 import { paragraphs } from "@/lib/content";
 import { categoryHref, postHref, productHref } from "@/lib/links";
 import { absoluteUrl, pageMeta, safeJsonLd } from "@/lib/seo";
-import { formatDate, formatVnd } from "@/lib/site";
+import { formatDate, formatVnd, site } from "@/lib/site";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -61,27 +61,39 @@ export default async function ProductPage({ params }: Props) {
     { name: product.name, href: productHref(product.slug) },
   ];
   const specs = [...(product.origin ? [{ label: "Xuất xứ", value: product.origin }] : []), ...(product.specs ?? [])];
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.name,
-    description: product.description ?? product.summary ?? undefined,
-    image: product.images.map((image) => image.url),
-    category: product.category.name,
-    url,
-    offers: {
-      "@type": "Offer",
-      url,
-      price: product.priceVnd,
-      priceCurrency: "VND",
-      availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-    },
-  };
   const { flatFeeVnd, freeFromVnd, eta } = store.shipping;
+  const shippingVnd = freeFromVnd !== null && product.priceVnd >= freeFromVnd ? 0 : flatFeeVnd;
+  // Google bắt buộc có ảnh cho Product. Trang mỏng (chưa ảnh hoặc mô tả) đang noindex nên không xuất schema
+  const jsonLd = isThin(product)
+    ? null
+    : {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: product.name,
+        description: product.description ?? product.summary ?? undefined,
+        image: product.images.map((image) => (image.url.startsWith("http") ? image.url : absoluteUrl(image.url))),
+        sku: product.slug,
+        brand: { "@type": "Brand", name: site.name },
+        category: product.category.name,
+        url,
+        offers: {
+          "@type": "Offer",
+          url,
+          price: product.priceVnd,
+          priceCurrency: "VND",
+          availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          seller: { "@type": "Organization", name: site.name },
+          shippingDetails: {
+            "@type": "OfferShippingDetails",
+            shippingRate: { "@type": "MonetaryAmount", value: shippingVnd, currency: "VND" },
+            shippingDestination: { "@type": "DefinedRegion", addressCountry: "VN" },
+          },
+        },
+      };
 
   return (
     <PageFrame>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+      {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />}
       <PageBreadcrumb crumbs={crumbs} />
 
       <div className="grid gap-8 lg:grid-cols-12 lg:gap-6">

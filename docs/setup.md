@@ -276,6 +276,7 @@ Những dòng nên xem, ở gần đầu file:
 Ở khoảng giữa file:
 
 - `SITE_INDEXING=on`: cho Google index website. Nếu mới là bản chạy thử, sửa thành `SITE_INDEXING=` (để trống), toàn site sẽ có `noindex`.
+- Hoặc truyền khi chạy: `sudo INDEXING=on GA_ID=G-XXXX bash scripts/deploy.sh`. Script ghi lại `apps/web/.env` và cấu hình nginx mỗi lần chạy, nên sửa tay hai file đó sẽ mất ở lần deploy sau. `GA_ID` là mã đo GA4, `GOOGLE_SITE_VERIFICATION` là mã thẻ meta Search Console (không cần nếu xác minh qua DNS).
 
 Lưu và thoát:
 

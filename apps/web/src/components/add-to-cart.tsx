@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { cart, useCart } from "@/lib/cart";
 import { cartHref } from "@/lib/links";
+import { trackEvent } from "@/lib/track";
 import { Button } from "./ui/button";
 import { QuantityInput } from "./ui/quantity-input";
 import { showToast } from "./ui/toast";
@@ -21,7 +22,9 @@ export function AddToCart({ slug, stock }: { slug: string; stock: number }) {
       showToast({ type: "error", title: "Đã đủ số lượng còn lại", desc: `Giỏ của bạn đã có ${inCart} sản phẩm này, bằng số shop còn.` });
       return;
     }
-    const total = cart.add(slug, Math.min(quantity, room), stock);
+    const added = Math.min(quantity, room);
+    const total = cart.add(slug, added, stock);
+    trackEvent("add_to_cart", { items: [{ item_id: slug, quantity: added }] });
     setQuantity(1);
     showToast({
       title: "Đã thêm vào giỏ",

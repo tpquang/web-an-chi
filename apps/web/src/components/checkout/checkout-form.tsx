@@ -19,6 +19,7 @@ import {
 import { postJson } from "@/lib/client-api";
 import { cartHref, checkoutHref, loginHref, orderHref, productsHref } from "@/lib/links";
 import { paymentOptions } from "@/lib/order";
+import { trackEvent } from "@/lib/track";
 import { useQuote } from "@/lib/use-quote";
 import { useSignedIn } from "@/lib/use-signed-in";
 import { OrderSummary } from "../cart/order-summary";
@@ -108,6 +109,15 @@ export function CheckoutForm() {
       });
       if (result.ok) {
         done.current = true;
+        if (state.status === "ready") {
+          const { quote } = state;
+          trackEvent("purchase", {
+            transaction_id: result.data.code,
+            value: quote.totalVnd,
+            shipping: quote.shippingVnd,
+            items: quote.lines.map((line) => ({ item_id: line.slug, item_name: line.product?.name, quantity: line.quantity, price: line.product?.unitPriceVnd })),
+          });
+        }
         cart.clear();
         clearDraft();
         router.replace(orderHref(result.data.code));

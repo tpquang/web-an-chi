@@ -11,6 +11,7 @@ import { BatchFormPage } from "./pages/BatchFormPage";
 import { CustomerDetailPage, CustomersPage } from "./pages/CustomersPage";
 import { InboxPage } from "./pages/InboxPage";
 import { StaffPage } from "./pages/StaffPage";
+import { StorePage } from "./pages/StorePage";
 import { MaterialsPage } from "./pages/MaterialsPage";
 import { MovementsPage } from "./pages/MovementsPage";
 import { PackingPage } from "./pages/PackingPage";
@@ -41,6 +42,7 @@ function App() {
         <Route path="inbox" element={<InboxPage />} />
         <Route path="inbox/:id" element={<InboxPage />} />
         <Route path="staff" element={<StaffPage />} />
+        <Route path="store" element={<StorePage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="products/new" element={<ProductFormPage />} />
         <Route path="products/:id" element={<ProductFormPage />} />

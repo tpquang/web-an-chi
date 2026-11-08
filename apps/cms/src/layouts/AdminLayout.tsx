@@ -78,7 +78,13 @@ const groups: NavGroup[] = [
       { to: "/post-categories", label: "Chủ đề bài viết", Icon: FolderIcon, perm: "posts" },
     ],
   },
-  { label: "Cửa hàng", links: [{ to: "/staff", label: "Tài khoản, phân quyền", Icon: ShieldIcon, perm: "owner" }] },
+  {
+    label: "Cửa hàng",
+    links: [
+      { to: "/store", label: "Thông tin cửa hàng", Icon: BagIcon, perm: "owner" },
+      { to: "/staff", label: "Tài khoản, phân quyền", Icon: ShieldIcon, perm: "owner" },
+    ],
+  },
 ];
 
 export function AdminLayout() {

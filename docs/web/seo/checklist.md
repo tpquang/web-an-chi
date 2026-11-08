@@ -13,7 +13,9 @@ Quy tắc ở skill `anchi-seo`. Trước khi ra mắt: đặt `NEXT_PUBLIC_SITE
 - [x] Sản phẩm chưa có ảnh hoặc mô tả: `noindex, follow` và không vào sitemap. Toàn bộ sản phẩm mẫu đang ở trạng thái này
 - [x] Giỏ, đặt hàng, đơn hàng, tra cứu: `noindex`
 - [x] `PageBreadcrumb` sinh cả phần hiển thị và `BreadcrumbList` từ một danh sách
-- [x] JSON-LD `Organization`, `WebSite`, `Product` + `Offer`, `Article`, qua `safeJsonLd`
+- [x] JSON-LD `Organization` (kèm `logo`, `sameAs` từ CMS > Thông tin cửa hàng), `WebSite`, `Product` + `Offer` (kèm `brand`, `sku`, `shippingDetails`, chỉ xuất khi sản phẩm đủ điều kiện index), `Article`, qua `safeJsonLd`
+- [x] Header bảo mật trong `next.config.ts`, HSTS khi site chạy https, tắt `X-Powered-By`
+- [x] GA4 theo `NEXT_PUBLIC_GA_ID`, chỉ nạp khi `SITE_INDEXING=on`; sự kiện `add_to_cart`, `purchase`
 - [x] Phân trang `?trang=N` bằng link thật; `?trang=1` và trang vượt quá trả 404
 - [x] `next/image` cho ảnh sản phẩm, chỉ nhận tên miền trong `IMAGE_HOSTNAMES`
 - [x] Trang sản phẩm và bài viết dựng ở lần xem đầu rồi cache (ISR)

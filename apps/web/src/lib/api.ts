@@ -84,6 +84,9 @@ export type Store = {
   openingHours?: string;
   shopeeUrl?: string;
   tiktokUrl?: string;
+  facebookUrl?: string;
+  zaloUrl?: string;
+  youtubeUrl?: string;
   shipping: { flatFeeVnd: number; freeFromVnd: number | null; eta: string };
   returnPolicy: string;
 };

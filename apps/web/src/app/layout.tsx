@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Be_Vietnam_Pro, Cormorant_SC } from "next/font/google";
 import type { ReactNode } from "react";
+import { Analytics } from "@/components/analytics";
 import { ChatLauncher } from "@/components/chat/chat-launcher";
 import { SiteHeader } from "@/components/site-header";
 import { getCategories } from "@/lib/api";
@@ -24,6 +25,8 @@ export const metadata: Metadata = {
   title: { default: site.name, template: `%s | ${site.name}` },
   description: site.description,
   openGraph: { siteName: site.name, locale: "vi_VN", type: "website" },
+  // Mã xác minh Search Console dạng thẻ meta, khi không xác minh được qua DNS
+  verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
   // Bản test, dev: noindex toàn site theo biến môi trường
   robots: site.indexable ? undefined : { index: false, follow: false },
 };
@@ -52,6 +55,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {children}
         <ChatLauncher />
         <Toaster />
+        <Analytics />
       </body>
     </html>
   );
