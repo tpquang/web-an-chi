@@ -11,10 +11,11 @@ import { absoluteUrl, pageMeta, safeJsonLd } from "@/lib/seo";
 import { site } from "@/lib/site";
 
 export const metadata = pageMeta({
-  title: `${site.name}: vòng tay, nhang và nụ trầm`,
+  // Cụm chính "trầm hương tự nhiên" kèm vùng nguyên liệu, theo docs/web/seo/keyword-map.md
+  title: `Trầm hương tự nhiên Hương Khê, Hà Tĩnh | ${site.name}`,
   absoluteTitle: true,
   description:
-    "Trầm hương An Chi: vòng tay, nhang, nụ trầm và trầm miếng, ghi rõ xuất xứ, kích thước, cách dùng. Giao hàng toàn quốc, đặt hàng không cần tài khoản.",
+    "Nhang trầm, nụ trầm và vòng tay trầm hương tự nhiên từ vùng Phúc Trạch, Hương Khê, Hà Tĩnh. Ghi rõ thành phần, kích thước, cách dùng. Giao hàng toàn quốc.",
   path: "/",
 });
 
@@ -36,6 +37,8 @@ export default async function HomePage() {
       "@type": "Organization",
       name: site.name,
       url: absoluteUrl("/"),
+      description: site.description,
+      areaServed: "VN",
       ...(store.phone ? { telephone: store.phone } : {}),
       ...(store.email ? { email: store.email } : {}),
       ...(store.address ? { address: store.address } : {}),
@@ -45,7 +48,7 @@ export default async function HomePage() {
         (url) => url && !url.includes("/search"),
       ),
     },
-    { "@context": "https://schema.org", "@type": "WebSite", name: site.name, url: absoluteUrl("/") },
+    { "@context": "https://schema.org", "@type": "WebSite", name: site.name, alternateName: site.shortName, url: absoluteUrl("/"), inLanguage: "vi" },
   ];
 
   const seeAll = (href: string, label: string) => (

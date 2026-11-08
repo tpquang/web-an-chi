@@ -9,7 +9,8 @@
 #
 # Biến tuỳ chọn: DOMAIN, CMS_DOMAIN, EMAIL (cho Let's Encrypt), SEED=0 (không nạp dữ liệu ban đầu; mặc định nạp), SKIP_SSL=1,
 #   INDEXING=on (cho Google index; mặc định off vì đang là web demo),
-#   GA_ID=G-XXXX (mã đo GA4, chỉ nạp khi INDEXING=on), GOOGLE_SITE_VERIFICATION (mã thẻ meta Search Console),
+#   GTM_ID=GTM-XXXX (Google Tag Manager, thẻ GA4 đặt trong GTM) hoặc GA_ID=G-XXXX (GA4 trực tiếp); chỉ nạp khi INDEXING=on,
+#   GOOGLE_SITE_VERIFICATION (mã thẻ meta Search Console),
 #   WEB_PORT, API_PORT, DB_PORT (đổi khi VPS mới có dịch vụ khác chiếm cổng)
 set -euo pipefail
 
@@ -22,6 +23,7 @@ API_PORT="${API_PORT:-4100}"
 DB_PORT="${DB_PORT:-5433}"
 INDEXING="${INDEXING:-off}"
 GA_ID="${GA_ID:-}"
+GTM_ID="${GTM_ID:-}"
 GOOGLE_SITE_VERIFICATION="${GOOGLE_SITE_VERIFICATION:-}"
 
 APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -71,6 +73,7 @@ API_URL=http://127.0.0.1:${API_PORT}
 NEXT_PUBLIC_SITE_URL=https://${DOMAIN}
 SITE_INDEXING=${INDEXING}
 NEXT_PUBLIC_GA_ID=${GA_ID}
+NEXT_PUBLIC_GTM_ID=${GTM_ID}
 GOOGLE_SITE_VERIFICATION=${GOOGLE_SITE_VERIFICATION}
 IMAGE_HOSTNAMES=
 EOF
@@ -114,6 +117,11 @@ server {
     server_name ${DOMAIN} www.${DOMAIN};
     client_max_body_size 10m;
 ${ROBOTS_HEADER}
+
+    # Một tên miền chính cho SEO: www chuyển hẳn về tên miền gốc (certbot chép khối này sang cổng 443)
+    if (\$host = www.${DOMAIN}) {
+        return 301 https://${DOMAIN}\$request_uri;
+    }
 
     # JS, CSS của Next có mã băm trong tên file, đổi mỗi lần build nên cache lâu được
     location /_next/static/ {

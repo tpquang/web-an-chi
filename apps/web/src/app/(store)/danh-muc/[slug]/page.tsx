@@ -8,13 +8,14 @@ import { EmptyState } from "@/components/ui/states";
 import { getCategories, getCategory, getProducts } from "@/lib/api";
 import { paragraphs } from "@/lib/content";
 import { categoryHref, pagedHref, productsHref } from "@/lib/links";
+import { notFoundOrRedirect } from "@/lib/redirect";
 import { pageMeta, parsePage } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ trang?: string | string[] }> };
 
 const loadCategory = cache(async (slug: string) => {
   const category = await getCategory(slug);
-  if (!category) notFound();
+  if (!category) return notFoundOrRedirect(categoryHref(slug));
   return category;
 });
 

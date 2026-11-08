@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { PublishStatus, type Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
+import { recordSlugChange } from "../../lib/redirects.js";
 import { optionalImageUrl, optionalText, pageQuery, slugField } from "../../lib/text.js";
 import { HttpError } from "../../middleware/errors.js";
 import { assertFeaturedRoom } from "./admin.home.js";
@@ -36,7 +37,10 @@ adminBlogRouter.post("/post-categories", async (req, res) => {
 });
 
 adminBlogRouter.put("/post-categories/:id", async (req, res) => {
-  const data = await prisma.postCategory.update({ where: { id: req.params.id }, data: postCategoryInput.parse(req.body) });
+  const input = postCategoryInput.parse(req.body);
+  const before = await prisma.postCategory.findUniqueOrThrow({ where: { id: req.params.id }, select: { slug: true } });
+  const data = await prisma.postCategory.update({ where: { id: req.params.id }, data: input });
+  await recordSlugChange("postCategory", before.slug, data.slug);
   res.json({ data });
 });
 
@@ -136,7 +140,9 @@ adminBlogRouter.post("/posts", async (req, res) => {
 adminBlogRouter.put("/posts/:id", async (req, res) => {
   const input = postData(postInput.parse(req.body));
   if (input.featured) await assertFeaturedRoom("posts", req.params.id);
+  const before = await prisma.post.findUniqueOrThrow({ where: { id: req.params.id }, select: { slug: true } });
   const data = await prisma.post.update({ where: { id: req.params.id }, data: input });
+  await recordSlugChange("post", before.slug, data.slug);
   res.json({ data });
 });
 

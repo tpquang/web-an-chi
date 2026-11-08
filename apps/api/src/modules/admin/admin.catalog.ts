@@ -3,6 +3,7 @@ import { z } from "zod";
 import { MovementType, ProductType, PublishStatus, type Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
 import { withLiveStock } from "../../lib/stock.js";
+import { recordSlugChange } from "../../lib/redirects.js";
 import { imageUrl, optionalText, optionalUrl, pageQuery, slugField } from "../../lib/text.js";
 import { HttpError } from "../../middleware/errors.js";
 import { assertFeaturedRoom } from "./admin.home.js";
@@ -38,7 +39,10 @@ adminCatalogRouter.post("/categories", async (req, res) => {
 });
 
 adminCatalogRouter.put("/categories/:id", async (req, res) => {
-  const data = await prisma.category.update({ where: { id: req.params.id }, data: categoryInput.parse(req.body) });
+  const input = categoryInput.parse(req.body);
+  const before = await prisma.category.findUniqueOrThrow({ where: { id: req.params.id }, select: { slug: true } });
+  const data = await prisma.category.update({ where: { id: req.params.id }, data: input });
+  await recordSlugChange("category", before.slug, data.slug);
   res.json({ data });
 });
 
@@ -147,6 +151,7 @@ adminCatalogRouter.post("/products", async (req, res) => {
 adminCatalogRouter.put("/products/:id", async (req, res) => {
   const { data, images } = productData(productInput.parse(req.body));
   if (data.featured) await assertFeaturedRoom("products", req.params.id);
+  const oldSlug = (await prisma.product.findUniqueOrThrow({ where: { id: req.params.id }, select: { slug: true } })).slug;
   const updated = await prisma.$transaction(async (tx) => {
     const before = await tx.product.findUniqueOrThrow({ where: { id: req.params.id }, select: { stock: true, unitCostVnd: true } });
     // Vòng xâu hạt không có tồn kho riêng, số bán được tính từ hạt
@@ -156,6 +161,7 @@ adminCatalogRouter.put("/products/:id", async (req, res) => {
     // Ảnh gửi lên là danh sách đầy đủ theo thứ tự mới, nên thay toàn bộ
     return tx.product.update({ where: { id: req.params.id }, data: { ...data, stock, images: { deleteMany: {}, create: images } } });
   });
+  await recordSlugChange("product", oldSlug, updated.slug);
   res.json({ data: updated });
 });
 

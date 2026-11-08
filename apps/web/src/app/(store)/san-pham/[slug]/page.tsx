@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { cache } from "react";
 import { AddToCart } from "@/components/add-to-cart";
 import { MarketplaceLinks } from "@/components/marketplace-links";
@@ -12,7 +11,8 @@ import { Tag } from "@/components/ui/tag";
 import { getProduct, getProducts, getStore } from "@/lib/api";
 import { paragraphs } from "@/lib/content";
 import { categoryHref, postHref, productHref } from "@/lib/links";
-import { absoluteUrl, pageMeta, safeJsonLd } from "@/lib/seo";
+import { notFoundOrRedirect } from "@/lib/redirect";
+import { absoluteImage, absoluteUrl, pageMeta, safeJsonLd } from "@/lib/seo";
 import { formatDate, formatVnd, site } from "@/lib/site";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -24,7 +24,7 @@ export function generateStaticParams() {
 
 const loadProduct = cache(async (slug: string) => {
   const product = await getProduct(slug);
-  if (!product) notFound();
+  if (!product) return notFoundOrRedirect(productHref(slug));
   return product;
 });
 
@@ -71,7 +71,7 @@ export default async function ProductPage({ params }: Props) {
         "@type": "Product",
         name: product.name,
         description: product.description ?? product.summary ?? undefined,
-        image: product.images.map((image) => (image.url.startsWith("http") ? image.url : absoluteUrl(image.url))),
+        image: product.images.map((image) => absoluteImage(image.url)),
         sku: product.slug,
         brand: { "@type": "Brand", name: site.name },
         category: product.category.name,

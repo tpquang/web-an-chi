@@ -173,6 +173,11 @@ export async function getStore() {
   return (await must<{ data: Store }>("/settings/store")).data;
 }
 
+// Bảng redirect khi đổi slug. API lỗi thì coi như trống: trang vẫn trả 404 thay vì 500
+export async function getRedirects(): Promise<Record<string, string>> {
+  return get<{ data: Record<string, string> }>("/settings/redirects").then((body) => body?.data ?? {}, () => ({}));
+}
+
 export type HomeImage = { id: string; version: number; width: number; height: number; alt: string };
 export type HomeLink = { label: string; href: string };
 export type HomeBanner = { eyebrow: string; title: string; text: string; image: HomeImage | null; primary: HomeLink; secondary: HomeLink | null };

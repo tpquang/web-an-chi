@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { cache } from "react";
 import { PostBody, TableOfContents } from "@/components/post-body";
 import { PostGrid } from "@/components/post-card";
@@ -9,8 +8,9 @@ import { PageFrame, Section } from "@/components/ui/layout";
 import { getPost, getPostCategories, getPosts } from "@/lib/api";
 import { parseContent, wordCount } from "@/lib/content";
 import { postHref, postsHref, topicHref } from "@/lib/links";
-import { absoluteUrl, pageMeta, safeJsonLd } from "@/lib/seo";
-import { formatDate, site } from "@/lib/site";
+import { notFoundOrRedirect } from "@/lib/redirect";
+import { absoluteImage, absoluteUrl, defaultOgImage, pageMeta, publisherLd, safeJsonLd } from "@/lib/seo";
+import { formatDate } from "@/lib/site";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -21,7 +21,7 @@ export function generateStaticParams() {
 
 const loadPost = cache(async (slug: string) => {
   const post = await getPost(slug);
-  if (!post) notFound();
+  if (!post) return notFoundOrRedirect(postHref(slug));
   return post;
 });
 
@@ -69,9 +69,11 @@ export default async function PostPage({ params }: Props) {
     datePublished: post.publishedAt,
     dateModified: post.updatedAt,
     author: { "@type": "Organization", name: post.authorName },
-    publisher: { "@type": "Organization", name: site.name, url: absoluteUrl("/") },
+    publisher: publisherLd,
     mainEntityOfPage: absoluteUrl(postHref(post.slug)),
-    ...(post.coverUrl ? { image: [post.coverUrl] } : {}),
+    inLanguage: "vi",
+    // Google khuyến nghị Article có ảnh: chưa có ảnh bìa thì dùng ảnh chia sẻ mặc định
+    image: [absoluteImage(post.coverUrl ?? defaultOgImage)],
   };
 
   return (

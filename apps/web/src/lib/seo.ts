@@ -11,6 +11,21 @@ export function absoluteUrl(path: string) {
   return `${site.url}${path}`;
 }
 
+// Ảnh trong JSON-LD phải là URL tuyệt đối; ảnh từ CDN đã tuyệt đối thì giữ nguyên
+export function absoluteImage(url: string) {
+  return /^https?:\/\//.test(url) ? url : absoluteUrl(url);
+}
+
+export const defaultOgImage = "/brand/default-og.png";
+
+// Đơn vị đăng nội dung dùng chung cho Article và Product
+export const publisherLd = {
+  "@type": "Organization",
+  name: site.name,
+  url: absoluteUrl("/"),
+  logo: { "@type": "ImageObject", url: absoluteUrl("/brand/logo-square.svg") },
+};
+
 // Cắt theo ranh giới từ, tối đa 158 ký tự
 export function clampDescription(text: string, max = 158) {
   const clean = text.replace(/\s+/g, " ").trim();
@@ -40,7 +55,7 @@ export function pageMeta({ title, description, path, noindex, absoluteTitle, ima
       title,
       description: desc,
       url: absoluteUrl(path),
-      images: [{ url: image ?? "/brand/default-og.png", width: 1200, height: 630 }],
+      images: [{ url: image ?? defaultOgImage, width: 1200, height: 630 }],
     },
   };
 }

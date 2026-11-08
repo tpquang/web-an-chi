@@ -1,7 +1,7 @@
 export const site = {
   name: "An Chi Trầm Hương",
   shortName: "An Chi",
-  description: "Cửa hàng trầm hương: vòng tay, nhang và nụ trầm.",
+  description: "Trầm hương tự nhiên Hương Khê, Hà Tĩnh: nhang trầm, nụ trầm và vòng tay.",
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, ""),
   // Mặc định noindex. Chỉ bản chính thức đặt SITE_INDEXING=on
   indexable: process.env.SITE_INDEXING === "on",

@@ -4,7 +4,7 @@ Mỗi URL một cụm chính. Các cụm dưới đây là **giả thuyết, ch�
 
 | URL dự kiến | Cụm chính | Ý định | Lượt tìm/tháng |
 |---|---|---|---|
-| `/` | trầm hương | Tìm hiểu, mua | Chưa đo |
+| `/` | trầm hương tự nhiên (phụ: trầm hương Hương Khê, Hà Tĩnh; trầm hương) | Tìm hiểu, mua | Chưa đo |
 | `/danh-muc/vong-tay-tram-huong` | vòng tay trầm hương | Mua | Chưa đo |
 | `/danh-muc/nhang-tram-huong` | nhang trầm hương | Mua | Chưa đo |
 | `/danh-muc/nu-tram-huong` | nụ trầm hương | Mua | Chưa đo |

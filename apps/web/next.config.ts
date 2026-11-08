@@ -19,6 +19,8 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   headers: async () => [{ source: "/:path*", headers: securityHeaders }],
+  // Trình duyệt và bot vẫn gọi /favicon.ico dù trang đã khai báo icon.svg
+  redirects: async () => [{ source: "/favicon.ico", destination: "/icon.svg", permanent: true }],
   // Mỗi lần build trên VPS có mã riêng (scripts/update.sh đặt). Tab đang mở bản cũ bấm sang trang khác
   // sẽ tải lại hẳn trang thay vì ghép JS mới với HTML cũ
   // start.cmd lan đặt LAN_HOST để máy khác trong mạng tải được JS lúc chạy dev

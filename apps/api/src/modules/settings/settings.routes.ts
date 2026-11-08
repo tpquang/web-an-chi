@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getHome, publicHome } from "../../lib/home.js";
 import { prisma } from "../../lib/prisma.js";
+import { getRedirects } from "../../lib/redirects.js";
 import { getStore } from "../../lib/store.js";
 import { HttpError } from "../../middleware/errors.js";
 
@@ -8,6 +9,11 @@ export const settingsRouter = Router();
 
 settingsRouter.get("/store", async (_req, res) => {
   res.json({ data: await getStore() });
+});
+
+// Web tra khi không tìm thấy trang, để URL cũ sau khi đổi slug chuyển 308 sang URL mới
+settingsRouter.get("/redirects", async (_req, res) => {
+  res.json({ data: await getRedirects() });
 });
 
 settingsRouter.get("/home", async (_req, res) => {

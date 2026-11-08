@@ -7,13 +7,14 @@ import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/ui/states";
 import { getPostCategories, getPostCategory, getPosts } from "@/lib/api";
 import { pagedHref, postsHref, topicHref } from "@/lib/links";
+import { notFoundOrRedirect } from "@/lib/redirect";
 import { pageMeta, parsePage } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ trang?: string | string[] }> };
 
 const loadTopic = cache(async (slug: string) => {
   const topic = await getPostCategory(slug);
-  if (!topic) notFound();
+  if (!topic) return notFoundOrRedirect(topicHref(slug));
   return topic;
 });
 

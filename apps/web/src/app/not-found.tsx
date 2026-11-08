@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { PageFrame } from "@/components/ui/layout";
 import { productsHref } from "@/lib/links";
 
+export const metadata = { title: "Không tìm thấy trang" };
+
 export default function NotFound() {
   return (
     <main id="noi-dung" className="flex-1 py-16">
