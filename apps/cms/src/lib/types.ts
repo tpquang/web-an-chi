@@ -22,6 +22,7 @@ export type ProductRow = {
   featured: boolean;
   updatedAt: string;
   category: { name: string };
+  _count?: { packRuns: number };
 };
 
 export type Product = {

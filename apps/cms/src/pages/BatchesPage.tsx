@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { PlusIcon } from "../components/icons";
+import { confirmDelete, RowActions } from "../components/RowActions";
 import { ButtonLink } from "../components/ui/Button";
 import { DataTable, PageHeader, td, tdMoney, th } from "../components/ui/Page";
 import { EmptyState, ErrorState, TableSkeleton, Tag } from "../components/ui/States";
@@ -46,7 +47,7 @@ export function BatchesPage() {
               </div>
             ))}
           </div>
-          <DataTable head={<tr><th className={th}>Đợt</th><th className={th}>Trạng thái</th><th className={`${th} text-right`}>Vốn cần</th><th className={`${th} text-right`}>Doanh thu</th><th className={`${th} text-right`}>Lợi nhuận</th><th className={`${th} text-right`}>Biên</th></tr>}>
+          <DataTable head={<tr><th className={th}>Đợt</th><th className={th}>Trạng thái</th><th className={`${th} text-right`}>Vốn cần</th><th className={`${th} text-right`}>Doanh thu</th><th className={`${th} text-right`}>Lợi nhuận</th><th className={`${th} text-right`}>Biên</th><th className={`${th} text-right`}>Thao tác</th></tr>}>
             {rows.map(({ batch, result }) => (
               <tr key={batch.id} className="hover:bg-paper">
                 <td className={td}>
@@ -58,6 +59,21 @@ export function BatchesPage() {
                 <td className={tdMoney}>{formatVnd(result.revenueVnd)}</td>
                 <td className={`${tdMoney} ${result.profitVnd < 0 ? "text-err" : "text-ok"}`}>{formatVnd(result.profitVnd)}</td>
                 <td className={tdMoney}>{result.marginPct.toFixed(1).replace(".", ",")}%</td>
+                <td className={td}>
+                  {/* Đã nhận hàng thì đã vào sổ kho: chỉ xem, không sửa, không xoá */}
+                  <RowActions
+                    name={batch.name}
+                    editTo={`/business/${batch.id}`}
+                    editLabel={batch.status === "RECEIVED" ? "Xem" : "Sửa"}
+                    onDelete={
+                      batch.status === "RECEIVED"
+                        ? undefined
+                        : async () => {
+                            if (await confirmDelete({ what: "đợt nhập", name: batch.name, path: `/batches/${batch.id}` })) reload();
+                          }
+                    }
+                  />
+                </td>
               </tr>
             ))}
           </DataTable>

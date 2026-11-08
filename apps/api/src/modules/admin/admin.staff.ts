@@ -42,3 +42,12 @@ adminStaffRouter.put("/staff/:id", async (req, res) => {
   });
   res.json({ data: updated });
 });
+
+// Xoá hẳn tài khoản, ví dụ tài khoản chủ shop cũ sau khi đổi ADMIN_EMAIL. Hội thoại và việc được giao
+// giữ lại, chỉ bỏ người phụ trách. Không tự xoá mình nên luôn còn ít nhất một chủ shop đang đăng nhập
+adminStaffRouter.delete("/staff/:id", async (req, res) => {
+  const me = res.locals.staff as StaffContext;
+  if (req.params.id === me.id) throw new HttpError(409, "Bạn không thể tự xoá tài khoản đang đăng nhập.", "SELF_DELETE");
+  await prisma.staffUser.delete({ where: { id: req.params.id } });
+  res.status(204).end();
+});

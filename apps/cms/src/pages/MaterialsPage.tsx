@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { AdjustModal } from "../components/business/AdjustModal";
 import { ModelModal } from "../components/business/ModelModal";
 import { PlusIcon } from "../components/icons";
+import { RowActions } from "../components/RowActions";
 import { Button } from "../components/ui/Button";
 import { Field, Input, NumberInput, Textarea } from "../components/ui/Field";
 import { confirmDialog, Modal } from "../components/ui/Modal";
@@ -129,8 +130,10 @@ export function MaterialsPage() {
                       {m.model ? "File 3D" : "Tải file 3D"}
                     </Button>
                   )}
-                  <Button variant="text" size="sm" onClick={() => setAdjusting(m)}>Hao hụt, kiểm kê</Button>
-                  <Button variant="text" size="sm" className="ml-4 text-err" onClick={() => handleDelete(m)}>Xoá</Button>
+                  <div className="inline-flex items-center gap-1 align-middle">
+                    <Button variant="text" size="sm" className="mr-3" onClick={() => setAdjusting(m)}>Hao hụt, kiểm kê</Button>
+                    <RowActions name={m.name} onEdit={() => open(m)} onDelete={() => handleDelete(m)} />
+                  </div>
                 </td>
               </tr>
             ))}

@@ -4,6 +4,7 @@ import { ButtonLink } from "../components/ui/Button";
 import { DataTable, PageHeader, Pagination, td, th } from "../components/ui/Page";
 import { Select } from "../components/ui/Select";
 import { FeaturedToggle } from "../components/FeaturedToggle";
+import { confirmDelete, RowActions } from "../components/RowActions";
 import { EmptyState, ErrorState, TableSkeleton, Tag } from "../components/ui/States";
 import { api } from "../lib/api";
 import { formatDate } from "../lib/format";
@@ -42,7 +43,7 @@ export function PostsPage() {
       )}
       {state.status === "ready" && state.data.data.length > 0 && (
         <>
-          <DataTable head={<tr><th className={th}>Tiêu đề</th><th className={th}>Chủ đề</th><th className={th}>Ngày đăng</th><th className={th}>Trạng thái</th><th className={th}>Nổi bật (tối đa 3)</th></tr>}>
+          <DataTable head={<tr><th className={th}>Tiêu đề</th><th className={th}>Chủ đề</th><th className={th}>Ngày đăng</th><th className={th}>Trạng thái</th><th className={th}>Nổi bật (tối đa 3)</th><th className={`${th} text-right`}>Thao tác</th></tr>}>
             {state.data.data.map((post) => (
               <tr key={post.id} className="hover:bg-paper">
                 <td className={td}>
@@ -53,6 +54,16 @@ export function PostsPage() {
                 <td className={`${td} whitespace-nowrap`}>{post.publishedAt ? formatDate(post.publishedAt) : "Chưa đăng"}</td>
                 <td className={td}><Tag tone={publishStatus[post.status].tone}>{publishStatus[post.status].label}</Tag></td>
                 <td className={td}><FeaturedToggle kind="posts" id={post.id} name={post.title} checked={post.featured} onChange={reload} /></td>
+                <td className={td}>
+                  <RowActions
+                    name={post.title}
+                    editTo={`/posts/${post.id}`}
+                    onDelete={async () => {
+                      const desc = `Xoá "${post.title}"? Link bài sẽ trả 404. Nếu chỉ tạm gỡ, bạn nên chuyển trạng thái sang "Đã ẩn".`;
+                      if (await confirmDelete({ what: "bài viết", name: post.title, desc, path: `/posts/${post.id}` })) reload();
+                    }}
+                  />
+                </td>
               </tr>
             ))}
           </DataTable>

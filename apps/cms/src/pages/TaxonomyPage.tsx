@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { PlusIcon } from "../components/icons";
+import { RowActions } from "../components/RowActions";
 import { Button } from "../components/ui/Button";
 import { Field, Input, Textarea } from "../components/ui/Field";
 import { confirmDialog, Modal } from "../components/ui/Modal";
@@ -86,7 +87,7 @@ export function TaxonomyPage({ kind }: { kind: keyof typeof kinds }) {
               <td className={td}><button type="button" onClick={() => open(item)} className="min-h-11 text-left font-medium hover:text-wood">{item.name}</button></td>
               <td className={`${td} text-ink-3`}>{config.urlPrefix}{item.slug}</td>
               <td className={`${td} text-right tabular-nums`}>{item._count?.[config.countKey] ?? 0}</td>
-              <td className={`${td} text-right`}><Button variant="text" size="sm" className="text-err" onClick={() => handleDelete(item)}>Xoá</Button></td>
+              <td className={td}><RowActions name={item.name} onEdit={() => open(item)} onDelete={() => handleDelete(item)} /></td>
             </tr>
           ))}
         </DataTable>

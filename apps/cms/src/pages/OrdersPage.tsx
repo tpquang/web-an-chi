@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { RowActions } from "../components/RowActions";
 import { DataTable, PageHeader, Pagination, td, tdMoney, th } from "../components/ui/Page";
 import { Select } from "../components/ui/Select";
 import { EmptyState, ErrorState, TableSkeleton, Tag } from "../components/ui/States";
@@ -47,6 +48,7 @@ export function OrdersPage() {
                 <th className={`${th} text-right`}>Tổng tiền</th>
                 <th className={th}>Thanh toán</th>
                 <th className={th}>Trạng thái</th>
+                <th className={`${th} text-right`}>Thao tác</th>
               </tr>
             }
           >
@@ -66,6 +68,7 @@ export function OrdersPage() {
                   <Tag tone={paymentStatus[order.paymentStatus].tone}>{paymentStatus[order.paymentStatus].label}</Tag>
                 </td>
                 <td className={td}><Tag tone={orderStatus[order.status].tone}>{orderStatus[order.status].label}</Tag></td>
+                <td className={td}><RowActions name={order.code} editTo={`/orders/${order.id}`} editLabel="Xem" /></td>
               </tr>
             ))}
           </DataTable>

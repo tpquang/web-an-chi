@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
-import { PlusIcon, TrashIcon } from "../components/icons";
-import { Button, IconButton } from "../components/ui/Button";
+import { PlusIcon } from "../components/icons";
+import { RowActions } from "../components/RowActions";
+import { Button } from "../components/ui/Button";
 import { Field, Input, MoneyInput, Textarea } from "../components/ui/Field";
 import { confirmDialog, Modal } from "../components/ui/Modal";
 import { DataTable, PageHeader, td, tdMoney, th } from "../components/ui/Page";
@@ -96,7 +97,7 @@ export function ExpensesPage() {
               </td>
               <td className={`${td} text-ink-2`}>{e.note}</td>
               <td className={tdMoney}>{formatVnd(e.amountVnd)}</td>
-              <td className={`${td} w-12`}>{editable && <IconButton label={`Xoá ${e.category}`} onClick={() => remove(e)}><TrashIcon size={18} /></IconButton>}</td>
+              <td className={td}>{editable && <RowActions name={`${e.category} ${formatVnd(e.amountVnd)}`} onEdit={() => open(e)} onDelete={() => remove(e)} />}</td>
             </tr>
           ))}
         </DataTable>

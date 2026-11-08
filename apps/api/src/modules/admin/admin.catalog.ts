@@ -119,7 +119,8 @@ adminCatalogRouter.get("/products", async (req, res) => {
   const [data, total] = await prisma.$transaction([
     prisma.product.findMany({
       where,
-      include: { category: { select: { name: true } }, images: { orderBy: { position: "asc" }, take: 1 } },
+      // _count.packRuns: CMS ẩn nút xoá với sản phẩm đã đóng gói (sổ kho phải giữ)
+      include: { category: { select: { name: true } }, images: { orderBy: { position: "asc" }, take: 1 }, _count: { select: { packRuns: true } } },
       orderBy: [{ updatedAt: "desc" }, { id: "asc" }],
       skip: (page - 1) * limit,
       take: limit,
@@ -166,6 +167,11 @@ adminCatalogRouter.put("/products/:id", async (req, res) => {
 });
 
 adminCatalogRouter.delete("/products/:id", async (req, res) => {
+  // Lịch sử đóng gói là sổ kho và giá vốn, không được mất, nên sản phẩm đã đóng gói chỉ ẩn được
+  const packed = await prisma.packRun.count({ where: { productId: req.params.id } });
+  if (packed > 0) {
+    throw new HttpError(409, `Sản phẩm đã có ${packed} lần đóng gói trong sổ kho nên không xoá được. Chuyển trạng thái sang "Đã ẩn" để gỡ khỏi website.`, "IN_USE");
+  }
   await prisma.product.delete({ where: { id: req.params.id } });
   res.status(204).end();
 });

@@ -170,6 +170,7 @@ Phép thử: nhãn đọc như "hiện cái gì" thì dùng checkbox, đọc nh�
 | Badge số | Tròn, nền `wood`, chữ `on-wood` 11px |
 | `Tabs` | Hàng nút cách 24px, viền dưới `line`, cuộn ngang khi hẹp. Chữ sans 500 15px `ink-3`, đang chọn gạch dưới 2px `wood`. `role="tablist"`, `tab`, `tabpanel` |
 | Bảng dữ liệu (CMS) | Đầu cột 13px 600 `ink-3`, dòng cách nhau bằng viền `line`, cột số tiền căn phải và không xuống dòng, cuộn ngang trong khung riêng |
+| Thao tác mỗi dòng (CMS) | Cột cuối "Thao tác" dùng `RowActions`: nút viền "Sửa" (mục đã khoá như đợt nhập đã nhận thì "Xem") và nút thùng rác. Xoá luôn qua `confirmDelete`, hỏi lại và nói rõ cái gì còn giữ. Không xoá được (đơn hàng, đợt đã nhập kho, tài khoản đang đăng nhập) thì ẩn nút thùng rác, không để bấm rồi mới báo lỗi |
 | Khối chặn chưa đăng nhập | Dùng cùng mẫu `EmptyState` |
 
 ## Ghép trang mới

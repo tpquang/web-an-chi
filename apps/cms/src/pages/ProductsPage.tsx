@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FeaturedToggle } from "../components/FeaturedToggle";
 import { PlusIcon, SearchIcon } from "../components/icons";
+import { confirmDelete, RowActions } from "../components/RowActions";
 import { ButtonLink } from "../components/ui/Button";
 import { Input } from "../components/ui/Field";
 import { DataTable, PageHeader, Pagination, td, tdMoney, th } from "../components/ui/Page";
@@ -40,6 +41,11 @@ export function ProductsPage() {
     { value: "", label: "Mọi danh mục" },
     ...(categories.state.status === "ready" ? categories.state.data.map((c) => ({ value: c.id, label: c.name })) : []),
   ];
+
+  async function remove(id: string, name: string) {
+    const desc = `"${name}" sẽ bị xoá khỏi website. Đơn cũ vẫn giữ tên và giá lúc đặt. Nếu chỉ tạm ngừng bán, bạn nên chuyển trạng thái sang "Đã ẩn".`;
+    if (await confirmDelete({ what: "sản phẩm", name, desc, path: `/products/${id}` })) reload();
+  }
 
   return (
     <>
@@ -86,6 +92,7 @@ export function ProductsPage() {
                 <th className={`${th} text-right`}>Tồn kho</th>
                 <th className={th}>Trạng thái</th>
                 <th className={th}>Nổi bật (tối đa 4)</th>
+                <th className={`${th} text-right`}>Thao tác</th>
               </tr>
             }
           >
@@ -104,6 +111,9 @@ export function ProductsPage() {
                 </td>
                 <td className={td}>
                   <FeaturedToggle kind="products" id={product.id} name={product.name} checked={product.featured} onChange={reload} />
+                </td>
+                <td className={`${td} text-right`}>
+                  <RowActions name={product.name} editTo={`/products/${product.id}`} onDelete={product._count?.packRuns ? undefined : () => remove(product.id, product.name)} />
                 </td>
               </tr>
             ))}

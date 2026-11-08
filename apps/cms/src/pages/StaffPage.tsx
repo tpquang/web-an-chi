@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { PlusIcon } from "../components/icons";
+import { confirmDelete, RowActions } from "../components/RowActions";
 import { Button } from "../components/ui/Button";
 import { Field, Input, Switch } from "../components/ui/Field";
 import { Modal } from "../components/ui/Modal";
@@ -7,7 +8,7 @@ import { DataTable, PageHeader, td, th } from "../components/ui/Page";
 import { ErrorState, TableSkeleton, Tag } from "../components/ui/States";
 import { showToast } from "../components/ui/Toast";
 import { api } from "../lib/api";
-import type { Level, PermissionKey, Permissions } from "../lib/auth";
+import { useAuth, type Level, type PermissionKey, type Permissions } from "../lib/auth";
 import { useLoad } from "../lib/use-load";
 import { useSubmit } from "../lib/use-submit";
 
@@ -35,6 +36,7 @@ const LEVELS: { value: Level; label: string }[] = [
 const SALES_DEFAULT: Permissions = { dashboard: "view", orders: "edit", products: "edit", inventory: "none", batches: "none", finance: "none", posts: "edit", home: "none", inbox: "edit" };
 
 export function StaffPage() {
+  const { staff } = useAuth();
   const { state, slow, reload } = useLoad(() => api.get<StaffRow[]>("/staff"), []);
   const [editing, setEditing] = useState<{ id: string | null; values: Values } | null>(null);
   const { submitting, errors, setErrors, run } = useSubmit();
@@ -79,12 +81,27 @@ export function StaffPage() {
       {state.status === "loading" && <div className={slow ? "" : "invisible"}><TableSkeleton rows={3} /></div>}
       {state.status === "error" && <ErrorState title="Chưa tải được tài khoản" desc={state.error} onRetry={reload} />}
       {state.status === "ready" && (
-        <DataTable head={<tr><th className={th}>Tài khoản</th><th className={th}>Quyền</th><th className={th}>Trạng thái</th></tr>}>
+        <DataTable head={<tr><th className={th}>Tài khoản</th><th className={th}>Quyền</th><th className={th}>Trạng thái</th><th className={`${th} text-right`}>Thao tác</th></tr>}>
           {state.data.map((s) => (
             <tr key={s.id}>
               <td className={td}><button type="button" onClick={() => open(s)} className="min-h-10 text-left font-medium hover:text-wood">{s.name}<span className="block text-xs font-normal text-ink-3">{s.email}</span></button></td>
               <td className={td}>{s.role === "OWNER" ? <Tag tone="wood">Chủ shop · toàn quyền</Tag> : <span className="text-ink-2">{summary(s.permissions)}</span>}</td>
               <td className={td}>{s.active ? <Tag tone="ok">Đang dùng</Tag> : <Tag>Đã khoá</Tag>}</td>
+              <td className={td}>
+                {/* Không tự xoá tài khoản đang đăng nhập, để luôn còn một chủ shop */}
+                <RowActions
+                  name={s.name}
+                  onEdit={() => open(s)}
+                  onDelete={
+                    s.id === staff?.id
+                      ? undefined
+                      : async () => {
+                          const desc = `Xoá hẳn tài khoản "${s.name}" (${s.email}). Người này không đăng nhập CMS được nữa. Hội thoại họ phụ trách vẫn giữ. Chỉ tạm nghỉ thì nên khoá tài khoản.`;
+                          if (await confirmDelete({ what: "tài khoản", name: s.name, desc, path: `/staff/${s.id}` })) reload();
+                        }
+                  }
+                />
+              </td>
             </tr>
           ))}
         </DataTable>

@@ -50,6 +50,31 @@ adminSalesRouter.get("/customers/:id", async (req, res) => {
   res.json({ data });
 });
 
+// Sửa hồ sơ khách. Không sửa "nhận tin tiếp thị": đồng ý phải do chính khách chọn.
+// Đơn cũ giữ thông tin giao hàng lúc đặt nên không đổi theo
+const customerInput = z.object({
+  name: z.string().trim().min(2, "Nhập tên khách").max(120),
+  phone: phoneField,
+  email: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || /^\S+@\S+\.\S+$/.test(v), "Email chưa đúng")
+    .transform((v) => v || null),
+  address: optionalText,
+});
+
+adminSalesRouter.put("/customers/:id", async (req, res) => {
+  const data = await prisma.customer.update({ where: { id: req.params.id }, data: customerInput.parse(req.body) });
+  res.json({ data });
+});
+
+// Xoá hồ sơ và tài khoản đăng nhập của khách (ví dụ khách yêu cầu xoá dữ liệu cá nhân).
+// Đơn hàng giữ lại để đối soát, chỉ bỏ liên kết tới hồ sơ
+adminSalesRouter.delete("/customers/:id", async (req, res) => {
+  await prisma.customer.delete({ where: { id: req.params.id } });
+  res.status(204).end();
+});
+
 // ---- Đơn hàng
 
 const orderQuery = z.object({
