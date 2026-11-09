@@ -2,14 +2,12 @@ import { BraceletDesigner } from "@/components/bracelet/bracelet-designer";
 import { PageFrame, PageHeader } from "@/components/ui/layout";
 import { getBracelet } from "@/lib/api";
 import { braceletHref } from "@/lib/links";
-import { pageMeta } from "@/lib/seo";
+import { staticPageMeta } from "@/lib/page-seo";
 
-export const metadata = pageMeta({
-  title: "Tự thiết kế vòng tay trầm hương",
-  description:
-    "Chọn từng hạt trầm tốc, trầm sánh, trầm chìm nước, charm bạc, vàng và hạt đá, xếp vòng 3D theo cỡ cổ tay, xem giá ngay và đặt hàng tại An Chi Trầm Hương.",
-  path: braceletHref,
-});
+// Tiêu đề, mô tả sửa ở CMS > Cài đặt SEO
+export function generateMetadata() {
+  return staticPageMeta("bracelet", braceletHref);
+}
 
 export default async function BraceletPage() {
   const { rules, beads } = await getBracelet();

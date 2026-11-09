@@ -13,7 +13,7 @@ export const PERMISSION_MODULES = [
   { key: "batches", label: "Đợt nhập hàng", paths: ["batches"] },
   { key: "finance", label: "Chi phí, lợi nhuận", paths: ["expenses", "reports"] },
   { key: "posts", label: "Bài viết", paths: ["posts", "post-categories"] },
-  { key: "home", label: "Trang chủ", paths: ["home", "site-images"] },
+  { key: "home", label: "Trang chủ, cài đặt SEO", paths: ["home", "site-images", "seo-pages"] },
   { key: "inbox", label: "Hộp thư", paths: ["inbox"] },
 ] as const;
 

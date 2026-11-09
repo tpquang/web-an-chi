@@ -16,6 +16,7 @@ import {
   LayersIcon,
   LogoutIcon,
   PackageIcon,
+  SeoIcon,
   ShieldIcon,
   TagIcon,
   TruckIcon,
@@ -76,6 +77,7 @@ const groups: NavGroup[] = [
       { to: "/home", label: "Trang chủ", Icon: ImageIcon, perm: "home" },
       { to: "/posts", label: "Bài viết", Icon: DocIcon, perm: "posts" },
       { to: "/post-categories", label: "Chủ đề bài viết", Icon: FolderIcon, perm: "posts" },
+      { to: "/seo", label: "Cài đặt SEO", Icon: SeoIcon, perm: "home" },
     ],
   },
   {

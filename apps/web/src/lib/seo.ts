@@ -41,21 +41,26 @@ type PageMeta = {
   noindex?: boolean;
   // Tiêu đề trùng tên site thì không gắn hậu tố
   absoluteTitle?: boolean;
-  image?: string;
+  image?: string | null;
+  // Chữ khi chia sẻ mạng xã hội, đặt ở CMS. Trống thì dùng title, description
+  ogTitle?: string | null;
+  ogDescription?: string | null;
 };
 
-export function pageMeta({ title, description, path, noindex, absoluteTitle, image }: PageMeta): Metadata {
+export function pageMeta({ title, description, path, noindex, absoluteTitle, image, ogTitle, ogDescription }: PageMeta): Metadata {
   const desc = description ? clampDescription(description) : undefined;
+  const ogDesc = ogDescription ? clampDescription(ogDescription, 200) : desc;
   return {
     title: absoluteTitle ? { absolute: title } : title,
     description: desc,
     alternates: { canonical: absoluteUrl(path) },
     robots: noindex || !site.indexable ? { index: false, follow: true } : undefined,
     openGraph: {
-      title,
-      description: desc,
+      title: ogTitle || title,
+      description: ogDesc,
       url: absoluteUrl(path),
-      images: [{ url: image ?? defaultOgImage, width: 1200, height: 630 }],
+      // Chỉ ảnh mặc định biết chắc cỡ 1200×630; ảnh tải lên thì để mạng xã hội tự đọc cỡ
+      images: [image ? { url: image } : { url: defaultOgImage, width: 1200, height: 630 }],
     },
   };
 }

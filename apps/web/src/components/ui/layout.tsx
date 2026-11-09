@@ -15,7 +15,7 @@ export function PageHeader({ title, desc, crumbs, actions }: HeaderProps) {
   return (
     <header className="mb-8">
       {crumbs && <PageBreadcrumb crumbs={crumbs} />}
-      <h1 className="font-serif text-[clamp(32px,4vw,48px)] leading-[1.1] font-medium">{title}</h1>
+      <h1 className="font-serif text-[clamp(32px,4vw,48px)] leading-[1.1]">{title}</h1>
       {desc && <div className="mt-3 max-w-[68ch] text-lg text-ink-2">{desc}</div>}
       {actions && <div className="mt-6 flex flex-wrap gap-2">{actions}</div>}
     </header>
@@ -41,7 +41,7 @@ export function Section({ title, eyebrow, id, action, children, className = "" }
       <div className="mb-8 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <div>
           {eyebrow && <Eyebrow className="mb-3">{eyebrow}</Eyebrow>}
-          <h2 id={headingId} className="font-serif text-[clamp(28px,3.2vw,40px)] leading-[1.12] font-medium">
+          <h2 id={headingId} className="font-serif text-[clamp(28px,3.2vw,40px)] leading-[1.12]">
             {title}
           </h2>
         </div>

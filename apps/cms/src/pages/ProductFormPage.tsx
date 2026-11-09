@@ -2,6 +2,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { RecipePanel } from "../components/business/RecipePanel";
 import { ImageList } from "../components/media/ImageList";
+import { IndexSwitch } from "../components/IndexSwitch";
+import { OgFields } from "../components/OgFields";
 import { RowsEditor } from "../components/RowsEditor";
 import { Button } from "../components/ui/Button";
 import { Field, Input, MoneyInput, Switch, Textarea } from "../components/ui/Field";
@@ -25,7 +27,7 @@ type Values = Omit<Product, "id" | "specs" | "images" | "priceVnd"> & {
 
 const empty: Values = {
   name: "", slug: "", summary: "", description: "", usage: "", specs: [], priceVnd: null, compareAtPriceVnd: null,
-  type: "RETAIL", stock: 0, origin: "", featured: false, shopeeUrl: "", tiktokUrl: "", status: "DRAFT", metaTitle: "", metaDescription: "",
+  type: "RETAIL", stock: 0, origin: "", featured: false, shopeeUrl: "", tiktokUrl: "", status: "DRAFT", metaTitle: "", metaDescription: "", noindex: false, ogTitle: "", ogDescription: "", ogImageUrl: "",
   categoryId: "", images: [],
 };
 
@@ -130,7 +132,22 @@ export function ProductFormPage() {
             <div className="flex flex-col gap-4">
               <Field label="Tiêu đề trên Google" optional hint={'Để trống thì dùng tên sản phẩm. Website tự thêm " | An Chi Trầm Hương".'} counter={{ value: (values.metaTitle ?? "").length, max: 45 }}><Input {...text("metaTitle")} placeholder={values.name} /></Field>
               <Field label="Mô tả trên Google" optional hint="120–158 ký tự." counter={{ value: (values.metaDescription ?? "").length, max: 158 }}><Textarea {...text("metaDescription")} rows={3} /></Field>
+              <IndexSwitch noindex={values.noindex} onChange={(v) => set("noindex", v)} disabled={submitting} />
+              {!values.noindex && (values.images.length === 0 || !values.description) && <p className="text-sm text-warn">Sản phẩm chưa có ảnh hoặc mô tả nên web tạm ẩn khỏi Google cho tới khi đủ.</p>}
             </div>
+          </Panel>
+          <Panel title="Chia sẻ mạng xã hội (Open Graph)">
+            <OgFields
+              values={{ ogTitle: values.ogTitle ?? "", ogDescription: values.ogDescription ?? "", ogImageUrl: values.ogImageUrl ?? "" }}
+              set={(key, value) => set(key, value)}
+              fallback={{
+                title: values.metaTitle || values.name,
+                description: values.metaDescription || values.summary || values.description || "",
+                image: values.images[0]?.url || null,
+                imageHint: "Để trống thì dùng ảnh đầu tiên của sản phẩm.",
+              }}
+              disabled={submitting}
+            />
           </Panel>
         </div>
 

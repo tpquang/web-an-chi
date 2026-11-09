@@ -6,18 +6,14 @@ import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/ui/states";
 import { getPostCategories, getPosts } from "@/lib/api";
 import { pagedHref, postsHref } from "@/lib/links";
-import { pageMeta, parsePage } from "@/lib/seo";
+import { staticPageMeta } from "@/lib/page-seo";
+import { parsePage } from "@/lib/seo";
 
 type Props = { searchParams: Promise<{ trang?: string | string[] }> };
 
 export async function generateMetadata({ searchParams }: Props) {
   const page = parsePage((await searchParams).trang);
-  return pageMeta({
-    title: page > 1 ? `Bài viết về trầm hương, trang ${page}` : "Bài viết về trầm hương",
-    description:
-      "Kiến thức trầm hương, cách phân biệt trầm thật, hướng dẫn đốt nhang, xông nụ, bảo quản vòng tay và chuẩn bị trầm cho các dịp lễ trong năm.",
-    path: pagedHref(postsHref, page),
-  });
+  return staticPageMeta("posts", pagedHref(postsHref, page), page);
 }
 
 export default async function PostsPage({ searchParams }: Props) {

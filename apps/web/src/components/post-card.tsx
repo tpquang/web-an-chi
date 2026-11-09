@@ -18,7 +18,7 @@ export function PostCard({ post }: { post: PostSummary }) {
         <p className="text-[13px] text-ink-3">
           {post.category.name} · <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
         </p>
-        <h3 className="mt-2 font-serif text-xl leading-tight font-semibold group-hover:text-wood">{post.title}</h3>
+        <h3 className="mt-2 font-serif text-xl leading-tight group-hover:text-wood">{post.title}</h3>
         {post.excerpt && <p className="mt-2 line-clamp-3 text-sm text-ink-2">{post.excerpt}</p>}
         <span className="mt-auto inline-flex items-center gap-2 pt-4 text-sm font-medium text-wood">
           Đọc bài

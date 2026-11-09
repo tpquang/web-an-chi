@@ -21,7 +21,7 @@ export function BankTransferBox({ payment, totalVnd }: { payment: NonNullable<Or
   ];
   return (
     <section aria-labelledby="chuyen-khoan" className="rounded-2xl border border-wood bg-surface p-5 md:p-6">
-      <h2 id="chuyen-khoan" className="font-serif text-2xl leading-tight font-semibold">
+      <h2 id="chuyen-khoan" className="font-serif text-2xl leading-tight">
         Thông tin chuyển khoản
       </h2>
       <p className="mt-2 text-sm text-ink-2">Bạn ghi đúng nội dung để shop đối chiếu nhanh. Đơn được giao sau khi shop nhận tiền.</p>
@@ -41,7 +41,7 @@ export function OrderDetails({ order }: { order: OrderSummary & { customerName?:
   return (
     <section aria-labelledby="chi-tiet-don" className="rounded-3xl border border-edge bg-surface p-5 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 id="chi-tiet-don" className="font-serif text-2xl leading-tight font-semibold">
+        <h2 id="chi-tiet-don" className="font-serif text-2xl leading-tight">
           Đơn {order.code}
         </h2>
         <Tag tone={statusTone[order.status]}>{orderStatusLabel[order.status]}</Tag>
@@ -69,7 +69,7 @@ export function OrderDetails({ order }: { order: OrderSummary & { customerName?:
         </div>
         <div className="flex items-baseline justify-between gap-4">
           <dt className="font-medium">Tổng cộng</dt>
-          <dd className="font-serif text-2xl font-semibold whitespace-nowrap">{formatVnd(order.totalVnd)}</dd>
+          <dd className="font-serif text-2xl whitespace-nowrap">{formatVnd(order.totalVnd)}</dd>
         </div>
         <div className="flex justify-between gap-4">
           <dt className="text-ink-2">Thanh toán</dt>

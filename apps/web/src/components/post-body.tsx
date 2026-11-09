@@ -7,13 +7,13 @@ export function PostBody({ blocks }: { blocks: Block[] }) {
         switch (block.type) {
           case "h2":
             return (
-              <h2 key={index} id={block.id} className="mt-10 mb-4 scroll-mt-24 font-serif text-[32px] leading-[1.15] font-medium">
+              <h2 key={index} id={block.id} className="mt-10 mb-4 scroll-mt-24 font-serif text-[32px] leading-[1.15]">
                 {block.text}
               </h2>
             );
           case "h3":
             return (
-              <h3 key={index} id={block.id} className="mt-8 mb-3 scroll-mt-24 font-serif text-2xl leading-tight font-semibold">
+              <h3 key={index} id={block.id} className="mt-8 mb-3 scroll-mt-24 font-serif text-2xl leading-tight">
                 {block.text}
               </h3>
             );
@@ -51,7 +51,7 @@ export function TableOfContents({ blocks }: { blocks: Block[] }) {
   if (headings.length < 2) return null;
   return (
     <nav aria-labelledby="muc-luc" className="rounded-3xl border border-edge bg-surface p-5">
-      <p id="muc-luc" className="font-serif text-xl font-semibold">
+      <p id="muc-luc" className="font-serif text-xl">
         Mục lục
       </p>
       <ol className="mt-2 list-decimal pl-5 text-sm">

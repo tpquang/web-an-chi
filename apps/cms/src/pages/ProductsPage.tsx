@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FeaturedToggle } from "../components/FeaturedToggle";
+import { NoindexTag } from "../components/IndexSwitch";
 import { PlusIcon, SearchIcon } from "../components/icons";
 import { confirmDelete, RowActions } from "../components/RowActions";
 import { ButtonLink } from "../components/ui/Button";
@@ -107,7 +108,10 @@ export function ProductsPage() {
                 <td className={tdMoney}>{formatVnd(product.priceVnd)}</td>
                 <td className={`${tdMoney} ${product.stock === 0 ? "text-err" : ""}`}>{product.stock}</td>
                 <td className={td}>
-                  <Tag tone={publishStatus[product.status as PublishStatus].tone}>{publishStatus[product.status as PublishStatus].label}</Tag>
+                  <span className="flex flex-wrap gap-1">
+                    <Tag tone={publishStatus[product.status as PublishStatus].tone}>{publishStatus[product.status as PublishStatus].label}</Tag>
+                    <NoindexTag noindex={product.noindex} />
+                  </span>
                 </td>
                 <td className={td}>
                   <FeaturedToggle kind="products" id={product.id} name={product.name} checked={product.featured} onChange={reload} />

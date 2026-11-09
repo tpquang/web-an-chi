@@ -45,7 +45,7 @@ export function SiteFooter({ store, minimal }: { store: Store | null; minimal?: 
           </nav>
           {!minimal && store && (store.shopeeUrl || store.tiktokUrl) && (
             <div>
-              <p className="font-serif text-lg font-semibold">An Chi trên sàn thương mại</p>
+              <p className="font-serif text-lg">An Chi trên sàn thương mại</p>
               <MarketplaceLinks
                 shopeeUrl={store.shopeeUrl}
                 tiktokUrl={store.tiktokUrl}

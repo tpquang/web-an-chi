@@ -31,16 +31,16 @@ export async function generateMetadata({ params }: Props) {
     title: post.metaTitle ?? post.title,
     description: post.metaDescription ?? post.excerpt,
     path: postHref(post.slug),
+    noindex: post.noindex,
+    ogTitle: post.ogTitle,
+    ogDescription: post.ogDescription,
     image: post.ogImageUrl ?? post.coverUrl ?? undefined,
   });
-  // Chữ khi chia sẻ mạng xã hội đặt riêng ở tab SEO, trống thì dùng tiêu đề và mô tả
   return {
     ...meta,
     openGraph: {
       ...meta.openGraph,
       type: "article",
-      ...(post.ogTitle ? { title: post.ogTitle } : {}),
-      ...(post.ogDescription ? { description: post.ogDescription } : {}),
       publishedTime: post.publishedAt,
       modifiedTime: post.updatedAt,
     },
@@ -83,7 +83,7 @@ export default async function PostPage({ params }: Props) {
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-6">
         <article className="lg:col-span-8">
           <header className="mb-8">
-            <h1 className="font-serif text-[clamp(32px,4vw,48px)] leading-[1.1] font-medium">{post.title}</h1>
+            <h1 className="font-serif text-[clamp(32px,4vw,48px)] leading-[1.1]">{post.title}</h1>
             {post.excerpt && <p className="mt-3 max-w-[68ch] text-lg text-ink-2">{post.excerpt}</p>}
             <p className="mt-4 text-sm text-ink-3">
               {post.authorName} · Đăng <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
@@ -110,7 +110,7 @@ export default async function PostPage({ params }: Props) {
             </div>
           )}
           <nav aria-labelledby="chu-de" className="rounded-3xl border border-edge bg-surface p-5">
-            <p id="chu-de" className="font-serif text-xl font-semibold">
+            <p id="chu-de" className="font-serif text-xl">
               Chủ đề
             </p>
             <ul className="mt-2 text-sm">

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Be_Vietnam_Pro, Cormorant_SC } from "next/font/google";
+import { Be_Vietnam_Pro, Playfair_Display_SC } from "next/font/google";
 import type { ReactNode } from "react";
 import { Analytics } from "@/components/analytics";
 import { ChatLauncher } from "@/components/chat/chat-launcher";
@@ -9,9 +9,10 @@ import { Toaster } from "@/components/ui/toast";
 import { site } from "@/lib/site";
 import "./globals.css";
 
-const serif = Cormorant_SC({
+// Chữ serif chỉ dùng nét thường 400 cho mảnh, xem .claude/skills/anchi-ui-ux/references/foundations.md
+const serif = Playfair_Display_SC({
   subsets: ["latin", "vietnamese"],
-  weight: ["400", "500", "600", "700"],
+  weight: "400",
   variable: "--next-serif",
 });
 const sans = Be_Vietnam_Pro({

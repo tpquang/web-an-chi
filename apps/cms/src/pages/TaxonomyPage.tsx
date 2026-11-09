@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { PlusIcon } from "../components/icons";
+import { IndexSwitch, NoindexTag } from "../components/IndexSwitch";
+import { OgFields, type OgValues } from "../components/OgFields";
 import { RowActions } from "../components/RowActions";
 import { Button } from "../components/ui/Button";
 import { Field, Input, Textarea } from "../components/ui/Field";
@@ -19,8 +21,8 @@ const kinds = {
   "post-categories": { title: "Chủ đề bài viết", one: "chủ đề", urlPrefix: "/chu-de/", countKey: "posts", countLabel: "Bài viết", hasGuide: false },
 } as const;
 
-type Values = { name: string; slug: string; description: string; guide: string; position: number; metaTitle: string; metaDescription: string };
-const empty: Values = { name: "", slug: "", description: "", guide: "", position: 0, metaTitle: "", metaDescription: "" };
+type Values = { name: string; slug: string; description: string; guide: string; position: number; metaTitle: string; metaDescription: string; noindex: boolean } & OgValues;
+const empty: Values = { name: "", slug: "", description: "", guide: "", position: 0, metaTitle: "", metaDescription: "", noindex: false, ogTitle: "", ogDescription: "", ogImageUrl: "" };
 
 export function TaxonomyPage({ kind }: { kind: keyof typeof kinds }) {
   const config = kinds[kind];
@@ -35,7 +37,7 @@ export function TaxonomyPage({ kind }: { kind: keyof typeof kinds }) {
     setEditing({
       id: item?.id ?? null,
       values: item
-        ? { name: item.name, slug: item.slug, description: item.description ?? "", guide: item.guide ?? "", position: item.position, metaTitle: item.metaTitle ?? "", metaDescription: item.metaDescription ?? "" }
+        ? { name: item.name, slug: item.slug, description: item.description ?? "", guide: item.guide ?? "", position: item.position, metaTitle: item.metaTitle ?? "", metaDescription: item.metaDescription ?? "", noindex: item.noindex, ogTitle: item.ogTitle ?? "", ogDescription: item.ogDescription ?? "", ogImageUrl: item.ogImageUrl ?? "" }
         : { ...empty, position: state.status === "ready" ? state.data.length + 1 : 0 },
     });
   }
@@ -84,7 +86,7 @@ export function TaxonomyPage({ kind }: { kind: keyof typeof kinds }) {
           {state.data.map((item) => (
             <tr key={item.id}>
               <td className={`${td} tabular-nums`}>{item.position}</td>
-              <td className={td}><button type="button" onClick={() => open(item)} className="min-h-11 text-left font-medium hover:text-wood">{item.name}</button></td>
+              <td className={td}><button type="button" onClick={() => open(item)} className="min-h-11 text-left font-medium hover:text-wood">{item.name}</button> <NoindexTag noindex={item.noindex} /></td>
               <td className={`${td} text-ink-3`}>{config.urlPrefix}{item.slug}</td>
               <td className={`${td} text-right tabular-nums`}>{item._count?.[config.countKey] ?? 0}</td>
               <td className={td}><RowActions name={item.name} onEdit={() => open(item)} onDelete={() => handleDelete(item)} /></td>
@@ -112,6 +114,9 @@ export function TaxonomyPage({ kind }: { kind: keyof typeof kinds }) {
             {config.hasGuide && <Field label="Hướng dẫn chọn" optional hint="Hiện dưới lưới sản phẩm, mỗi đoạn cách một dòng trống."><Textarea value={v.guide} onChange={(e) => set("guide", e.target.value)} rows={5} disabled={submitting} /></Field>}
             <Field label="Tiêu đề trên Google" optional counter={{ value: v.metaTitle.length, max: 45 }}><Input value={v.metaTitle} onChange={(e) => set("metaTitle", e.target.value)} placeholder={v.name} disabled={submitting} /></Field>
             <Field label="Mô tả trên Google" optional counter={{ value: v.metaDescription.length, max: 158 }}><Textarea value={v.metaDescription} onChange={(e) => set("metaDescription", e.target.value)} disabled={submitting} /></Field>
+            <IndexSwitch noindex={v.noindex} onChange={(value) => set("noindex", value)} disabled={submitting} />
+            <h3 className="mt-2 font-semibold">Chia sẻ mạng xã hội</h3>
+            <OgFields values={v} set={set} fallback={{ title: v.metaTitle || v.name, description: v.metaDescription || v.description, image: null, imageHint: "Để trống thì dùng ảnh mặc định của An Chi." }} disabled={submitting} />
           </form>
         )}
       </Modal>

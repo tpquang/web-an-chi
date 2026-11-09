@@ -4,7 +4,7 @@ import { MovementType, ProductType, PublishStatus, type Prisma } from "../../gen
 import { prisma } from "../../lib/prisma.js";
 import { withLiveStock } from "../../lib/stock.js";
 import { recordSlugChange } from "../../lib/redirects.js";
-import { imageUrl, optionalText, optionalUrl, pageQuery, slugField } from "../../lib/text.js";
+import { imageUrl, optionalImageUrl, optionalText, optionalUrl, pageQuery, slugField } from "../../lib/text.js";
 import { HttpError } from "../../middleware/errors.js";
 import { assertFeaturedRoom } from "./admin.home.js";
 
@@ -20,6 +20,10 @@ const categoryInput = z.object({
   position: z.number().int().min(0).default(0),
   metaTitle: optionalText,
   metaDescription: optionalText,
+  noindex: z.boolean().default(false),
+  ogTitle: optionalText,
+  ogDescription: optionalText,
+  ogImageUrl: optionalImageUrl,
 });
 
 adminCatalogRouter.get("/categories", async (_req, res) => {
@@ -80,6 +84,10 @@ const productInput = z
     status: z.enum(PublishStatus),
     metaTitle: optionalText,
     metaDescription: optionalText,
+    noindex: z.boolean().default(false),
+    ogTitle: optionalText,
+    ogDescription: optionalText,
+    ogImageUrl: optionalImageUrl,
     categoryId: z.string().min(1),
     images: z
       .array(z.object({ url: imageUrl, alt: optionalText }))

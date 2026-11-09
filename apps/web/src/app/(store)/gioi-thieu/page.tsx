@@ -3,16 +3,13 @@ import { Button } from "@/components/ui/button";
 import { PageFrame, PageHeader, Section } from "@/components/ui/layout";
 import { getStore } from "@/lib/api";
 import { aboutHref, postHref, productsHref } from "@/lib/links";
-import { pageMeta } from "@/lib/seo";
+import { staticPageMeta } from "@/lib/page-seo";
 import { formatVnd, site } from "@/lib/site";
 
-export const metadata = pageMeta({
-  title: "Giới thiệu An Chi Trầm Hương",
-  absoluteTitle: true,
-  description:
-    "An Chi Trầm Hương bán vòng tay, nhang, nụ trầm và trầm miếng. Mỗi sản phẩm ghi rõ kích thước, xuất xứ, cách dùng; không hứa công dụng chữa bệnh hay tâm linh.",
-  path: aboutHref,
-});
+// Tiêu đề, mô tả sửa ở CMS > Cài đặt SEO
+export function generateMetadata() {
+  return staticPageMeta("about", aboutHref);
+}
 
 // Chỉ nêu nguyên tắc và thông tin kiểm tra được. Câu chuyện thương hiệu, nguồn hàng cụ thể chờ chủ shop cung cấp
 const principles = [
@@ -70,7 +67,7 @@ export default async function AboutPage() {
         <ul className="grid gap-4 md:grid-cols-2">
           {principles.map((item) => (
             <li key={item.title} className="rounded-3xl border border-edge bg-surface p-5">
-              <h3 className="font-serif text-xl font-semibold">{item.title}</h3>
+              <h3 className="font-serif text-xl">{item.title}</h3>
               <p className="mt-2 text-ink-2">{item.text}</p>
             </li>
           ))}

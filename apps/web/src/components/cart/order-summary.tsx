@@ -9,7 +9,7 @@ export function OrderSummary({ quote, children, busy }: { quote: Quote; children
 
   return (
     <section aria-labelledby="tom-tat" aria-busy={busy || undefined} className="rounded-3xl border border-edge bg-surface p-5 md:p-6">
-      <h2 id="tom-tat" className="font-serif text-2xl leading-tight font-semibold">
+      <h2 id="tom-tat" className="font-serif text-2xl leading-tight">
         Tóm tắt đơn hàng
       </h2>
       <dl className="mt-4 flex flex-col gap-2 text-sm" aria-live="polite">
@@ -23,7 +23,7 @@ export function OrderSummary({ quote, children, busy }: { quote: Quote; children
         </div>
         <div className="mt-2 flex items-baseline justify-between gap-4 border-t border-line pt-3">
           <dt className="font-medium">Tổng cộng</dt>
-          <dd className="font-serif text-[28px] leading-tight font-semibold whitespace-nowrap">{formatVnd(totalVnd)}</dd>
+          <dd className="font-serif text-[28px] leading-tight whitespace-nowrap">{formatVnd(totalVnd)}</dd>
         </div>
       </dl>
       <p className="mt-3 text-sm text-ink-3">

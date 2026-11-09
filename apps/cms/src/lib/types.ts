@@ -9,6 +9,11 @@ export type Category = {
   position: number;
   metaTitle: string | null;
   metaDescription: string | null;
+  // true: ẩn khỏi Google (noindex) và bỏ khỏi sitemap
+  noindex: boolean;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImageUrl: string | null;
   _count?: { products?: number; posts?: number };
 };
 
@@ -20,6 +25,7 @@ export type ProductRow = {
   stock: number;
   status: PublishStatus;
   featured: boolean;
+  noindex: boolean;
   updatedAt: string;
   category: { name: string };
   _count?: { packRuns: number };
@@ -44,6 +50,11 @@ export type Product = {
   status: PublishStatus;
   metaTitle: string | null;
   metaDescription: string | null;
+  // true: ẩn khỏi Google (noindex) và bỏ khỏi sitemap
+  noindex: boolean;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImageUrl: string | null;
   categoryId: string;
   images: { url: string; alt: string | null }[];
 };
@@ -56,6 +67,7 @@ export type PostRow = {
   featured: boolean;
   publishedAt: string | null;
   updatedAt: string;
+  noindex: boolean;
   authorName: string;
   category: { name: string };
 };
@@ -77,6 +89,8 @@ export type Post = {
   publishedAt: string | null;
   metaTitle: string | null;
   metaDescription: string | null;
+  // true: ẩn khỏi Google (noindex) và bỏ khỏi sitemap
+  noindex: boolean;
   categoryId: string;
   featured: boolean;
   productIds: string[];

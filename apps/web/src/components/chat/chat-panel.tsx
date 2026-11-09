@@ -118,7 +118,7 @@ export function ChatPanel({ onClose, onRead }: { onClose: () => void; onRead: ()
       <div className="flex items-center gap-3 border-b border-line px-4 py-3">
         <BrandMark className="size-9 text-brand" />
         <div className="min-w-0 flex-1">
-          <p className="font-serif text-lg leading-tight font-semibold">An Chi Trầm Hương</p>
+          <p className="font-serif text-lg leading-tight">An Chi Trầm Hương</p>
           <p className="text-[13px] text-ink-3">Shop trả lời trong giờ làm việc</p>
         </div>
         <button ref={closeRef} type="button" onClick={onClose} aria-label="Thu nhỏ khung chat" className="inline-flex size-11 items-center justify-center rounded-full text-ink-2 hover:bg-paper-2">

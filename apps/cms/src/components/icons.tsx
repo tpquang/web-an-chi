@@ -208,6 +208,16 @@ export const ShieldIcon = (p: P) => (
     <path d="m9 12 2 2 4-4" />
   </Icon>
 );
+// Kính lúp trên trang: cài đặt SEO
+export const SeoIcon = (p: P) => (
+  <Icon {...p}>
+    <path d="M13 19.5H6A1.5 1.5 0 0 1 4.5 18V6A1.5 1.5 0 0 1 6 4.5h12A1.5 1.5 0 0 1 19.5 6v5" />
+    <path d="M8 9h8M8 12.5h4" />
+    <circle cx="16.5" cy="16.5" r="2.5" />
+    <path d="m18.5 18.5 2 2" />
+  </Icon>
+);
+
 export const LogoutIcon = (p: P) => (
   <Icon {...p}>
     <path d="M14 4.5H7A1.5 1.5 0 0 0 5.5 6v12A1.5 1.5 0 0 0 7 19.5h7" />

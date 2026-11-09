@@ -28,9 +28,9 @@ const loadProduct = cache(async (slug: string) => {
   return product;
 });
 
-// Chưa có ảnh thật hoặc mô tả thì là trang mỏng, chưa cho index
-function isThin(product: Awaited<ReturnType<typeof loadProduct>>) {
-  return product.images.length === 0 || !product.description;
+// Chưa có ảnh thật hoặc mô tả thì là trang mỏng, chưa cho index. Tắt "Hiện trên Google" ở CMS cũng vậy
+function isNoindex(product: Awaited<ReturnType<typeof loadProduct>>) {
+  return product.noindex || product.images.length === 0 || !product.description;
 }
 
 export async function generateMetadata({ params }: Props) {
@@ -42,8 +42,11 @@ export async function generateMetadata({ params }: Props) {
       ([product.summary, product.description].filter(Boolean).join(" ") ||
         `${product.name}, giá ${formatVnd(product.priceVnd)}.`),
     path: productHref(product.slug),
-    noindex: isThin(product),
-    image: product.images[0]?.url,
+    noindex: isNoindex(product),
+    // Ảnh chia sẻ riêng đặt ở CMS, trống thì dùng ảnh chính của sản phẩm
+    image: product.ogImageUrl ?? product.images[0]?.url,
+    ogTitle: product.ogTitle,
+    ogDescription: product.ogDescription,
   });
 }
 
@@ -64,7 +67,7 @@ export default async function ProductPage({ params }: Props) {
   const { flatFeeVnd, freeFromVnd, eta } = store.shipping;
   const shippingVnd = freeFromVnd !== null && product.priceVnd >= freeFromVnd ? 0 : flatFeeVnd;
   // Google bắt buộc có ảnh cho Product. Trang mỏng (chưa ảnh hoặc mô tả) đang noindex nên không xuất schema
-  const jsonLd = isThin(product)
+  const jsonLd = isNoindex(product)
     ? null
     : {
         "@context": "https://schema.org",
@@ -106,7 +109,7 @@ export default async function ProductPage({ params }: Props) {
             <Link href={categoryHref(product.category.slug)} className="text-sm text-ink-3 hover:text-wood">
               {product.category.name}
             </Link>
-            <h1 className="mt-1 font-serif text-[clamp(32px,4vw,48px)] leading-[1.1] font-medium">{product.name}</h1>
+            <h1 className="mt-1 font-serif text-[clamp(32px,4vw,48px)] leading-[1.1]">{product.name}</h1>
             {product.summary && <p className="mt-3 text-lg text-ink-2">{product.summary}</p>}
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -129,7 +132,7 @@ export default async function ProductPage({ params }: Props) {
         <div className="flex flex-col gap-10 lg:col-span-8">
           {specs.length > 0 && (
             <section aria-labelledby="thong-so">
-              <h2 id="thong-so" className="mb-4 font-serif text-[32px] leading-[1.15] font-medium">
+              <h2 id="thong-so" className="mb-4 font-serif text-[32px] leading-[1.15]">
                 Thông số
               </h2>
               <dl className="divide-y divide-line rounded-3xl border border-edge bg-surface">
@@ -144,7 +147,7 @@ export default async function ProductPage({ params }: Props) {
           )}
           {product.description && (
             <section aria-labelledby="mo-ta">
-              <h2 id="mo-ta" className="mb-4 font-serif text-[32px] leading-[1.15] font-medium">
+              <h2 id="mo-ta" className="mb-4 font-serif text-[32px] leading-[1.15]">
                 Mô tả
               </h2>
               <div className="max-w-[68ch] space-y-4 leading-[1.75]">
@@ -156,7 +159,7 @@ export default async function ProductPage({ params }: Props) {
           )}
           {product.usage && (
             <section aria-labelledby="cach-dung">
-              <h2 id="cach-dung" className="mb-4 font-serif text-[32px] leading-[1.15] font-medium">
+              <h2 id="cach-dung" className="mb-4 font-serif text-[32px] leading-[1.15]">
                 Cách dùng và bảo quản
               </h2>
               <div className="max-w-[68ch] space-y-4 leading-[1.75]">
@@ -167,7 +170,7 @@ export default async function ProductPage({ params }: Props) {
             </section>
           )}
           <section aria-labelledby="giao-hang">
-            <h2 id="giao-hang" className="mb-4 font-serif text-[32px] leading-[1.15] font-medium">
+            <h2 id="giao-hang" className="mb-4 font-serif text-[32px] leading-[1.15]">
               Giao hàng và đổi trả
             </h2>
             <ul className="max-w-[68ch] list-disc space-y-2 pl-5 leading-[1.75]">
@@ -183,7 +186,7 @@ export default async function ProductPage({ params }: Props) {
 
         {product.posts.length > 0 && (
           <aside aria-labelledby="bai-lien-quan" className="lg:col-span-4">
-            <h2 id="bai-lien-quan" className="mb-4 font-serif text-2xl leading-tight font-semibold">
+            <h2 id="bai-lien-quan" className="mb-4 font-serif text-2xl leading-tight">
               Bài viết liên quan
             </h2>
             <ul className="flex flex-col gap-3">

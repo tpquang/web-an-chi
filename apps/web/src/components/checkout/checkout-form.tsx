@@ -186,7 +186,7 @@ export function CheckoutForm() {
           />
         )}
         <fieldset className="flex flex-col gap-4" disabled={submitting}>
-          <legend className="mb-4 font-serif text-2xl leading-tight font-semibold">Thông tin giao hàng</legend>
+          <legend className="mb-4 font-serif text-2xl leading-tight">Thông tin giao hàng</legend>
           {!signedIn && (
             <p className="-mt-2 text-sm text-ink-2">
               Đã có tài khoản?{" "}

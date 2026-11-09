@@ -21,7 +21,7 @@ import { useSubmit } from "../lib/use-submit";
 type Values = Omit<Post, "id">;
 const empty: Values = {
   title: "", slug: "", excerpt: "", content: "", coverUrl: "", coverAlt: "", focusKeyword: "", ogTitle: "", ogDescription: "", ogImageUrl: "",
-  authorName: "Ban biên tập An Chi", status: "DRAFT", publishedAt: null, metaTitle: "", metaDescription: "", categoryId: "", featured: false, productIds: [],
+  authorName: "Ban biên tập An Chi", status: "DRAFT", publishedAt: null, metaTitle: "", metaDescription: "", noindex: false, categoryId: "", featured: false, productIds: [],
 };
 const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined) ?? "";
 type Tab = "content" | "seo";
@@ -124,7 +124,7 @@ export function PostFormPage() {
       </div>
       {tab === "seo" && (
         <div role="tabpanel" id="panel-seo" aria-labelledby="tab-seo" className="mb-6">
-          <SeoTab values={seoValues(values)} set={(k, v) => set(k as keyof Values, v as never)} disabled={submitting} siteUrl={SITE_URL} />
+          <SeoTab values={seoValues(values)} set={(k, v) => set(k as keyof Values, v as never)} noindex={values.noindex} onNoindex={(v) => set("noindex", v)} disabled={submitting} siteUrl={SITE_URL} />
           <div className="mt-4"><Button type="submit" loading={submitting}>Lưu bài viết</Button></div>
         </div>
       )}

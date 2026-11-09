@@ -7,7 +7,7 @@ export function Price({ value, compareAt, size = "card" }: Props) {
   const showCompare = compareAt != null && compareAt > value;
   return (
     <p className="flex flex-wrap items-baseline gap-x-2">
-      <span className={`font-serif font-semibold whitespace-nowrap ${size === "page" ? "text-[28px] leading-tight text-wood" : "text-xl"}`}>
+      <span className={`font-serif whitespace-nowrap ${size === "page" ? "text-[28px] leading-tight text-wood" : "text-xl"}`}>
         {formatVnd(value)}
       </span>
       {showCompare && (

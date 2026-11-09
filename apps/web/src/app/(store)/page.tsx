@@ -7,17 +7,14 @@ import { Button } from "@/components/ui/button";
 import { PageFrame, Section } from "@/components/ui/layout";
 import { getHome, getPosts, getProducts, getStore } from "@/lib/api";
 import { postsHref, productsHref } from "@/lib/links";
-import { absoluteUrl, pageMeta, safeJsonLd } from "@/lib/seo";
+import { staticPageMeta } from "@/lib/page-seo";
+import { absoluteUrl, safeJsonLd } from "@/lib/seo";
 import { site } from "@/lib/site";
 
-export const metadata = pageMeta({
-  // Cụm chính "trầm hương tự nhiên" kèm vùng nguyên liệu, theo docs/web/seo/keyword-map.md
-  title: `Trầm hương tự nhiên Hương Khê, Hà Tĩnh | ${site.name}`,
-  absoluteTitle: true,
-  description:
-    "Nhang trầm, nụ trầm và vòng tay trầm hương tự nhiên từ vùng Phúc Trạch, Hương Khê, Hà Tĩnh. Ghi rõ thành phần, kích thước, cách dùng. Giao hàng toàn quốc.",
-  path: "/",
-});
+// Tiêu đề, mô tả sửa ở CMS > Cài đặt SEO. Cụm chính "trầm hương tự nhiên" kèm vùng nguyên liệu, theo docs/web/seo/keyword-map.md
+export function generateMetadata() {
+  return staticPageMeta("home", "/");
+}
 
 // Năm khối theo thứ tự: banner, sản phẩm nổi bật, slide giới thiệu, bài viết nổi bật, footer (ở layout).
 // Banner và slide cấu hình ở CMS. Sản phẩm tối đa 4, bài viết tối đa 3, giới hạn kiểm ở API.

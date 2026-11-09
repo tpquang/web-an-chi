@@ -3,6 +3,7 @@ import { z } from "zod";
 import { FEATURED_LIMIT, getHome, HOME_IMAGE, homeImageIds, homeSchema } from "../../lib/home.js";
 import { imageInfo } from "../../lib/image.js";
 import { prisma } from "../../lib/prisma.js";
+import { adminSeoPages, isSeoPageKey, saveSeoPage, seoPageInput } from "../../lib/seo-pages.js";
 import { HttpError } from "../../middleware/errors.js";
 
 export const adminHomeRouter = Router();
@@ -72,4 +73,17 @@ adminHomeRouter.get("/featured", async (_req, res) => {
     prisma.post.findMany({ where: { featured: true }, select: { id: true, title: true, status: true }, orderBy: { updatedAt: "desc" } }),
   ]);
   res.json({ data: { products, posts, limit: FEATURED_LIMIT } });
+});
+
+// ---- SEO trang không có slug: trang chủ, danh sách sản phẩm, bài viết, trang tĩnh
+
+adminHomeRouter.get("/seo-pages", async (_req, res) => {
+  res.json({ data: await adminSeoPages() });
+});
+
+adminHomeRouter.put("/seo-pages/:key", async (req, res) => {
+  const key = req.params.key;
+  if (!isSeoPageKey(key)) throw new HttpError(404, "Không có trang này trong cài đặt SEO.", "NOT_FOUND");
+  await saveSeoPage(key, seoPageInput.parse(req.body));
+  res.json({ data: await adminSeoPages() });
 });

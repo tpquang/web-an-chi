@@ -43,7 +43,7 @@ export function WristSize({ state, compact }: { state: BraceletState; compact?: 
 
   return (
     <section aria-labelledby="co-tay" className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-5">
-      <h2 id="co-tay" className="font-serif text-2xl font-semibold">
+      <h2 id="co-tay" className="font-serif text-2xl">
         Kích thước cổ tay
       </h2>
       <div className="flex flex-col gap-2">
@@ -103,7 +103,7 @@ export function BraceletSummary({ state }: { state: BraceletState }) {
         </dl>
         <p className="flex items-baseline justify-between border-t border-line pt-3" aria-live="polite">
           <span className="text-lg font-medium">Tạm tính</span>
-          <span className="font-serif text-[28px] font-semibold text-wood lining-nums tabular-nums">{formatVnd(totalVnd)}</span>
+          <span className="font-serif text-[28px] text-wood lining-nums tabular-nums">{formatVnd(totalVnd)}</span>
         </p>
         <p role="status" className={`text-sm ${problem ? "text-err" : "text-ok"}`}>
           {problem ?? "Vòng đã vừa cỡ tay."}

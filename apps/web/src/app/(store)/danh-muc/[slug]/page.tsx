@@ -26,6 +26,10 @@ export async function generateMetadata({ params, searchParams }: Props) {
     title: page > 1 ? `${title}, trang ${page}` : title,
     description: category.metaDescription ?? category.description,
     path: pagedHref(categoryHref(category.slug), page),
+    noindex: category.noindex,
+    image: category.ogImageUrl,
+    ogTitle: category.ogTitle,
+    ogDescription: category.ogDescription,
   });
 }
 

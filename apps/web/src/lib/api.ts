@@ -16,6 +16,10 @@ export type Category = {
   guide: string | null;
   metaTitle: string | null;
   metaDescription: string | null;
+  noindex: boolean;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImageUrl: string | null;
   updatedAt: string;
   _count?: { products: number };
 };
@@ -37,6 +41,10 @@ export type Product = {
   tiktokUrl: string | null;
   metaTitle: string | null;
   metaDescription: string | null;
+  noindex: boolean;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImageUrl: string | null;
   updatedAt: string;
   category: { id: string; name: string; slug: string };
   images: Image[];
@@ -50,6 +58,7 @@ export type PostSummary = {
   coverUrl: string | null;
   authorName: string;
   publishedAt: string;
+  noindex: boolean;
   updatedAt: string;
   category: { name: string; slug: string };
 };
@@ -72,6 +81,10 @@ export type PostCategory = {
   description: string | null;
   metaTitle: string | null;
   metaDescription: string | null;
+  noindex: boolean;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImageUrl: string | null;
   updatedAt: string;
   _count?: { posts: number };
 };
@@ -176,6 +189,21 @@ export async function getStore() {
 // Bảng redirect khi đổi slug. API lỗi thì coi như trống: trang vẫn trả 404 thay vì 500
 export async function getRedirects(): Promise<Record<string, string>> {
   return get<{ data: Record<string, string> }>("/settings/redirects").then((body) => body?.data ?? {}, () => ({}));
+}
+
+export type SeoPage = {
+  title: string;
+  description: string;
+  absoluteTitle: boolean;
+  noindex: boolean;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImageUrl: string | null;
+};
+
+// SEO trang chủ, trang danh sách, trang tĩnh. Sửa ở CMS > Cài đặt SEO
+export async function getSeoPages() {
+  return (await must<{ data: Record<string, SeoPage> }>("/settings/seo-pages")).data;
 }
 
 export type HomeImage = { id: string; version: number; width: number; height: number; alt: string };

@@ -1,23 +1,21 @@
-import { mediaSrc } from "../../lib/media";
 import { analyzeSeo, LIMITS, type SeoInput } from "../../lib/seo-check";
 import { CheckIcon, AlertIcon, CloseIcon } from "../icons";
-import { ImageUpload } from "../media/ImageUpload";
-import { Button } from "../ui/Button";
+import { IndexSwitch } from "../IndexSwitch";
+import { OgFields } from "../OgFields";
 import { Field, Input, Textarea } from "../ui/Field";
 import { Panel } from "../ui/Page";
 
 type Values = SeoInput & { ogTitle: string; ogDescription: string; ogImageUrl: string };
-type Props = { values: Values; set: <K extends keyof Values>(key: K, value: Values[K]) => void; disabled?: boolean; siteUrl: string };
+type Props = { values: Values; set: <K extends keyof Values>(key: K, value: Values[K]) => void; noindex: boolean; onNoindex(noindex: boolean): void; disabled?: boolean; siteUrl: string };
 
 const tone = { good: "text-ok", warn: "text-warn", bad: "text-err" } as const;
 const Icon = { good: CheckIcon, warn: AlertIcon, bad: CloseIcon } as const;
 const word = { good: "Tốt", warn: "Nên sửa", bad: "Cần sửa" } as const;
 
-export function SeoTab({ values, set, disabled, siteUrl }: Props) {
+export function SeoTab({ values, set, noindex, onNoindex, disabled, siteUrl }: Props) {
   const { checks, score } = analyzeSeo(values);
   const title = values.metaTitle || values.title;
   const desc = values.metaDescription || values.excerpt;
-  const ogImage = values.ogImageUrl || values.coverUrl;
   const scoreTone = score >= 80 ? "text-ok" : score >= 50 ? "text-warn" : "text-err";
 
   return (
@@ -25,6 +23,7 @@ export function SeoTab({ values, set, disabled, siteUrl }: Props) {
       <div className="flex flex-col gap-5">
         <Panel title="Từ khoá và thẻ meta">
           <div className="flex flex-col gap-4">
+            <IndexSwitch noindex={noindex} onChange={onNoindex} disabled={disabled} />
             <Field label="Từ khoá chính" hint="Một cụm khách hay gõ trên Google, mỗi bài một cụm khác nhau.">
               <Input value={values.focusKeyword} onChange={(e) => set("focusKeyword", e.target.value)} placeholder="VD: cách phân biệt trầm hương" disabled={disabled} />
             </Field>
@@ -43,26 +42,7 @@ export function SeoTab({ values, set, disabled, siteUrl }: Props) {
           </div>
         </Panel>
         <Panel title="Chia sẻ mạng xã hội (Open Graph)">
-          <div className="flex flex-col gap-4">
-            <Field label="Tiêu đề khi chia sẻ" optional hint="Để trống thì dùng tiêu đề trên Google." counter={{ value: values.ogTitle.length, max: 60 }}>
-              <Input value={values.ogTitle} onChange={(e) => set("ogTitle", e.target.value)} placeholder={title} disabled={disabled} />
-            </Field>
-            <Field label="Mô tả khi chia sẻ" optional counter={{ value: values.ogDescription.length, max: 200 }}>
-              <Textarea value={values.ogDescription} onChange={(e) => set("ogDescription", e.target.value)} rows={2} placeholder={desc} disabled={disabled} />
-            </Field>
-            <Field label="Ảnh chia sẻ" optional hint="Tỉ lệ 1200×630. Để trống thì dùng ảnh bìa.">
-              <ImageUpload value={values.ogImageUrl || null} onChange={(path) => set("ogImageUrl", path)} disabled={disabled} preview={false} />
-            </Field>
-            {values.ogImageUrl && <div><Button variant="text" size="sm" onClick={() => set("ogImageUrl", "")} disabled={disabled}>Bỏ ảnh chia sẻ riêng</Button></div>}
-            <div className="max-w-md overflow-hidden rounded-lg border border-line" aria-label="Xem trước thẻ chia sẻ">
-              {ogImage ? <img src={mediaSrc(ogImage)} alt="" className="aspect-[1200/630] w-full bg-paper-2 object-cover" /> : <div className="aspect-[1200/630] bg-paper-2" />}
-              <div className="bg-paper-2 px-3 py-2">
-                <p className="text-xs text-ink-3 uppercase">{siteUrl.replace(/^https?:\/\//, "")}</p>
-                <p className="truncate text-sm font-semibold">{values.ogTitle || title || "Tiêu đề"}</p>
-                <p className="line-clamp-1 text-xs text-ink-2">{values.ogDescription || desc}</p>
-              </div>
-            </div>
-          </div>
+          <OgFields values={values} set={set} fallback={{ title, description: desc, image: values.coverUrl || null, imageHint: "Để trống thì dùng ảnh bìa." }} disabled={disabled} />
         </Panel>
       </div>
       <Panel title="Kiểm tra SEO">

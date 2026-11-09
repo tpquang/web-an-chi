@@ -22,6 +22,8 @@ const postListSelect = {
   authorName: true,
   publishedAt: true,
   updatedAt: true,
+  // Sitemap bỏ bài đã tắt hiện trên Google
+  noindex: true,
   category: { select: { name: true, slug: true } },
 } as const satisfies Prisma.PostSelect;
 

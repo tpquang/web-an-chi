@@ -9,6 +9,13 @@ Biên tập sửa title, noindex, redirect mà không cần deploy.
 3. Ảnh lưu key, BE ghép URL rồi mới trả client.
 4. Web đọc có cache. CMS lưu xong gọi webhook để xoá cache.
 
+## Đã làm (11/2026)
+
+- Trang có slug (sản phẩm, danh mục, bài viết, chủ đề) cài SEO trong form của mục đó: tiêu đề, mô tả, công tắc "Hiện trên Google" (cột `noindex`).
+- Trang không có slug (trang chủ, `/san-pham`, `/bai-viet`, `/thiet-ke-vong-tay`, `/gioi-thieu`) cài ở CMS > Cài đặt SEO, lưu Setting `seo-pages`. Danh sách và mặc định ở `apps/api/src/lib/seo-pages.ts`, bản dự phòng khi API lỗi ở `apps/web/src/lib/page-seo.ts`; hai nơi phải khớp. Thêm trang tĩnh mới thì thêm vào cả hai và vào `sitemap.ts`.
+- `noindex` bật thì trang có thẻ noindex, ra khỏi sitemap và llms.txt. Trang riêng tư luôn noindex trong code, CMS chỉ liệt kê.
+- Mọi trang lẻ có `ogTitle`, `ogDescription`, `ogImageUrl` (form dùng `components/OgFields.tsx`). Trống thì dùng tiêu đề, mô tả trên Google; ảnh trống thì sản phẩm dùng ảnh đầu, bài viết dùng ảnh bìa, còn lại dùng `/brand/default-og.png`.
+
 ## Dữ liệu
 
 **Toàn site:** tên và URL site, title và description mặc định, ảnh OG, logo, màu theme, `sameAs`, thông tin đơn vị bán hàng, mã xác minh, id analytics, `noindexSite`.

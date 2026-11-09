@@ -237,7 +237,7 @@ export function BraceletDesigner({
             aria-live="polite"
           >
             Tạm tính
-            <span className="block font-serif text-lg font-semibold text-wood tabular-nums">
+            <span className="block font-serif text-lg text-wood tabular-nums">
               {formatVnd(totalVnd)}
             </span>
           </p>

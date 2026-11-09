@@ -12,7 +12,7 @@ export function HomeBanner({ banner }: { banner: Banner }) {
     <section aria-labelledby="banner-title" className="grid items-center gap-8 pt-6 md:pt-10 lg:grid-cols-12 lg:gap-6">
       <div className="lg:col-span-6 lg:pr-6">
         {banner.eyebrow && <Eyebrow>{banner.eyebrow}</Eyebrow>}
-        <h1 id="banner-title" className="mt-5 font-serif text-[clamp(40px,5.6vw,72px)] leading-[1.05] font-semibold text-balance">
+        <h1 id="banner-title" className="mt-5 font-serif text-[clamp(40px,5.6vw,72px)] leading-[1.05] text-balance">
           {banner.title}
         </h1>
         {banner.text && <p className="mt-6 max-w-[46ch] text-lg text-ink-2">{banner.text}</p>}

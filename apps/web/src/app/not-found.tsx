@@ -8,7 +8,7 @@ export default function NotFound() {
   return (
     <main id="noi-dung" className="flex-1 py-16">
       <PageFrame>
-        <h1 className="font-serif text-[clamp(32px,4vw,48px)] leading-[1.1] font-medium">Không tìm thấy trang</h1>
+        <h1 className="font-serif text-[clamp(32px,4vw,48px)] leading-[1.1]">Không tìm thấy trang</h1>
         <p className="mt-3 max-w-[68ch] text-lg text-ink-2">
           Đường dẫn có thể đã đổi hoặc sản phẩm không còn bán. Bạn xem các sản phẩm đang có tại cửa hàng nhé.
         </p>

@@ -33,7 +33,7 @@ export default async function OrderPage({ params }: Props) {
         <div className="flex flex-col gap-6 lg:col-span-7">
           {order.payment && <BankTransferBox payment={order.payment} totalVnd={order.totalVnd} />}
           <section aria-labelledby="tiep-theo">
-            <h2 id="tiep-theo" className="font-serif text-2xl leading-tight font-semibold">
+            <h2 id="tiep-theo" className="font-serif text-2xl leading-tight">
               Việc tiếp theo
             </h2>
             <ol className="mt-3 list-decimal space-y-2 pl-5 leading-[1.75]">
@@ -47,7 +47,7 @@ export default async function OrderPage({ params }: Props) {
             </ol>
           </section>
           <section aria-labelledby="lien-he">
-            <h2 id="lien-he" className="font-serif text-2xl leading-tight font-semibold">
+            <h2 id="lien-he" className="font-serif text-2xl leading-tight">
               Cần đổi thông tin đơn?
             </h2>
             <p className="mt-3 leading-[1.75]">

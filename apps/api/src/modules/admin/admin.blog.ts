@@ -18,6 +18,10 @@ const postCategoryInput = z.object({
   position: z.number().int().min(0).default(0),
   metaTitle: optionalText,
   metaDescription: optionalText,
+  noindex: z.boolean().default(false),
+  ogTitle: optionalText,
+  ogDescription: optionalText,
+  ogImageUrl: optionalImageUrl,
 });
 
 adminBlogRouter.get("/post-categories", async (_req, res) => {
@@ -69,6 +73,7 @@ const postInput = z.object({
   publishedAt: z.iso.datetime({ offset: true }).nullish(),
   metaTitle: optionalText,
   metaDescription: optionalText,
+  noindex: z.boolean().default(false),
   categoryId: z.string().min(1),
   featured: z.boolean().default(false),
   productIds: z.array(z.string()).max(3, "Tối đa 3 sản phẩm liên quan.").default([]),
@@ -109,6 +114,7 @@ adminBlogRouter.get("/posts", async (req, res) => {
         featured: true,
         publishedAt: true,
         updatedAt: true,
+        noindex: true,
         authorName: true,
         category: { select: { name: true } },
       },

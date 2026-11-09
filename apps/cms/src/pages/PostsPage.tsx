@@ -4,6 +4,7 @@ import { ButtonLink } from "../components/ui/Button";
 import { DataTable, PageHeader, Pagination, td, th } from "../components/ui/Page";
 import { Select } from "../components/ui/Select";
 import { FeaturedToggle } from "../components/FeaturedToggle";
+import { NoindexTag } from "../components/IndexSwitch";
 import { confirmDelete, RowActions } from "../components/RowActions";
 import { EmptyState, ErrorState, TableSkeleton, Tag } from "../components/ui/States";
 import { api } from "../lib/api";
@@ -52,7 +53,7 @@ export function PostsPage() {
                 </td>
                 <td className={td}>{post.category.name}</td>
                 <td className={`${td} whitespace-nowrap`}>{post.publishedAt ? formatDate(post.publishedAt) : "Chưa đăng"}</td>
-                <td className={td}><Tag tone={publishStatus[post.status].tone}>{publishStatus[post.status].label}</Tag></td>
+                <td className={td}><span className="flex flex-wrap gap-1"><Tag tone={publishStatus[post.status].tone}>{publishStatus[post.status].label}</Tag><NoindexTag noindex={post.noindex} /></span></td>
                 <td className={td}><FeaturedToggle kind="posts" id={post.id} name={post.title} checked={post.featured} onChange={reload} /></td>
                 <td className={td}>
                   <RowActions

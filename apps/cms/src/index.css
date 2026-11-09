@@ -22,7 +22,7 @@
   --text-3xl: 1.625rem;
   /* CMS chỉ dùng Be Vietnam Pro. Class font-serif cũ trong CMS cũng ra chữ không chân; riêng logo dùng font-logo */
   --font-serif: var(--sans);
-  --font-logo: "Cormorant SC", "Times New Roman", serif;
+  --font-logo: "Playfair Display SC", "Times New Roman", serif;
 }
 
 /* iOS tự phóng to khi ô nhập dưới 16px, nên trên điện thoại vẫn giữ 16px */

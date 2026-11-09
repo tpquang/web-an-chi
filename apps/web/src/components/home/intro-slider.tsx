@@ -51,7 +51,7 @@ export function IntroSlider({ slides, label }: { slides: HomeSlide[]; label: str
             {slide.image && <div aria-hidden className="absolute inset-0 bg-linear-to-t from-shade via-shade/80 to-shade/10 md:bg-linear-to-r md:from-shade md:via-shade/70 md:to-transparent" />}
             <div className="relative w-full px-6 pt-16 pb-28 md:max-w-xl md:px-12 md:py-14">
               {slide.eyebrow && <p className="text-[13px] font-medium tracking-wide text-on-night-2">{slide.eyebrow}</p>}
-              <h2 className="mt-3 font-serif text-[clamp(30px,4vw,44px)] leading-[1.1] font-semibold">{slide.title}</h2>
+              <h2 className="mt-3 font-serif text-[clamp(30px,4vw,44px)] leading-[1.1]">{slide.title}</h2>
               {slide.text && <p className="mt-4 text-on-night-2 md:text-lg">{slide.text}</p>}
               {slide.cta && (
                 <Button href={slide.cta.href} variant="light" className="mt-7">

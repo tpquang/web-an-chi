@@ -4,22 +4,22 @@
 
 | Token | Class | Font | Dùng cho |
 |---|---|---|---|
-| `--serif` | `font-serif` | Cormorant SC 400–700 | Tiêu đề, thương hiệu, chữ trong logo, giá tiền |
+| `--serif` | `font-serif` | Playfair Display SC 400 | Tiêu đề, thương hiệu, chữ trong logo, giá tiền |
 | `--sans` | `font-sans` | Be Vietnam Pro 400–600 | Nội dung, form, nút, bảng |
 
 Web nạp bằng `next/font/google`, gắn biến `--next-serif`, `--next-sans` lên `<html>`. CMS nạp Be Vietnam Pro và cũng dùng serif cho tiêu đề thương hiệu.
 
-Cormorant SC là chữ hoa nhỏ: chữ thường hiện thành chữ hoa cỡ nhỏ, mặt chữ thấp, nét mảnh. Dùng từ 18px trở lên và độ đậm từ 500; không dùng cho đoạn văn, nhãn form, nút hay chữ phụ. `body` đặt `font-variant-numeric: lining-nums`; cột số trong bảng thêm `tabular-nums`, chữ serif có số thì ghi đủ `lining-nums tabular-nums` vì class của Tailwind ghi đè cả hai.
+Playfair Display SC là chữ hoa nhỏ: chữ thường hiện thành chữ hoa cỡ nhỏ, tương phản nét dày mảnh cao, khổ chữ rộng. Chỉ nạp và dùng nét 400 cho mảnh (chốt 11/2026), không gắn `font-medium`, `font-semibold` lên `font-serif`. Dùng từ 18px trở lên; không dùng cho đoạn văn, nhãn form, nút hay chữ phụ. `body` đặt `font-variant-numeric: lining-nums`; cột số trong bảng thêm `tabular-nums`, chữ serif có số thì ghi đủ `lining-nums tabular-nums` vì class của Tailwind ghi đè cả hai.
 
 | Cấp | Cỡ / line-height | Kiểu |
 |---|---|---|
-| Hero | `clamp(40px, 5.6vw, 72px)` / 1.05 | serif 600, `text-balance` |
-| H1 | `clamp(32px, 4vw, 48px)` / 1.1 | serif 500 |
-| H2 section | `clamp(28px, 3.2vw, 40px)` / 1.12 | serif 500 |
-| H2 trong thẻ, khối tối | `clamp(30px, 4vw, 44px)` / 1.1 | serif 600 |
-| H3 | 24 / 1.2 | serif 600 |
-| H4 | 20 / 1.25 | serif 600 |
-| Giá | 28 / 1.2, thẻ sản phẩm 20 | serif 600 |
+| Hero | `clamp(40px, 5.6vw, 72px)` / 1.05 | serif 400, `text-balance` |
+| H1 | `clamp(32px, 4vw, 48px)` / 1.1 | serif 400 |
+| H2 section | `clamp(28px, 3.2vw, 40px)` / 1.12 | serif 400 |
+| H2 trong thẻ, khối tối | `clamp(30px, 4vw, 44px)` / 1.1 | serif 400 |
+| H3 | 24 / 1.2 | serif 400 |
+| H4 | 20 / 1.25 | serif 400 |
+| Giá | 28 / 1.2, thẻ sản phẩm 20 | serif 400 |
 | Eyebrow | 13 / 1.4, `tracking-wide` | sans 500 màu `wood`, gạch 24px phía trước |
 | Lời dẫn | 18 / 1.6 | sans 400 |
 | Nội dung | 16 / 1.6 | sans 400 |
@@ -28,7 +28,7 @@ Cormorant SC là chữ hoa nhỏ: chữ thường hiện thành chữ hoa cỡ n
 
 - Đoạn đọc rộng tối đa `68ch`, line-height 1.7–1.75.
 - Chữ tối thiểu 12px, nội dung đọc từ 14px.
-- Không viết hoa toàn bộ, kể cả class `uppercase`: dấu tiếng Việt viết hoa dễ bị cắt và khó đọc. Vẻ chữ hoa đậm của mẫu thiết kế đến từ Cormorant SC đậm 600, không từ `uppercase`. Ngoại lệ duy nhất là chữ trong logo.
+- Không viết hoa toàn bộ, kể cả class `uppercase`: dấu tiếng Việt viết hoa dễ bị cắt và khó đọc. Vẻ chữ hoa của mẫu thiết kế đến từ chữ hoa nhỏ của Playfair Display SC, không từ `uppercase`. Ngoại lệ duy nhất là chữ trong logo.
 
 ## Khoảng cách
 

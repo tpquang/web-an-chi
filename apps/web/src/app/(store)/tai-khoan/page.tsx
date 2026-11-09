@@ -25,7 +25,7 @@ export default async function AccountPage() {
       <PageHeader title={`Chào ${account.name}`} desc={`Số điện thoại đăng nhập: ${account.phone}`} actions={<LogoutButton />} />
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-6">
         <section aria-labelledby="don-cua-ban" className="lg:col-span-7">
-          <h2 id="don-cua-ban" className="mb-4 font-serif text-2xl leading-tight font-semibold">
+          <h2 id="don-cua-ban" className="mb-4 font-serif text-2xl leading-tight">
             Đơn hàng của bạn
           </h2>
           {account.orders.length === 0 ? (
