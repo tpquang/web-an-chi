@@ -5,6 +5,7 @@ import { env } from "./env.js";
 import { prisma } from "./lib/prisma.js";
 import { errorHandler, notFound } from "./middleware/errors.js";
 import { accountRouter } from "./modules/account/account.routes.js";
+import { supplierRouter } from "./modules/supplier/supplier.routes.js";
 import { adminRouter } from "./modules/admin/admin.routes.js";
 import { blogRouter } from "./modules/blog/blog.routes.js";
 import { braceletRouter } from "./modules/bracelet/bracelet.routes.js";
@@ -38,6 +39,7 @@ app.use("/api/v1/settings", settingsRouter);
 app.use("/api/v1/media", mediaRouter);
 app.use("/api/v1/account", accountRouter);
 app.use("/api/v1/chat", chatRouter);
+app.use("/api/v1/supplier", supplierRouter);
 app.use("/api/v1/admin", adminRouter);
 
 app.use(notFound);

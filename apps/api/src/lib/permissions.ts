@@ -10,7 +10,7 @@ export const PERMISSION_MODULES = [
   { key: "orders", label: "Đơn hàng, khách hàng", paths: ["orders", "customers"] },
   { key: "products", label: "Sản phẩm, danh mục, hạt", paths: ["products", "categories", "featured", "bead-textures"] },
   { key: "inventory", label: "Kho, đóng gói, kiểm kho", paths: ["materials", "recipes", "pack", "pack-runs", "movements"] },
-  { key: "batches", label: "Đợt nhập hàng", paths: ["batches"] },
+  { key: "batches", label: "Đợt nhập hàng, nhà cung cấp", paths: ["batches", "suppliers"] },
   { key: "finance", label: "Chi phí, lợi nhuận", paths: ["expenses", "reports"] },
   { key: "posts", label: "Bài viết", paths: ["posts", "post-categories"] },
   { key: "home", label: "Trang chủ, cài đặt SEO", paths: ["home", "site-images", "seo-pages"] },

@@ -5,6 +5,7 @@ import { ConfirmHost } from "./components/ui/Modal";
 import { Toaster } from "./components/ui/Toast";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { AuthProvider, useAuth } from "./lib/auth";
+import { SuppliersPage } from "./pages/SuppliersPage";
 import { BatchesPage } from "./pages/BatchesPage";
 import { BeadTexturesPage } from "./pages/BeadTexturesPage";
 import { BatchFormPage } from "./pages/BatchFormPage";
@@ -61,6 +62,7 @@ function App() {
         <Route path="customers" element={<CustomersPage />} />
         <Route path="customers/:id" element={<CustomerDetailPage />} />
         <Route path="business" element={<BatchesPage />} />
+        <Route path="suppliers" element={<SuppliersPage />} />
         <Route path="business/new" element={<BatchFormPage />} />
         <Route path="business/:id" element={<BatchFormPage />} />
         <Route path="materials" element={<MaterialsPage />} />

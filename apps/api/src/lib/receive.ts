@@ -9,6 +9,7 @@ export const batchInclude = {
   extras: { orderBy: { position: "asc" } },
   writeOffs: { orderBy: { position: "asc" } },
   plans: true,
+  supplier: { select: { id: true, name: true } },
 } as const satisfies Prisma.PurchaseBatchInclude;
 
 // Nhập kho một đợt: cộng nguyên liệu đã trừ hao hụt, cập nhật giá vốn bình quân, ghi sổ kho, cập nhật giá

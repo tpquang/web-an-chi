@@ -21,7 +21,7 @@ export type PlanInput = { productId: string; quantity: number };
 
 export type BatchInput = {
   name: string;
-  supplier: string | null;
+  supplierId: string | null;
   orderedAt: string | null;
   status: BatchStatus;
   capitalVnd: number | null;

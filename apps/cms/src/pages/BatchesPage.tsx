@@ -11,7 +11,7 @@ import { formatDate, formatVnd } from "../lib/format";
 import { batchStatus } from "../lib/labels";
 import { useLoad } from "../lib/use-load";
 
-type Batch = BatchInput & { id: string; createdAt: string };
+type Batch = BatchInput & { id: string; createdAt: string; supplier: { id: string; name: string } | null };
 
 export function BatchesPage() {
   const { state, slow, reload } = useLoad(() => api.get<Batch[]>("/batches"), []);
@@ -52,7 +52,7 @@ export function BatchesPage() {
               <tr key={batch.id} className="hover:bg-paper">
                 <td className={td}>
                   <Link to={`/business/${batch.id}`} className="font-medium hover:text-wood">{batch.name}</Link>
-                  <span className="block text-[13px] text-ink-3">{[batch.supplier, batch.orderedAt ? formatDate(batch.orderedAt) : null, `${batch.lines.length} nguyên liệu`].filter(Boolean).join(" · ")}</span>
+                  <span className="block text-[13px] text-ink-3">{[batch.supplier?.name, batch.orderedAt ? formatDate(batch.orderedAt) : null, `${batch.lines.length} nguyên liệu`].filter(Boolean).join(" · ")}</span>
                 </td>
                 <td className={td}><Tag tone={batchStatus[batch.status].tone}>{batchStatus[batch.status].label}</Tag></td>
                 <td className={tdMoney}>{formatVnd(result.capitalNeededVnd)}</td>

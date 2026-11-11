@@ -9,6 +9,7 @@ export const loginHref = "/dang-nhap";
 export const registerHref = "/dang-ky";
 export const accountHref = "/tai-khoan";
 export const braceletHref = "/thiet-ke-vong-tay";
+export const supplierHref = "/nha-cung-cap";
 
 export const productHref = (slug: string) => `/san-pham/${slug}`;
 export const categoryHref = (slug: string) => `/danh-muc/${slug}`;

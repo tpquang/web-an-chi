@@ -14,7 +14,7 @@ const qty = z.number().int().positive("Số lượng phải lớn hơn 0.").max(
 const batchInput = z
   .object({
     name: z.string().trim().min(2, "Đặt tên cho đợt nhập, ví dụ Đợt 1 bán thử.").max(120),
-    supplier: optionalText,
+    supplierId: z.string().min(1).nullish().transform((value) => value ?? null),
     orderedAt: z.iso.date().nullish().transform((value) => (value ? new Date(value) : null)),
     status: z.enum([BatchStatus.PLANNED, BatchStatus.ORDERED]),
     capitalVnd: vnd.nullish().transform((value) => value ?? null),

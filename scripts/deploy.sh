@@ -77,7 +77,7 @@ NEXT_PUBLIC_GTM_ID=${GTM_ID}
 GOOGLE_SITE_VERIFICATION=${GOOGLE_SITE_VERIFICATION}
 IMAGE_HOSTNAMES=
 EOF
-echo "VITE_API_URL=https://${CMS_DOMAIN}" > apps/cms/.env
+printf "VITE_API_URL=https://%s\nVITE_SITE_URL=https://%s\n" "$CMS_DOMAIN" "$DOMAIN" > apps/cms/.env
 
 # Mật khẩu database lấy từ DATABASE_URL để docker compose dùng cùng giá trị
 DB_PASS="$(sed -n 's#^DATABASE_URL=postgresql://anchi:\([^@]*\)@.*#\1#p' apps/api/.env)"

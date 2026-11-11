@@ -19,6 +19,7 @@ import { adminMediaRouter } from "./admin.media.js";
 import { adminSalesRouter } from "./admin.sales.js";
 import { adminStaffRouter } from "./admin.staff.js";
 import { adminStoreRouter } from "./admin.store.js";
+import { adminSuppliersRouter } from "./admin.suppliers.js";
 
 export const adminRouter = Router();
 
@@ -74,6 +75,7 @@ adminRouter.use(adminSalesRouter);
 // Vốn, kho, nhân viên chỉ chủ shop xem
 adminRouter.use(adminMediaRouter);
 adminRouter.use(adminBusinessRouter);
+adminRouter.use(adminSuppliersRouter);
 adminRouter.use(adminInventoryRouter);
 adminRouter.use(adminFinanceRouter);
 adminRouter.use(adminStaffRouter);

@@ -334,7 +334,8 @@ enum BatchStatus {
 model PurchaseBatch {
   id         String          @id @default(cuid())
   name       String
-  supplier   String?
+  supplierId String?
+  supplier   Supplier?       @relation(fields: [supplierId], references: [id], onDelete: SetNull)
   orderedAt  DateTime?
   receivedAt DateTime?
   status     BatchStatus     @default(PLANNED)
@@ -351,6 +352,7 @@ model PurchaseBatch {
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
 
+  @@index([supplierId])
   @@index([createdAt])
 }
 
@@ -656,4 +658,18 @@ model Expense {
   updatedAt DateTime @updatedAt
 
   @@index([spentAt])
+}
+
+// Nhà cung cấp. Vào trang /nha-cung-cap bằng mã giới thiệu để xem đơn shop đặt, không cần tài khoản
+model Supplier {
+  id        String          @id @default(cuid())
+  name      String          @unique
+  phone     String?
+  note      String?
+  // Mã giới thiệu: chữ in hoa và số, không dấu gạch. Đổi mã thì mã cũ hết dùng được
+  code      String          @unique
+  active    Boolean         @default(true)
+  batches   PurchaseBatch[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
 }

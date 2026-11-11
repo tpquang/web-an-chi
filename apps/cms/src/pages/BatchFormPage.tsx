@@ -15,14 +15,15 @@ import { api, errorMessage } from "../lib/api";
 import { calcBatch, fillMax, type BatchInput } from "../lib/batch";
 import { formatDate } from "../lib/format";
 import { loadMaterials, loadRecipes } from "../lib/inventory";
+import { loadSuppliers } from "../lib/suppliers";
 import { batchStatus } from "../lib/labels";
 import { useLoad } from "../lib/use-load";
 import { useSubmit } from "../lib/use-submit";
 
-type Saved = BatchInput & { id: string; receivedAt: string | null };
+type Saved = BatchInput & { id: string; receivedAt: string | null; supplier: { id: string; name: string } | null };
 
 const empty: BatchInput = {
-  name: "", supplier: null, orderedAt: null, status: "PLANNED", capitalVnd: null, feePct: 0, note: null,
+  name: "", supplierId: null, orderedAt: null, status: "PLANNED", capitalVnd: null, feePct: 0, note: null,
   lines: [{ materialId: "", quantity: null, totalCostVnd: null, inputKg: null, pricePerKgVnd: null }],
   extras: [{ label: "Phí vận chuyển nhập hàng", amountVnd: 0, allocate: true, note: null }],
   writeOffs: [],
@@ -43,6 +44,7 @@ export function BatchFormPage() {
   const loaded = useLoad(() => (id ? api.get<Saved>(`/batches/${id}`) : Promise.resolve(null)), [id]);
   const materials = useLoad(loadMaterials, []);
   const recipes = useLoad(loadRecipes, []);
+  const suppliers = useLoad(loadSuppliers, []);
   const [values, setValues] = useState<BatchInput>(empty);
   const [dateText, setDateText] = useState("");
   const [includeStock, setIncludeStock] = useState(false);
@@ -137,7 +139,25 @@ export function BatchFormPage() {
           <Panel title="Thông tin đợt">
             <div className="grid gap-4 md:grid-cols-2">
               <div data-field="name"><Field label="Tên đợt" error={errors.name}><Input value={values.name} onChange={(e) => set("name", e.target.value)} placeholder="VD: Đợt 1 bán thử" /></Field></div>
-              <Field label="Nhà cung cấp" optional><Input value={values.supplier ?? ""} onChange={(e) => set("supplier", e.target.value || null)} /></Field>
+              <Field
+                label="Nhà cung cấp"
+                optional
+                hint={<>Nhà cung cấp xem được đơn này ở trang /nha-cung-cap khi đợt chuyển sang Đã đặt hàng. <Link to="/suppliers" className="text-wood underline-offset-4 hover:underline">Quản lý nhà cung cấp</Link></>}
+              >
+                <Select
+                  value={values.supplierId}
+                  onChange={(v) => set("supplierId", v || null)}
+                  options={[
+                    { value: "", label: "Chưa chọn" },
+                    ...(suppliers.state.status === "ready" ? suppliers.state.data : [])
+                      .filter((s) => s.active || s.id === values.supplierId)
+                      .map((s) => ({ value: s.id, label: s.active ? s.name : `${s.name} (ngừng dùng)` })),
+                  ]}
+                  placeholder={suppliers.state.status === "loading" ? "Đang tải…" : "Chọn nhà cung cấp"}
+                  searchable
+                  disabled={locked}
+                />
+              </Field>
               <Field label="Ngày nhập" optional hint="Dạng ngày/tháng/năm."><Input value={dateText} onChange={(e) => setDateText(e.target.value)} placeholder="VD: 15/11/2026" inputMode="numeric" /></Field>
               <Field label="Trạng thái"><Select value={values.status === "RECEIVED" ? "RECEIVED" : values.status} options={[{ value: "PLANNED", label: batchStatus.PLANNED.label }, { value: "ORDERED", label: batchStatus.ORDERED.label }, ...(locked ? [{ value: "RECEIVED", label: batchStatus.RECEIVED.label }] : [])]} onChange={(v) => set("status", v as BatchInput["status"])} disabled={busy} /></Field>
               <Field label="Vốn đang có cho đợt này" optional><MoneyInput value={values.capitalVnd} onChange={(v) => set("capitalVnd", v)} /></Field>

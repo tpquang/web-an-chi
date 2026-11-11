@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { receiveBatch } from "../src/lib/receive.js";
 import { syncCustomPrices } from "../src/lib/stock.js";
+import { newSupplierCode } from "../src/lib/supplier-code.js";
 import { BatchStatus, MaterialGroup, MaterialKind, PrismaClient, ProductType, PublishStatus } from "../src/generated/prisma/client.js";
 
 // Dữ liệu ban đầu (mặc định khi cài server lần đầu) nằm trong sample-data.json, file này chỉ nạp vào database.
@@ -124,11 +125,16 @@ async function main() {
 
   // Hàng vào kho chỉ qua đợt nhập, nhập kho bằng đúng hàm CMS dùng. Đợt đã có (theo tên) thì bỏ qua,
   // nên seed lại không nhập kho hai lần
-  for (const { lines, receive, orderedAt, ...batch } of sample.batches) {
+  for (const { lines, receive, orderedAt, supplier, ...batch } of sample.batches) {
     if (await prisma.purchaseBatch.findFirst({ where: { name: batch.name }, select: { id: true } })) continue;
+    // Nhà cung cấp mẫu có mã giới thiệu ngẫu nhiên, xem trong CMS mục Nhà cung cấp
+    const supplierId = supplier
+      ? (await prisma.supplier.upsert({ where: { name: supplier }, update: {}, create: { name: supplier, code: newSupplierCode() }, select: { id: true } })).id
+      : null;
     const created = await prisma.purchaseBatch.create({
       data: {
         ...batch,
+        supplierId,
         orderedAt: orderedAt ? new Date(`${orderedAt}T12:00:00+07:00`) : null,
         status: BatchStatus.ORDERED,
         lines: {

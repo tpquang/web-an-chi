@@ -50,6 +50,7 @@ const groups: NavGroup[] = [
     label: "Kho",
     links: [
       { to: "/business", label: "Đợt nhập hàng", Icon: TruckIcon, perm: "batches" },
+      { to: "/suppliers", label: "Nhà cung cấp", Icon: UsersIcon, perm: "batches" },
       { to: "/materials", label: "Nguyên liệu", Icon: LayersIcon, perm: "inventory" },
       { to: "/packing", label: "Đóng gói", Icon: PackageIcon, perm: "inventory" },
       { to: "/stocktake", label: "Kiểm kho", Icon: ClipboardIcon, perm: "inventory" },
