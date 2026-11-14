@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cache } from "react";
 import { AddToCart } from "@/components/add-to-cart";
+import { LaunchTag, ProductLaunchPanel, SalesGate } from "@/components/launch/launch-notice";
 import { MarketplaceLinks } from "@/components/marketplace-links";
 import { ProductGrid } from "@/components/product-card";
 import { ProductImage } from "@/components/product-image";
@@ -10,6 +11,7 @@ import { Price } from "@/components/ui/price";
 import { Tag } from "@/components/ui/tag";
 import { getProduct, getProducts, getStore } from "@/lib/api";
 import { paragraphs } from "@/lib/content";
+import { isPreLaunch, launchIso } from "@/lib/launch";
 import { categoryHref, postHref, productHref } from "@/lib/links";
 import { notFoundOrRedirect } from "@/lib/redirect";
 import { absoluteImage, absoluteUrl, pageMeta, safeJsonLd } from "@/lib/seo";
@@ -84,7 +86,13 @@ export default async function ProductPage({ params }: Props) {
           url,
           price: product.priceVnd,
           priceCurrency: "VND",
-          availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          // Trước ngày mở bán chưa nhận đơn nên không khai InStock
+          availability: isPreLaunch()
+            ? "https://schema.org/PreOrder"
+            : product.stock > 0
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+          ...(isPreLaunch() ? { availabilityStarts: launchIso } : {}),
           seller: { "@type": "Organization", name: site.name },
           shippingDetails: {
             "@type": "OfferShippingDetails",
@@ -114,9 +122,13 @@ export default async function ProductPage({ params }: Props) {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Price value={product.priceVnd} compareAt={product.compareAtPriceVnd} size="page" />
-            {product.stock > 0 ? <Tag tone="ok">Còn {product.stock} sản phẩm</Tag> : <Tag>Hết hàng</Tag>}
+            <SalesGate waiting={<LaunchTag />}>
+              {product.stock > 0 ? <Tag tone="ok">Còn {product.stock} sản phẩm</Tag> : <Tag>Hết hàng</Tag>}
+            </SalesGate>
           </div>
-          <AddToCart slug={product.slug} stock={product.stock} />
+          <SalesGate waiting={<ProductLaunchPanel />}>
+            <AddToCart slug={product.slug} stock={product.stock} />
+          </SalesGate>
           <p className="text-sm text-ink-2">
             Phí giao {formatVnd(flatFeeVnd)}
             {freeFromVnd ? `, miễn phí cho đơn từ ${formatVnd(freeFromVnd)}` : ""}. Giao trong {eta}.

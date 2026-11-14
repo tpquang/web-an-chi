@@ -23,7 +23,7 @@ export function OrderSummary({ quote, children, busy }: { quote: Quote; children
         </div>
         <div className="mt-2 flex items-baseline justify-between gap-4 border-t border-line pt-3">
           <dt className="font-medium">Tổng cộng</dt>
-          <dd className="font-serif text-[28px] leading-tight whitespace-nowrap">{formatVnd(totalVnd)}</dd>
+          <dd className="font-serif text-[28px] leading-tight font-semibold whitespace-nowrap tabular-nums">{formatVnd(totalVnd)}</dd>
         </div>
       </dl>
       <p className="mt-3 text-sm text-ink-3">

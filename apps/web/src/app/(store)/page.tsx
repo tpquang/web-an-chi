@@ -1,11 +1,13 @@
 import { HomeBanner } from "@/components/home/home-banner";
 import { IntroSlider } from "@/components/home/intro-slider";
 import { ArrowRightIcon } from "@/components/icons";
+import { HomeLaunch } from "@/components/launch/launch-notice";
 import { PostGrid } from "@/components/post-card";
 import { ProductGrid } from "@/components/product-card";
 import { Button } from "@/components/ui/button";
 import { PageFrame, Section } from "@/components/ui/layout";
 import { getHome, getPosts, getProducts, getStore } from "@/lib/api";
+import { isPreLaunch } from "@/lib/launch";
 import { postsHref, productsHref } from "@/lib/links";
 import { staticPageMeta } from "@/lib/page-seo";
 import { absoluteUrl, safeJsonLd } from "@/lib/seo";
@@ -60,8 +62,10 @@ export default async function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <PageFrame>
         <HomeBanner banner={home.banner} />
+        <HomeLaunch />
 
-        {featured.data.length > 0 && (
+        {/* Tạm ẩn tới ngày mở bán: trang sản phẩm đang chuyển về /countdown */}
+        {!isPreLaunch() && featured.data.length > 0 && (
           <Section eyebrow="Sản phẩm nổi bật" title="Gợi ý từ An Chi" id="noi-bat" action={seeAll(productsHref, "Xem tất cả sản phẩm")}>
             <ProductGrid products={featured.data} />
           </Section>

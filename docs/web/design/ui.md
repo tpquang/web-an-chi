@@ -25,6 +25,8 @@
 
 **Thành phần bán hàng:** `ProductCard`, `ProductGrid`, `ProductImage` (ô có dấu logo khi chưa có ảnh thật), `AddToCart`, `CartButton`, `CartLine`, `OrderSummary`, `MarketplaceLinks`, `PostCard`, `TopicNav`, `PostBody`.
 
+**Chờ ngày mở bán (tạm thời, tới 01/12/2026):** giờ mở bán ở `lib/launch.ts`, đổi bằng `NEXT_PUBLIC_LAUNCH_AT` rồi build lại. Trước giờ này: `src/proxy.ts` chuyển tạm (307) `/san-pham`, `/san-pham/*`, `/danh-muc/*` về `/countdown` (trang đếm ngược, noindex); trang chủ ẩn khối sản phẩm nổi bật và có khối đếm ngược dưới banner (`HomeLaunch`); `/thiet-ke-vong-tay` có dải đếm ngược đầu trang (`LaunchStrip`). Dải đếm ngược ở trang danh sách và khối thay nút mua ở trang sản phẩm vẫn còn trong code, phòng khi bỏ chuyển hướng; trang thiết kế vòng vẫn cho phối hạt, xem giá nhưng không có nút thêm vào giỏ; `POST /api/orders` trả 403. Server tính trạng thái lúc dựng trang, `LaunchGate` ở trình duyệt tự mở đúng giờ nên không cần deploy lại vào ngày mở bán. Các trang nội dung, tài khoản, tra cứu đơn, chat không đổi. Sau ngày mở bán gỡ `components/launch` và các chỗ gọi.
+
 **Chat với shop:** nút "Nhắn shop" góc phải dưới (`ChatLauncher`), khung chat chỉ tải khi mở. Ẩn ở giỏ và đặt hàng nếu khách chưa từng chat, để khu đặt hàng gọn. Khách điền tên, số điện thoại (không bắt buộc) và câu hỏi; đã đăng nhập thì điền sẵn.
 
 **Giỏ hàng:** chỉ lưu slug và số lượng trong `localStorage` (`lib/cart.ts`); giá và tồn kho luôn hỏi lại API. Dữ liệu form đặt hàng giữ trong `sessionStorage` của tab, đóng tab thì mất.

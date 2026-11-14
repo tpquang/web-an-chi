@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { LaunchStrip } from "@/components/launch/launch-notice";
 import { ProductGrid } from "@/components/product-card";
 import { PageFrame, PageHeader } from "@/components/ui/layout";
 import { Pagination } from "@/components/ui/pagination";
@@ -45,6 +46,7 @@ export default async function ProductsPage({ searchParams }: Props) {
           ))}
         </ul>
       </nav>
+      <LaunchStrip>Bạn có thể xem trước sản phẩm và giá. Nút thêm vào giỏ sẽ mở vào ngày này.</LaunchStrip>
       {products.data.length === 0 ? (
         <EmptyState title="Shop đang cập nhật sản phẩm." desc="Bạn quay lại sau ít ngày, hoặc đọc các bài hướng dẫn chọn trầm trong lúc chờ." />
       ) : (

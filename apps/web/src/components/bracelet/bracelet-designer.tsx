@@ -4,9 +4,12 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import type { Bead, BraceletRules } from "@/lib/api";
 import { cm } from "@/lib/bracelet";
+import { launchDateLabel } from "@/lib/launch";
 import { formatVnd } from "@/lib/site";
 import { CloseIcon, ResetIcon, SpinIcon, UndoIcon } from "../icons";
+import { useLaunch } from "../launch/launch-clock";
 import { Button, buttonClass } from "../ui/button";
+import { Tag } from "../ui/tag";
 import { BeadPicker } from "./bead-picker";
 import { BraceletOptions } from "./bracelet-options";
 import { BraceletSummary, WristSize } from "./bracelet-summary";
@@ -45,11 +48,15 @@ const action =
 export function BraceletDesigner({
   rules,
   beads,
+  salesOpen: initialOpen,
 }: {
   rules: BraceletRules;
   beads: Bead[];
+  // Server tính lúc dựng trang; trước ngày mở bán chỉ cho thử thiết kế, chưa thêm vào giỏ
+  salesOpen: boolean;
 }) {
   const state = useBracelet(rules, beads);
+  const { open: salesOpen } = useLaunch(initialOpen);
   const {
     ring,
     sceneItems,
@@ -237,13 +244,17 @@ export function BraceletDesigner({
             aria-live="polite"
           >
             Tạm tính
-            <span className="block font-serif text-lg text-wood tabular-nums">
+            <span className="block font-serif text-lg font-semibold text-wood tabular-nums">
               {formatVnd(totalVnd)}
             </span>
           </p>
-          <Button onClick={state.addToCart} className="rounded-full">
-            Thêm vào giỏ
-          </Button>
+          {salesOpen ? (
+            <Button onClick={state.addToCart} className="rounded-full">
+              Thêm vào giỏ
+            </Button>
+          ) : (
+            <Tag tone="wood">Mở bán {launchDateLabel}</Tag>
+          )}
         </div>
         <div className="flex flex-col gap-2 px-(--page-gutter) pt-3 lg:hidden">
           <WristSize state={state} compact />
@@ -375,7 +386,7 @@ export function BraceletDesigner({
 
         {/* Cột phải trên máy tính: cỡ tay, tóm tắt, giá */}
         <div className="hidden lg:col-span-4 lg:block lg:self-start">
-          <BraceletSummary state={state} />
+          <BraceletSummary state={state} salesOpen={salesOpen} />
         </div>
 
         {dragging && (

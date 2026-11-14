@@ -69,7 +69,7 @@ export function OrderDetails({ order }: { order: OrderSummary & { customerName?:
         </div>
         <div className="flex items-baseline justify-between gap-4">
           <dt className="font-medium">Tổng cộng</dt>
-          <dd className="font-serif text-2xl whitespace-nowrap">{formatVnd(order.totalVnd)}</dd>
+          <dd className="font-serif text-2xl font-semibold whitespace-nowrap tabular-nums">{formatVnd(order.totalVnd)}</dd>
         </div>
         <div className="flex justify-between gap-4">
           <dt className="text-ink-2">Thanh toán</dt>

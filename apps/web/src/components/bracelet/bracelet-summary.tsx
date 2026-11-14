@@ -1,6 +1,7 @@
 "use client";
 
 import { beadTitle, cm } from "@/lib/bracelet";
+import { launchDateLabel } from "@/lib/launch";
 import { formatVnd } from "@/lib/site";
 import { MinusIcon, PlusIcon } from "../icons";
 import { Button } from "../ui/button";
@@ -74,7 +75,7 @@ export function WristSize({ state, compact }: { state: BraceletState; compact?: 
   );
 }
 
-export function BraceletSummary({ state }: { state: BraceletState }) {
+export function BraceletSummary({ state, salesOpen }: { state: BraceletState; salesOpen: boolean }) {
   const { lines, rules, totalVnd, problem, addToCart } = state;
 
   return (
@@ -103,14 +104,21 @@ export function BraceletSummary({ state }: { state: BraceletState }) {
         </dl>
         <p className="flex items-baseline justify-between border-t border-line pt-3" aria-live="polite">
           <span className="text-lg font-medium">Tạm tính</span>
-          <span className="font-serif text-[28px] text-wood lining-nums tabular-nums">{formatVnd(totalVnd)}</span>
+          <span className="font-serif text-[28px] font-semibold text-wood tabular-nums">{formatVnd(totalVnd)}</span>
         </p>
         <p role="status" className={`text-sm ${problem ? "text-err" : "text-ok"}`}>
           {problem ?? "Vòng đã vừa cỡ tay."}
         </p>
-        <Button size="lg" block onClick={addToCart}>
-          Thêm vào giỏ
-        </Button>
+        {salesOpen ? (
+          <Button size="lg" block onClick={addToCart}>
+            Thêm vào giỏ
+          </Button>
+        ) : (
+          <p className="rounded-2xl bg-wood-soft p-4 text-sm">
+            <span className="block font-medium text-wood">Chờ ngày mở bán {launchDateLabel}</span>
+            Vòng thiết kế đặt được từ ngày này. Thiết kế chưa được lưu lại, bạn ghi nhớ mẫu ưng ý để đặt khi shop mở bán.
+          </p>
+        )}
       </section>
 
       <details className="group rounded-xl border border-line bg-surface">

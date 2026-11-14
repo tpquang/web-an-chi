@@ -61,6 +61,7 @@ Theo mẫu thiết kế: nền kem, tấm bo lớn, một khối tối. Thứ t�
 | Khối | Dưới 960 | Từ 960 | Nguồn nội dung |
 |---|---|---|---|
 | Banner | Chữ trên, ảnh 4:3 dưới, hai thẻ thông tin xếp dưới ảnh | Chữ 6 cột, ảnh 6 cột tỉ lệ 5:6, thẻ kính nổi góc phải dưới ảnh | CMS `/home`: eyebrow, tiêu đề H1, lời dẫn, ảnh, hai nút. Thẻ thông tin lấy từ cấu hình cửa hàng |
+| Chờ ngày mở bán (chỉ trước giờ mở bán) | Tấm `surface`: chữ trên, đếm ngược dưới | Chữ 7 cột, đếm ngược 5 cột căn phải | `lib/launch.ts`, ngày đặt bằng `NEXT_PUBLIC_LAUNCH_AT` |
 | Sản phẩm nổi bật | 2 cột | 4 cột | Sản phẩm bật nổi bật, tối đa 4. Không có thì ẩn khối |
 | Slide giới thiệu | Chữ dưới, lớp tối từ dưới lên | Chữ trái tối đa 576px, lớp tối từ trái sang | CMS `/home`, 1–6 slide |
 | Bài viết nổi bật | 1 cột, 2 cột từ 720 | 3 cột | Bài bật nổi bật, tối đa 3. Không có thì lấy 3 bài mới nhất |

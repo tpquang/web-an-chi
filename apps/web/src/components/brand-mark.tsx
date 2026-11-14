@@ -11,7 +11,7 @@ export function BrandMark({ className = "size-8" }: { className?: string }) {
   );
 }
 
-// Logo = biểu tượng + chữ thật bằng Playfair Display SC, không dùng chữ đã vẽ thành path.
+// Logo = biểu tượng + chữ thật bằng Cormorant SC, không dùng chữ đã vẽ thành path.
 // Cỡ logo theo font-size: đặt text-2xl, text-5xl... ở nơi dùng, mọi phần đo bằng em.
 // inline: cho header, footer. stacked: có dòng TRẦM HƯƠNG, chỉ dùng khi chữ từ 2.25rem trở lên để dòng phụ còn đọc được
 export function BrandLogo({ variant = "inline", className = "" }: { variant?: "inline" | "stacked"; className?: string }) {

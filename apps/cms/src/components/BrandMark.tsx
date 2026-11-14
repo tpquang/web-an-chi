@@ -3,7 +3,7 @@ export function BrandMark({ className = "size-8" }: { className?: string }) {
   return <span aria-hidden className={`inline-block flex-none bg-current [mask:url(/logo-mark.svg)_center/contain_no-repeat] ${className}`} />;
 }
 
-// Logo = biểu tượng + chữ thật bằng Playfair Display SC (chỗ duy nhất trong CMS dùng font này), cỡ theo font-size của nơi dùng
+// Logo = biểu tượng + chữ thật bằng Cormorant SC (chỗ duy nhất trong CMS dùng font này), cỡ theo font-size của nơi dùng
 export function BrandLogo({ className = "text-2xl" }: { className?: string }) {
   return (
     <span className={`inline-flex flex-none items-center gap-[0.4em] leading-none ${className}`}>

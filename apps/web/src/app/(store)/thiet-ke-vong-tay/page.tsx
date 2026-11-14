@@ -1,6 +1,8 @@
 import { BraceletDesigner } from "@/components/bracelet/bracelet-designer";
 import { PageFrame, PageHeader } from "@/components/ui/layout";
 import { getBracelet } from "@/lib/api";
+import { LaunchStrip } from "@/components/launch/launch-notice";
+import { isPreLaunch } from "@/lib/launch";
 import { braceletHref } from "@/lib/links";
 import { staticPageMeta } from "@/lib/page-seo";
 
@@ -22,7 +24,8 @@ export default async function BraceletPage() {
           { name: "Tự thiết kế vòng tay", href: braceletHref },
         ]}
       />
-      <BraceletDesigner rules={rules} beads={beads} />
+      <LaunchStrip>Bạn có thể thử phối hạt và xem giá trước. Vòng thiết kế đặt được từ ngày này.</LaunchStrip>
+      <BraceletDesigner rules={rules} beads={beads} salesOpen={!isPreLaunch()} />
     </PageFrame>
   );
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
+import { LaunchStrip } from "@/components/launch/launch-notice";
 import { ProductGrid } from "@/components/product-card";
 import { PageFrame, PageHeader, Section } from "@/components/ui/layout";
 import { Pagination } from "@/components/ui/pagination";
@@ -51,6 +52,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           { name: category.name, href: categoryHref(category.slug) },
         ]}
       />
+      <LaunchStrip>Bạn có thể xem trước sản phẩm và giá. Nút thêm vào giỏ sẽ mở vào ngày này.</LaunchStrip>
       {products.data.length === 0 ? (
         <EmptyState
           title="Danh mục này chưa có sản phẩm đang bán."

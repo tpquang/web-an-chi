@@ -4,12 +4,12 @@
 
 | Token | Class | Font | Dùng cho |
 |---|---|---|---|
-| `--serif` | `font-serif` | Playfair Display SC 400 | Tiêu đề, thương hiệu, chữ trong logo, giá tiền |
+| `--serif` | `font-serif` | Cormorant SC 400, 600 | Tiêu đề, thương hiệu, chữ trong logo, giá tiền |
 | `--sans` | `font-sans` | Be Vietnam Pro 400–600 | Nội dung, form, nút, bảng |
 
 Web nạp bằng `next/font/google`, gắn biến `--next-serif`, `--next-sans` lên `<html>`. CMS nạp Be Vietnam Pro và cũng dùng serif cho tiêu đề thương hiệu.
 
-Playfair Display SC là chữ hoa nhỏ: chữ thường hiện thành chữ hoa cỡ nhỏ, tương phản nét dày mảnh cao, khổ chữ rộng. Chỉ nạp và dùng nét 400 cho mảnh (chốt 11/2026), không gắn `font-medium`, `font-semibold` lên `font-serif`. Dùng từ 18px trở lên; không dùng cho đoạn văn, nhãn form, nút hay chữ phụ. `body` đặt `font-variant-numeric: lining-nums`; cột số trong bảng thêm `tabular-nums`, chữ serif có số thì ghi đủ `lining-nums tabular-nums` vì class của Tailwind ghi đè cả hai.
+Cormorant SC là chữ hoa nhỏ: chữ thường hiện thành chữ hoa cỡ nhỏ, nét thanh mảnh, khổ chữ hẹp. Web nạp hai nét: 400 cho tiêu đề trang, khối; 600 (`font-semibold`) chỉ cho tiêu đề thẻ bài viết và số cần nhấn như giá, tổng tiền, đồng hồ đếm ngược (chốt 11/2026, vì Cormorant SC nét 400 quá mảnh ở cỡ nhỏ). Không dùng `font-medium` với `font-serif` vì nét 500 chưa nạp. Dùng từ 18px trở lên; không dùng cho đoạn văn, nhãn form, nút hay chữ phụ. Chữ số mặc định của Cormorant SC là kiểu cổ (lên xuống so với dòng). `body` bật số thẳng hàng bằng cả `font-variant-numeric: lining-nums` và `font-feature-settings: "lnum"`: dòng sau vẫn giữ khi class Tailwind như `tabular-nums` ghi đè `font-variant-numeric`, nên không cần nhớ thêm `lining-nums`. Không đặt `font-feature-settings` ở component vì sẽ xoá `lnum`. Cột số, giá, đồng hồ thêm `tabular-nums` cho số rộng đều.
 
 | Cấp | Cỡ / line-height | Kiểu |
 |---|---|---|
@@ -19,7 +19,8 @@ Playfair Display SC là chữ hoa nhỏ: chữ thường hiện thành chữ hoa
 | H2 trong thẻ, khối tối | `clamp(30px, 4vw, 44px)` / 1.1 | serif 400 |
 | H3 | 24 / 1.2 | serif 400 |
 | H4 | 20 / 1.25 | serif 400 |
-| Giá | 28 / 1.2, thẻ sản phẩm 20 | serif 400 |
+| Giá, tổng tiền, đồng hồ | 28 / 1.2, thẻ sản phẩm 20 | serif 600, `tabular-nums` |
+| Tiêu đề thẻ bài viết | 20 / 1.25 | serif 600 |
 | Eyebrow | 13 / 1.4, `tracking-wide` | sans 500 màu `wood`, gạch 24px phía trước |
 | Lời dẫn | 18 / 1.6 | sans 400 |
 | Nội dung | 16 / 1.6 | sans 400 |
@@ -28,7 +29,7 @@ Playfair Display SC là chữ hoa nhỏ: chữ thường hiện thành chữ hoa
 
 - Đoạn đọc rộng tối đa `68ch`, line-height 1.7–1.75.
 - Chữ tối thiểu 12px, nội dung đọc từ 14px.
-- Không viết hoa toàn bộ, kể cả class `uppercase`: dấu tiếng Việt viết hoa dễ bị cắt và khó đọc. Vẻ chữ hoa của mẫu thiết kế đến từ chữ hoa nhỏ của Playfair Display SC, không từ `uppercase`. Ngoại lệ duy nhất là chữ trong logo.
+- Không viết hoa toàn bộ, kể cả class `uppercase`: dấu tiếng Việt viết hoa dễ bị cắt và khó đọc. Vẻ chữ hoa của mẫu thiết kế đến từ chữ hoa nhỏ của Cormorant SC, không từ `uppercase`. Ngoại lệ duy nhất là chữ trong logo.
 
 ## Khoảng cách
 
