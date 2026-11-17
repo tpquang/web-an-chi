@@ -4,11 +4,12 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { buildIncenseBox } from "./incense-box";
 import { buildBox, buildCones, type Built, type Loader } from "./models";
 
-export type SceneModel = "box" | "cone";
+export type SceneModel = "box" | "cone" | "incense";
 
-const builders: Record<SceneModel, (load: Loader) => Promise<Built>> = { box: buildBox, cone: () => buildCones() };
+const builders: Record<SceneModel, (load: Loader) => Promise<Built>> = { box: buildBox, cone: () => buildCones(), incense: buildIncenseBox };
 
 type Props = { model: SceneModel; label: string; onReady(): void; onError(): void };
 
@@ -103,6 +104,7 @@ export function ModelScene({ model, label, onReady, onError }: Props) {
         const material = mesh.material as THREE.MeshStandardMaterial | undefined;
         material?.map?.dispose();
         material?.bumpMap?.dispose();
+        material?.alphaMap?.dispose();
         material?.dispose();
       });
       controls.dispose();

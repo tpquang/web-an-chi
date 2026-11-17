@@ -59,6 +59,8 @@ model Category {
 enum Product3DModel {
   // Hộp tròn đựng nụ trầm, ảnh in ở design/assets/nap-hop-tron.pdf và vo-hop-tron.pdf
   ROUND_BOX
+  // Hộp nhang trầm chữ nhật có ô cửa sổ nhìn thấy nhang, ảnh in ở design/assets/Hop huong.pdf
+  INCENSE_BOX
 }
 
 enum ProductType {

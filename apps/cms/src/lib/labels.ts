@@ -5,8 +5,11 @@ export type PaymentMethod = "COD" | "BANK_TRANSFER";
 export type ProductType = "RETAIL" | "SUPPLY" | "CUSTOM";
 
 // Mô hình 3D dựng sẵn trên web, thêm mẫu mới thì thêm cả enum Product3DModel ở API
-export type Product3DModel = "ROUND_BOX";
-export const product3dModels: { value: Product3DModel; label: string }[] = [{ value: "ROUND_BOX", label: "Hộp tròn nụ trầm" }];
+export type Product3DModel = "ROUND_BOX" | "INCENSE_BOX";
+export const product3dModels: { value: Product3DModel; label: string }[] = [
+  { value: "ROUND_BOX", label: "Hộp tròn nụ trầm" },
+  { value: "INCENSE_BOX", label: "Hộp nhang trầm" },
+];
 export type MaterialGroup = "PACKAGING" | "BEAD" | "CONE" | "STICK" | "PRODUCT" | "CONSUMABLE";
 export type SalesChannel = "WEB" | "SHOPEE" | "TIKTOK" | "REFERRAL" | "OTHER";
 export type Tone = "neutral" | "wood" | "ok" | "warn" | "err" | "info";

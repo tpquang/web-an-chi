@@ -8,12 +8,13 @@ import type { SceneModel } from "./model-scene";
 // three.js chỉ nạp khi khách bấm một nút 3D
 const ModelScene = dynamic(() => import("./model-scene").then((m) => m.ModelScene), { ssr: false });
 
-// Mỗi mẫu 3D của sản phẩm có những khung xem nào. Hộp tròn nụ trầm: xem riêng hộp và riêng nụ
+// Mỗi mẫu 3D của sản phẩm có những khung xem nào. Hộp tròn nụ trầm: xem riêng hộp và riêng nụ. Hộp nhang: hộp có cửa sổ thấy nhang
 const views: Record<Product3DModel, { id: SceneModel; label: string; alt: string }[]> = {
   ROUND_BOX: [
     { id: "box", label: "Hộp 3D", alt: "Hộp tròn" },
     { id: "cone", label: "Nụ 3D", alt: "Nụ trầm hình chóp, cao 38 mm, đường kính 14 mm" },
   ],
+  INCENSE_BOX: [{ id: "incense", label: "Hộp 3D", alt: "Hộp nhang trầm hương có ô cửa sổ nhìn thấy nhang" }],
 };
 
 const segment =

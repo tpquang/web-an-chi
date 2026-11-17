@@ -91,6 +91,12 @@
       "unit": "cái"
     },
     {
+      "name": "Hộp nhang",
+      "group": "PACKAGING",
+      "unit": "cái",
+      "note": "Hộp giấy chữ nhật có ô cửa sổ, đựng 100 nén. Ảnh in ở design/assets/Hop huong.pdf."
+    },
+    {
       "name": "Hộp carton ship",
       "group": "CONSUMABLE",
       "unit": "cái",
@@ -361,6 +367,34 @@
         },
         {
           "material": "Hộp vuông lớn",
+          "quantity": 1
+        }
+      ],
+      "type": "RETAIL"
+    },
+    {
+      "stock": 0,
+      "name": "Nhang trầm hương, hộp 100 nén",
+      "model3d": "INCENSE_BOX",
+      "slug": "nhang-tram-huong-hop-100-nen",
+      "category": "nhang-tram-huong",
+      "priceVnd": 0,
+      "summary": "100 nén nhang làm từ bột trầm Phúc Trạch và keo bời lời, đựng trong hộp giấy có ô nhìn thấy nhang.",
+      "usage": "Châm đầu nhang cho bén lửa, phẩy nhẹ cho tắt để nhang cháy âm ỉ, cắm vào bát hương hoặc đế cắm nơi thoáng khí.\n\nĐậy kín nắp, để nơi khô ráo, tránh nắng.",
+      "origin": "Phúc Trạch, Hà Tĩnh",
+      "specs": [
+        {
+          "label": "Số nén",
+          "value": "100"
+        },
+        {
+          "label": "Thành phần",
+          "value": "Bột trầm Phúc Trạch, keo bời lời"
+        }
+      ],
+      "components": [
+        {
+          "material": "Hộp nhang",
           "quantity": 1
         }
       ],
