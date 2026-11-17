@@ -45,6 +45,7 @@ export type Product = {
   stock: number;
   origin: string | null;
   featured: boolean;
+  model3d: import("./labels").Product3DModel | null;
   shopeeUrl: string | null;
   tiktokUrl: string | null;
   status: PublishStatus;

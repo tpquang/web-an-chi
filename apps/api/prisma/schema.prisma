@@ -43,7 +43,7 @@ model Category {
   metaTitle       String?
   metaDescription String?
   // Ẩn khỏi Google: thẻ noindex và bỏ khỏi sitemap. Trang vẫn mở được bằng link
-  noindex         Boolean       @default(false)
+  noindex         Boolean   @default(false)
   // Chữ và ảnh khi chia sẻ lên mạng xã hội. Để trống thì dùng tiêu đề, mô tả, ảnh mặc định
   ogTitle         String?
   ogDescription   String?
@@ -55,6 +55,12 @@ model Category {
 
 // Kinh doanh: bán trên web. Phát sinh: đóng gói nội bộ như hộp ship, không bán.
 // Vòng xâu hạt: giá tính theo công thức hạt, chỉ có giá sau khi đóng xong
+// Mô hình 3D dựng sẵn trên web: ảnh in bọc lên hình dựng bằng three.js, ảnh ở apps/web/public/models
+enum Product3DModel {
+  // Hộp tròn đựng nụ trầm, ảnh in ở design/assets/nap-hop-tron.pdf và vo-hop-tron.pdf
+  ROUND_BOX
+}
+
 enum ProductType {
   RETAIL
   SUPPLY
@@ -81,6 +87,8 @@ model Product {
   // Hiện ở mục sản phẩm nổi bật trang chủ, tối đa 4 sản phẩm
   featured          Boolean            @default(false)
   // Link gian hàng của chính sản phẩm này trên sàn, để trống nếu không bán ở đó
+  // Mô hình 3D xem cạnh ảnh ở trang sản phẩm. Để trống thì chỉ có ảnh
+  model3d           Product3DModel?
   shopeeUrl         String?
   tiktokUrl         String?
   status            PublishStatus      @default(DRAFT)
@@ -130,7 +138,7 @@ model PostCategory {
   metaTitle       String?
   metaDescription String?
   // Ẩn khỏi Google: thẻ noindex và bỏ khỏi sitemap. Trang vẫn mở được bằng link
-  noindex         Boolean       @default(false)
+  noindex         Boolean  @default(false)
   // Chữ và ảnh khi chia sẻ lên mạng xã hội. Để trống thì dùng tiêu đề, mô tả, ảnh mặc định
   ogTitle         String?
   ogDescription   String?

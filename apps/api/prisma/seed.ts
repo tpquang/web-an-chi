@@ -4,7 +4,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { receiveBatch } from "../src/lib/receive.js";
 import { syncCustomPrices } from "../src/lib/stock.js";
 import { newSupplierCode } from "../src/lib/supplier-code.js";
-import { BatchStatus, MaterialGroup, MaterialKind, PrismaClient, ProductType, PublishStatus } from "../src/generated/prisma/client.js";
+import { BatchStatus, MaterialGroup, MaterialKind, PrismaClient, Product3DModel, ProductType, PublishStatus } from "../src/generated/prisma/client.js";
 
 // Dữ liệu ban đầu (mặc định khi cài server lần đầu) nằm trong sample-data.json, file này chỉ nạp vào database.
 // Chạy lại nhiều lần được: bản ghi tìm theo slug hoặc tên.
@@ -25,6 +25,7 @@ type SampleData = {
     category: string;
     type: keyof typeof ProductType;
     status?: keyof typeof PublishStatus;
+    model3d?: keyof typeof Product3DModel;
     summary?: string;
     priceVnd: number;
     stock: number;

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { MovementType, ProductType, PublishStatus, type Prisma } from "../../generated/prisma/client.js";
+import { MovementType, Product3DModel, ProductType, PublishStatus, type Prisma } from "../../generated/prisma/client.js";
 import { prisma } from "../../lib/prisma.js";
 import { withLiveStock } from "../../lib/stock.js";
 import { recordSlugChange } from "../../lib/redirects.js";
@@ -79,6 +79,7 @@ const productInput = z
     stock: z.number().int().min(0).max(100_000),
     origin: optionalText,
     featured: z.boolean().default(false),
+    model3d: z.enum(Product3DModel).nullish().transform((value) => value ?? null),
     shopeeUrl: optionalUrl,
     tiktokUrl: optionalUrl,
     status: z.enum(PublishStatus),

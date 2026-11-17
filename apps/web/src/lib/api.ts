@@ -5,6 +5,9 @@ const REVALIDATE_SECONDS = 60;
 // Quá thời gian này thì coi BE lỗi để trang trả 500 thay vì treo
 const TIMEOUT_MS = 8000;
 
+// Mô hình 3D dựng sẵn, khớp enum Product3DModel ở API
+export type Product3DModel = "ROUND_BOX";
+
 export type Image = { id: string; url: string; alt: string | null };
 export type Spec = { label: string; value: string };
 
@@ -37,6 +40,7 @@ export type Product = {
   stock: number;
   origin: string | null;
   featured: boolean;
+  model3d: Product3DModel | null;
   shopeeUrl: string | null;
   tiktokUrl: string | null;
   metaTitle: string | null;

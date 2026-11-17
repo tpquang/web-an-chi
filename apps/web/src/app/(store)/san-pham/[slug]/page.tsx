@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cache } from "react";
 import { AddToCart } from "@/components/add-to-cart";
+import { ProductMedia } from "@/components/box3d/product-media";
 import { LaunchTag, ProductLaunchPanel, SalesGate } from "@/components/launch/launch-notice";
 import { MarketplaceLinks } from "@/components/marketplace-links";
 import { ProductGrid } from "@/components/product-card";
@@ -109,7 +110,13 @@ export default async function ProductPage({ params }: Props) {
 
       <div className="grid gap-8 lg:grid-cols-12 lg:gap-6">
         <div className="lg:col-span-7">
-          <ProductImage image={product.images[0]} alt={product.name} sizes="(min-width: 960px) 680px, 100vw" priority />
+          {product.model3d ? (
+            <ProductMedia model={product.model3d} name={product.name}>
+              <ProductImage image={product.images[0]} alt={product.name} sizes="(min-width: 960px) 680px, 100vw" priority />
+            </ProductMedia>
+          ) : (
+            <ProductImage image={product.images[0]} alt={product.name} sizes="(min-width: 960px) 680px, 100vw" priority />
+          )}
         </div>
 
         <div className="flex flex-col gap-5 lg:sticky lg:top-24 lg:col-span-5 lg:self-start">

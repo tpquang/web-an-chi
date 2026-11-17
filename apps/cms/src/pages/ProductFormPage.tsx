@@ -14,7 +14,7 @@ import { ErrorState, Skeleton } from "../components/ui/States";
 import { showToast } from "../components/ui/Toast";
 import { api, errorMessage } from "../lib/api";
 import { slugify } from "../lib/format";
-import { options, productType, publishStatus, type ProductType, type PublishStatus } from "../lib/labels";
+import { options, product3dModels, productType, publishStatus, type ProductType, type PublishStatus } from "../lib/labels";
 import type { Category, Product } from "../lib/types";
 import { useLoad } from "../lib/use-load";
 import { useSubmit } from "../lib/use-submit";
@@ -27,7 +27,7 @@ type Values = Omit<Product, "id" | "specs" | "images" | "priceVnd"> & {
 
 const empty: Values = {
   name: "", slug: "", summary: "", description: "", usage: "", specs: [], priceVnd: null, compareAtPriceVnd: null,
-  type: "RETAIL", stock: 0, origin: "", featured: false, shopeeUrl: "", tiktokUrl: "", status: "DRAFT", metaTitle: "", metaDescription: "", noindex: false, ogTitle: "", ogDescription: "", ogImageUrl: "",
+  type: "RETAIL", stock: 0, origin: "", featured: false, model3d: null, shopeeUrl: "", tiktokUrl: "", status: "DRAFT", metaTitle: "", metaDescription: "", noindex: false, ogTitle: "", ogDescription: "", ogImageUrl: "",
   categoryId: "", images: [],
 };
 
@@ -126,6 +126,16 @@ export function ProductFormPage() {
             <p className="mb-3 text-sm text-ink-2">Ảnh thật của đúng sản phẩm, tỉ lệ 1:1. Ảnh đầu tiên là ảnh chính. Sản phẩm chưa có ảnh sẽ không được Google index.</p>
             <ImageList images={values.images} onChange={(images) => set("images", images)} disabled={submitting} />
             {errors.images && <p role="alert" className="mt-2 text-sm text-err">{errors.images}</p>}
+            <div className="mt-4">
+              <Field label="Xem 3D" optional hint="Trang sản phẩm có thêm nút 3D để khách xoay xem hộp, cạnh nút Ảnh.">
+                <Select
+                  value={values.model3d ?? ""}
+                  onChange={(v) => set("model3d", (v || null) as Values["model3d"])}
+                  options={[{ value: "", label: "Không có" }, ...product3dModels]}
+                  disabled={submitting}
+                />
+              </Field>
+            </div>
           </Panel>
           {!isNew && id && <RecipePanel productId={id} priceVnd={values.priceVnd ?? 0} />}
           <Panel title="SEO">

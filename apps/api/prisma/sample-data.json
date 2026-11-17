@@ -220,6 +220,7 @@
     {
       "stock": 0,
       "name": "Nụ trầm hương, hộp tròn 25 nụ",
+      "model3d": "ROUND_BOX",
       "slug": "nu-tram-huong-hop-tron-25-nu",
       "category": "nu-tram-huong",
       "priceVnd": 0,
