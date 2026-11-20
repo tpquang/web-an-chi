@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getCategories, getPostCategories, getPosts, getProducts, getSeoPages, type Paged } from "@/lib/api";
-import { aboutHref, braceletHref, categoryHref, postHref, postsHref, productHref, productsHref, topicHref } from "@/lib/links";
+import { aboutHref, braceletHref, categoryHref, policyHref, postHref, postsHref, productHref, productsHref, topicHref } from "@/lib/links";
 import { absoluteUrl } from "@/lib/seo";
 
 export const revalidate = 3600;
@@ -28,11 +28,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { key: "bracelet", path: braceletHref },
     { key: "about", path: aboutHref },
     { key: "posts", path: postsHref },
+    { key: "policy", path: policyHref },
   ].filter((page) => !pages[page.key]?.noindex);
 
   return [
     ...staticPages.map((page) => ({ url: absoluteUrl(page.path) })),
-    ...categories.filter((c) => !c.noindex).map((category) => ({ url: absoluteUrl(categoryHref(category.slug)), lastModified: category.updatedAt })),
+    // Danh mục chưa có sản phẩm đang bán là trang mỏng, trang cũng noindex
+    ...categories.filter((c) => !c.noindex && (c._count?.products ?? 0) > 0).map((category) => ({ url: absoluteUrl(categoryHref(category.slug)), lastModified: category.updatedAt })),
     // Trang sản phẩm mỏng (chưa ảnh hoặc mô tả) cũng đang noindex
     ...products
       .filter((product) => !product.noindex && product.images.length > 0 && product.description)

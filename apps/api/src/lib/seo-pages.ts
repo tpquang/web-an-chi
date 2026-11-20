@@ -22,7 +22,7 @@ export const SEO_PAGES = [
     path: "/",
     label: "Trang chủ",
     absoluteTitle: true,
-    title: "Trầm hương tự nhiên Hương Khê, Hà Tĩnh | An Chi Trầm Hương",
+    title: "Trầm hương tự nhiên Phúc Trạch, Hương Khê | An Chi Trầm Hương",
     description:
       "Nhang trầm, nụ trầm và vòng tay trầm hương tự nhiên từ vùng Phúc Trạch, Hương Khê, Hà Tĩnh. Ghi rõ thành phần, kích thước, cách dùng. Giao hàng toàn quốc.",
   },
@@ -61,6 +61,15 @@ export const SEO_PAGES = [
     title: "Giới thiệu An Chi Trầm Hương",
     description:
       "An Chi Trầm Hương bán vòng tay, nhang, nụ trầm và trầm miếng. Mỗi sản phẩm ghi rõ kích thước, xuất xứ, cách dùng; không hứa công dụng chữa bệnh hay tâm linh.",
+  },
+  {
+    key: "policy",
+    path: "/chinh-sach",
+    label: "Giao hàng, đổi trả, bảo mật",
+    absoluteTitle: false,
+    title: "Giao hàng, đổi trả và bảo mật",
+    description:
+      "Chính sách giao hàng toàn quốc, phí giao, đổi trả, cách thanh toán và cách An Chi Trầm Hương dùng thông tin bạn cung cấp khi đặt hàng.",
   },
 ] as const satisfies readonly PageDef[];
 

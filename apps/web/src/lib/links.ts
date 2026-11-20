@@ -5,6 +5,7 @@ export const cartHref = "/gio-hang";
 export const checkoutHref = "/thanh-toan";
 export const orderLookupHref = "/tra-cuu-don-hang";
 export const aboutHref = "/gioi-thieu";
+export const policyHref = "/chinh-sach";
 export const loginHref = "/dang-nhap";
 export const registerHref = "/dang-ky";
 export const accountHref = "/tai-khoan";

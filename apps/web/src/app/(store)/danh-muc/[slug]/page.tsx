@@ -6,11 +6,11 @@ import { ProductGrid } from "@/components/product-card";
 import { PageFrame, PageHeader, Section } from "@/components/ui/layout";
 import { Pagination } from "@/components/ui/pagination";
 import { EmptyState } from "@/components/ui/states";
-import { getCategories, getCategory, getProducts } from "@/lib/api";
+import { getCategories, getCategory, getProducts, PRODUCTS_PER_PAGE } from "@/lib/api";
 import { paragraphs } from "@/lib/content";
-import { categoryHref, pagedHref, productsHref } from "@/lib/links";
+import { categoryHref, pagedHref, productHref, productsHref } from "@/lib/links";
 import { notFoundOrRedirect } from "@/lib/redirect";
-import { pageMeta, parsePage } from "@/lib/seo";
+import { absoluteUrl, pageMeta, parsePage, safeJsonLd } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ trang?: string | string[] }> };
 
@@ -22,12 +22,15 @@ const loadCategory = cache(async (slug: string) => {
 
 export async function generateMetadata({ params, searchParams }: Props) {
   const [category, page] = await Promise.all([loadCategory((await params).slug), searchParams.then((s) => parsePage(s.trang))]);
+  // Cùng lời gọi với trang nên dùng lại cache fetch, không tốn thêm request
+  const products = await getProducts({ category: category.slug, page });
   const title = category.metaTitle ?? category.name;
   return pageMeta({
     title: page > 1 ? `${title}, trang ${page}` : title,
     description: category.metaDescription ?? category.description,
     path: pagedHref(categoryHref(category.slug), page),
-    noindex: category.noindex,
+    // Chưa có sản phẩm đang bán là trang mỏng: noindex và sitemap cũng bỏ ra
+    noindex: category.noindex || products.meta.total === 0,
     image: category.ogImageUrl,
     ogTitle: category.ogTitle,
     ogDescription: category.ogDescription,
@@ -41,9 +44,24 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   if (page > products.meta.totalPages) notFound();
   const others = categories.filter((item) => item.id !== category.id);
   const guide = paragraphs(category.guide);
+  const itemList =
+    products.data.length > 0 && !category.noindex
+      ? {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: category.name,
+          itemListElement: products.data.map((product, index) => ({
+            "@type": "ListItem",
+            position: (page - 1) * PRODUCTS_PER_PAGE + index + 1,
+            url: absoluteUrl(productHref(product.slug)),
+            name: product.name,
+          })),
+        }
+      : null;
 
   return (
     <PageFrame>
+      {itemList && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(itemList) }} />}
       <PageHeader
         title={category.name}
         desc={category.description}

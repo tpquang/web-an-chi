@@ -47,6 +47,17 @@ export function CheckoutForm() {
 
   const signedIn = useSignedIn();
 
+  // begin_checkout gửi một lần khi giỏ đã tính xong giá
+  const checkoutTracked = useRef(false);
+  useEffect(() => {
+    if (state.status !== "ready" || checkoutTracked.current) return;
+    checkoutTracked.current = true;
+    trackEvent("begin_checkout", {
+      value: state.quote.totalVnd,
+      items: state.quote.lines.map((line) => ({ item_id: line.slug, quantity: line.quantity, price: line.product?.unitPriceVnd })),
+    });
+  }, [state]);
+
   useEffect(() => {
     idempotencyKey.current = crypto.randomUUID();
     setValues(loadDraft());

@@ -9,7 +9,7 @@ const noOg = { ogTitle: null, ogDescription: null, ogImageUrl: null };
 
 export const PAGE_SEO_DEFAULTS = {
   home: {
-    title: "Trầm hương tự nhiên Hương Khê, Hà Tĩnh | An Chi Trầm Hương",
+    title: "Trầm hương tự nhiên Phúc Trạch, Hương Khê | An Chi Trầm Hương",
     description:
       "Nhang trầm, nụ trầm và vòng tay trầm hương tự nhiên từ vùng Phúc Trạch, Hương Khê, Hà Tĩnh. Ghi rõ thành phần, kích thước, cách dùng. Giao hàng toàn quốc.",
     absoluteTitle: true,
@@ -45,6 +45,14 @@ export const PAGE_SEO_DEFAULTS = {
     description:
       "An Chi Trầm Hương bán vòng tay, nhang, nụ trầm và trầm miếng. Mỗi sản phẩm ghi rõ kích thước, xuất xứ, cách dùng; không hứa công dụng chữa bệnh hay tâm linh.",
     absoluteTitle: true,
+    noindex: false,
+    ...noOg,
+  },
+  policy: {
+    title: "Giao hàng, đổi trả và bảo mật",
+    description:
+      "Chính sách giao hàng toàn quốc, phí giao, đổi trả, cách thanh toán và cách An Chi Trầm Hương dùng thông tin bạn cung cấp khi đặt hàng.",
+    absoluteTitle: false,
     noindex: false,
     ...noOg,
   },

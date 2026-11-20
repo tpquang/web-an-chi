@@ -10,7 +10,7 @@ import { getHome, getPosts, getProducts, getStore } from "@/lib/api";
 import { isPreLaunch } from "@/lib/launch";
 import { postsHref, productsHref } from "@/lib/links";
 import { staticPageMeta } from "@/lib/page-seo";
-import { absoluteUrl, safeJsonLd } from "@/lib/seo";
+import { absoluteUrl, logoLdUrl, safeJsonLd } from "@/lib/seo";
 import { site } from "@/lib/site";
 
 // Tiêu đề, mô tả sửa ở CMS > Cài đặt SEO. Cụm chính "trầm hương tự nhiên" kèm vùng nguyên liệu, theo docs/web/seo/keyword-map.md
@@ -40,8 +40,13 @@ export default async function HomePage() {
       areaServed: "VN",
       ...(store.phone ? { telephone: store.phone } : {}),
       ...(store.email ? { email: store.email } : {}),
-      ...(store.address ? { address: store.address } : {}),
-      logo: absoluteUrl("/brand/logo-square.svg"),
+      ...(store.address
+        ? { address: { "@type": "PostalAddress", streetAddress: store.address, addressCountry: "VN" } }
+        : {}),
+      ...(store.phone
+        ? { contactPoint: { "@type": "ContactPoint", telephone: store.phone, contactType: "customer service", areaServed: "VN", availableLanguage: "vi" } }
+        : {}),
+      logo: logoLdUrl,
       // Link tìm kiếm trên sàn không phải trang của shop nên bỏ
       sameAs: [store.facebookUrl, store.zaloUrl, store.youtubeUrl, store.tiktokUrl, store.shopeeUrl].filter(
         (url) => url && !url.includes("/search"),

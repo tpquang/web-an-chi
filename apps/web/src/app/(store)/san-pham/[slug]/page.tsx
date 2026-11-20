@@ -10,12 +10,13 @@ import { PageBreadcrumb } from "@/components/ui/page-breadcrumb";
 import { PageFrame, Section } from "@/components/ui/layout";
 import { Price } from "@/components/ui/price";
 import { Tag } from "@/components/ui/tag";
+import { TrackViewItem } from "@/components/track-view-item";
 import { getProduct, getProducts, getStore } from "@/lib/api";
 import { paragraphs } from "@/lib/content";
 import { isPreLaunch, launchIso } from "@/lib/launch";
-import { categoryHref, postHref, productHref } from "@/lib/links";
+import { categoryHref, policyHref, postHref, productHref } from "@/lib/links";
 import { notFoundOrRedirect } from "@/lib/redirect";
-import { absoluteImage, absoluteUrl, pageMeta, safeJsonLd } from "@/lib/seo";
+import { absoluteImage, absoluteUrl, pageMeta, parseDayRange, safeJsonLd } from "@/lib/seo";
 import { formatDate, formatVnd, site } from "@/lib/site";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -69,6 +70,8 @@ export default async function ProductPage({ params }: Props) {
   const specs = [...(product.origin ? [{ label: "Xuất xứ", value: product.origin }] : []), ...(product.specs ?? [])];
   const { flatFeeVnd, freeFromVnd, eta } = store.shipping;
   const shippingVnd = freeFromVnd !== null && product.priceVnd >= freeFromVnd ? 0 : flatFeeVnd;
+  const transitDays = parseDayRange(eta);
+  const returnDays = parseDayRange(store.returnPolicy)?.max;
   // Google bắt buộc có ảnh cho Product. Trang mỏng (chưa ảnh hoặc mô tả) đang noindex nên không xuất schema
   const jsonLd = isNoindex(product)
     ? null
@@ -78,7 +81,8 @@ export default async function ProductPage({ params }: Props) {
         name: product.name,
         description: product.description ?? product.summary ?? undefined,
         image: product.images.map((image) => absoluteImage(image.url)),
-        sku: product.slug,
+        // id không đổi khi sửa slug, để Google và Merchant Center không coi là sản phẩm mới
+        sku: product.id,
         brand: { "@type": "Brand", name: site.name },
         category: product.category.name,
         url,
@@ -99,13 +103,36 @@ export default async function ProductPage({ params }: Props) {
             "@type": "OfferShippingDetails",
             shippingRate: { "@type": "MonetaryAmount", value: shippingVnd, currency: "VND" },
             shippingDestination: { "@type": "DefinedRegion", addressCountry: "VN" },
+            ...(transitDays
+              ? {
+                  deliveryTime: {
+                    "@type": "ShippingDeliveryTime",
+                    handlingTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 1, unitCode: "DAY" },
+                    transitTime: { "@type": "QuantitativeValue", minValue: transitDays.min, maxValue: transitDays.max, unitCode: "DAY" },
+                  },
+                }
+              : {}),
           },
+          // Chỉ khai khi chính sách trên CMS ghi số ngày, khớp trang /chinh-sach
+          ...(returnDays
+            ? {
+                hasMerchantReturnPolicy: {
+                  "@type": "MerchantReturnPolicy",
+                  applicableCountry: "VN",
+                  returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+                  merchantReturnDays: returnDays,
+                  returnMethod: "https://schema.org/ReturnByMail",
+                  merchantReturnLink: absoluteUrl(policyHref),
+                },
+              }
+            : {}),
         },
       };
 
   return (
     <PageFrame>
       {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />}
+      <TrackViewItem slug={product.slug} name={product.name} priceVnd={product.priceVnd} />
       <PageBreadcrumb crumbs={crumbs} />
 
       <div className="grid gap-8 lg:grid-cols-12 lg:gap-6">

@@ -18,12 +18,15 @@ export function absoluteImage(url: string) {
 
 export const defaultOgImage = "/brand/default-og.png";
 
+// Logo trong JSON-LD phải là ảnh raster vuông (Google không nhận SVG), tối thiểu 112×112
+export const logoLdUrl = absoluteUrl("/brand/logo-square.png");
+
 // Đơn vị đăng nội dung dùng chung cho Article và Product
 export const publisherLd = {
   "@type": "Organization",
   name: site.name,
   url: absoluteUrl("/"),
-  logo: { "@type": "ImageObject", url: absoluteUrl("/brand/logo-square.svg") },
+  logo: { "@type": "ImageObject", url: logoLdUrl, width: 512, height: 512 },
 };
 
 // Cắt theo ranh giới từ, tối đa 158 ký tự
@@ -62,6 +65,8 @@ export function pageMeta({ title, description, path, noindex, absoluteTitle, ima
       // Chỉ ảnh mặc định biết chắc cỡ 1200×630; ảnh tải lên thì để mạng xã hội tự đọc cỡ
       images: [image ? { url: image } : { url: defaultOgImage, width: 1200, height: 630 }],
     },
+    // Ảnh lớn khi chia sẻ lên X và các ứng dụng đọc thẻ twitter:*
+    twitter: { card: "summary_large_image", title: ogTitle || title, description: ogDesc, images: [image || defaultOgImage] },
   };
 }
 
@@ -74,7 +79,16 @@ export function parsePage(value: string | string[] | undefined) {
   return Number(value);
 }
 
-export type Crumb = { name: string; href: string };
+// Đọc khoảng ngày từ chữ CMS như "2–4 ngày làm việc" hay "Đổi trả trong 7 ngày". Không đọc được thì null,
+// schema bỏ trường đó thay vì đoán
+export function parseDayRange(text: string | null | undefined): { min: number; max: number } | null {
+  const match = text?.match(/(\d+)\s*(?:[-–]\s*(\d+)\s*)?ngày/);
+  if (!match) return null;
+  const min = Number(match[1]);
+  return { min, max: match[2] ? Number(match[2]) : min };
+}
+
+export type Crumb ={ name: string; href: string };
 
 export function breadcrumbJsonLd(crumbs: Crumb[]) {
   return {

@@ -23,12 +23,22 @@ Quy tắc ở skill `anchi-seo`. Trước khi ra mắt: đặt `NEXT_PUBLIC_SITE
 - [x] Phân trang `?trang=N` bằng link thật; `?trang=1` và trang vượt quá trả 404
 - [x] `next/image` cho ảnh sản phẩm, chỉ nhận tên miền trong `IMAGE_HOSTNAMES`
 - [x] Trang sản phẩm và bài viết dựng ở lần xem đầu rồi cache (ISR)
+- [x] Ảnh OG mặc định 1200×630 (`public/brand/default-og.png`), thẻ `twitter:card` = `summary_large_image`
+- [x] Logo trong JSON-LD là PNG 512×512 (`public/brand/logo-square.png`), Google không nhận SVG
+- [x] Organization có `PostalAddress`, `contactPoint`
+- [x] Product: `sku` theo id (không đổi khi sửa slug), `deliveryTime` và `hasMerchantReturnPolicy` đọc số ngày từ CMS > Thông tin cửa hàng
+- [x] Danh mục chưa có sản phẩm đang bán: `noindex` và không vào sitemap; danh mục có hàng xuất `ItemList`
+- [x] Trang `/chinh-sach`: giao hàng, đổi trả, thanh toán, bảo mật; có trong sitemap và footer
+- [x] `/countdown` chuyển 308 về trang chủ sau giờ mở bán
+- [x] Sự kiện GA4 `view_item`, `add_to_cart`, `begin_checkout`, `purchase`
+- [x] Mô hình 3D và khung chat nạp bằng `next/dynamic`
 
 ## Còn thiếu
 
-- [ ] Ảnh OG 1200×630 mặc định và theo bài (mục 4)
+- [ ] Ảnh OG riêng theo bài (ảnh mặc định đã có)
 - [ ] Trang 500 trả HTML rỗng chờ JS dựng giao diện lỗi; mã 500 đúng nhưng người dùng tắt JS không thấy chữ
 - [ ] Màn hình CMS xem, sửa, xoá redirect thủ công (bảng tự ghi đã có, xem trên)
 - [ ] Webhook xoá cache khi lưu trên CMS; hiện web cập nhật sau tối đa 60 giây
 - [ ] Đo ngân sách hiệu năng, Lighthouse (mục 10)
-- [ ] Trang giới thiệu, chính sách giao hàng, đổi trả, bảo mật (mục 8)
+- [ ] Trang giới thiệu có người sáng lập, ảnh xưởng, giấy phép kinh doanh (mục 8)
+- [ ] Tác giả bài viết dạng `Person`, trang `/tac-gia/<slug>`
