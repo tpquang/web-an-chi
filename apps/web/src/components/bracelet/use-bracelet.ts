@@ -10,6 +10,8 @@ import type { SceneItem } from "./bracelet-scene";
 
 // Vòng vừa khi chiều dài lệch không quá khoảng này so với cỡ cần
 const FIT_TOLERANCE_MM = 5;
+// Chuỗi quấn được coi là đúng số vòng khi lệch không quá chừng này vòng: dây thun giãn hoặc chùng bù phần lẻ
+const WRAP_TOLERANCE = 0.4;
 // Số bước hoàn tác giữ lại
 const HISTORY = 50;
 
@@ -28,15 +30,20 @@ export function useBracelet(rules: BraceletRules, beads: Bead[]) {
     firstBead ? Array.from({ length: Math.round(((startWristCm + startFit.easeCm) * 10) / firstBead.sizeMm) }, () => ringItem(firstBead.slug)) : [];
 
   const [ring, setRingState] = useState<RingItem[]>(initialRing);
-  const [history, setHistory] = useState<RingItem[][]>([]);
+  const [history, setHistory] = useState<{ ring: RingItem[]; wraps: number }[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [wristCm, setWristCmState] = useState(startWristCm);
   const [fit, setFitState] = useState(startFit.id);
   const [cord, setCord] = useState(rules.cords[0].id);
+  // 1 là vòng một tầng; 3 hoặc 4 là chuỗi 108 hạt quấn quanh cổ tay
+  const [wraps, setWrapsState] = useState(1);
+  // Chuỗi có hạt chủ và hai dây tua, khách tự tick
+  const [accent, setAccent] = useState(false);
+  const mala = wraps > 1;
 
   // Mọi thay đổi vòng đi qua đây để hoàn tác được
   function setRing(next: RingItem[]) {
-    setHistory((h) => [...h.slice(-HISTORY + 1), ring]);
+    setHistory((h) => [...h.slice(-HISTORY + 1), { ring, wraps }]);
     setRingState(next);
   }
 
@@ -55,20 +62,51 @@ export function useBracelet(rules: BraceletRules, beads: Bead[]) {
   const easeCm = rules.fits.find((f) => f.id === fit)?.easeCm ?? 1;
   const targetMm = Math.round((wristCm + easeCm) * 10);
   const diff = lengthMm - targetMm;
+  const beadCount = ringBeads.filter((bead) => bead.kind === "BEAD").length;
+  const charmCount = ring.length - beadCount;
+  // Số vòng chuỗi quấn được trên cổ tay này
+  const turns = lengthMm / Math.max(targetMm, 1);
+  const maxItems = mala ? rules.mala.beads + rules.mala.maxCharms : rules.maxBeads;
   // Hạt chính là hạt trầm dùng nhiều nhất, để tự lấp đầy và ước số hạt
   const mainBead = ringBeads.filter((bead) => bead.kind === "BEAD").sort((a, b) => (counts.get(b.slug) ?? 0) - (counts.get(a.slug) ?? 0))[0] ?? firstBead;
 
-  const beadsVnd = ringBeads.reduce((sum, bead) => sum + bead.priceVnd, 0);
+  // Hạt chủ và tua: thêm chừng này hạt cùng loại hạt chính
+  const accentCount = mala && accent && mainBead ? rules.mala.accentBeads : 0;
+  const accentVnd = accentCount * (mainBead?.priceVnd ?? 0);
+  const beadsVnd = ringBeads.reduce((sum, bead) => sum + bead.priceVnd, 0) + accentVnd;
   const totalVnd = beadsVnd + rules.feeVnd;
 
-  const outOfStock = [...counts].find(([slug, count]) => (bySlug.get(slug)?.stock ?? 0) < count);
-  const problem =
-    ring.length < rules.minBeads ? `Vòng cần ít nhất ${rules.minBeads} hạt.`
+  const stockNeed = new Map(counts);
+  if (accentCount && mainBead) stockNeed.set(mainBead.slug, (stockNeed.get(mainBead.slug) ?? 0) + accentCount);
+  const outOfStock = [...stockNeed].find(([slug, count]) => (bySlug.get(slug)?.stock ?? 0) < count);
+  const malaProblem = () => {
+    if (beadCount !== rules.mala.beads) return `Chuỗi cần đúng ${rules.mala.beads} hạt trầm, đang có ${beadCount} hạt.`;
+    if (charmCount > rules.mala.maxCharms) return `Chuỗi gắn tối đa ${rules.mala.maxCharms} charm.`;
+    if (Math.abs(turns - wraps) <= WRAP_TOLERANCE) return null;
+    const best = mainBead && malaBead(wraps, targetMm, mainBead);
+    const hint = best && best.sizeMm !== mainBead?.sizeMm ? `Chọn hạt ${best.sizeMm} mm để quấn ${wraps} vòng.` : "Chuỗi này chưa hợp cỡ tay, bạn đổi cỡ hạt hoặc chọn vòng đơn.";
+    return `Hạt ${mainBead?.sizeMm} mm quấn được khoảng ${turns.toLocaleString("vi-VN", { maximumFractionDigits: 1 })} vòng trên cổ tay ${wristCm.toLocaleString("vi-VN")} cm. ${hint}`;
+  };
+  const problem = mala
+    ? (malaProblem() ?? (outOfStockProblem()))
+    : ring.length < rules.minBeads ? `Vòng cần ít nhất ${rules.minBeads} hạt.`
     : lengthMm > rules.maxLengthMm ? `Vòng dài tối đa ${cm(rules.maxLengthMm)} cm. Bạn bớt hạt hoặc chọn hạt nhỏ hơn.`
     : diff < -FIT_TOLERANCE_MM ? `Còn thiếu ${cm(-diff)} cm để vừa cổ tay ${wristCm.toLocaleString("vi-VN")} cm.`
     : diff > FIT_TOLERANCE_MM ? `Vòng đang dư ${cm(diff)} cm. Bạn bớt hạt hoặc đổi kiểu đeo.`
-    : outOfStock ? `Shop chỉ còn ${bySlug.get(outOfStock[0])?.stock} hạt ${bySlug.get(outOfStock[0])?.name}.`
-    : null;
+    : outOfStockProblem();
+  function outOfStockProblem() {
+    return outOfStock ? `Shop chỉ còn ${bySlug.get(outOfStock[0])?.stock} hạt ${bySlug.get(outOfStock[0])?.name}.` : null;
+  }
+
+  // Hạt cùng loại trầm có cỡ quấn gần đúng số vòng nhất. Ưu tiên hạt còn hàng, rồi hạt cùng phân loại
+  function malaBead(n: number, target: number, current: Bead) {
+    const grade = current.slug.replace(/^.*?\d+mm/, "");
+    const keptMm = ring.reduce((sum, item) => sum + (bySlug.get(item.slug)?.kind === "BEAD" ? 0 : (bySlug.get(item.slug)?.sizeMm ?? 0)), 0);
+    const score = (bead: Bead) => Math.abs((rules.mala.beads * bead.sizeMm + keptMm) / target - n);
+    return beads
+      .filter((bead) => bead.kind === "BEAD" && bead.material === current.material)
+      .sort((a, b) => score(a) - score(b) || Number(b.stock > 0) - Number(a.stock > 0) || Number(b.slug.endsWith(grade)) - Number(a.slug.endsWith(grade)))[0];
+  }
 
   // Dòng tóm tắt: gộp hạt trùng loại, giữ thứ tự xuất hiện trên vòng
   const lines = [...counts].flatMap(([slug, count]) => {
@@ -77,8 +115,8 @@ export function useBracelet(rules: BraceletRules, beads: Bead[]) {
   });
 
   function insert(slug: string, at?: number) {
-    if (ring.length >= rules.maxBeads) {
-      showToast({ type: "error", title: "Đã đủ số hạt tối đa", desc: `Một vòng có tối đa ${rules.maxBeads} hạt.` });
+    if (ring.length >= maxItems) {
+      showToast({ type: "error", title: "Đã đủ số hạt tối đa", desc: mala ? `Chuỗi có ${rules.mala.beads} hạt trầm và tối đa ${rules.mala.maxCharms} charm.` : `Một vòng có tối đa ${rules.maxBeads} hạt.` });
       return;
     }
     const index = at ?? (selected !== null ? selected + 1 : ring.length);
@@ -103,9 +141,16 @@ export function useBracelet(rules: BraceletRules, beads: Bead[]) {
   // Lấp đầy bằng hạt chính cho tới khi vừa cỡ tay, giữ nguyên các charm đã đặt
   function autoFill(target = targetMm) {
     if (!mainBead) return;
+    // Chuỗi giữ đủ 108 hạt; cổ tay đổi thì đổi cỡ hạt cho vừa số vòng quấn
+    if (mala) {
+      const best = malaBead(wraps, target, mainBead);
+      if (best && best.slug !== mainBead.slug) rebuild(best.slug, wraps, target);
+      else if (beadCount !== rules.mala.beads) rebuild(mainBead.slug, wraps, target);
+      return;
+    }
     const next = [...ring];
     let length = lengthMm;
-    while (length + mainBead.sizeMm / 2 < target && next.length < rules.maxBeads) {
+    while (length + mainBead.sizeMm / 2 < target && next.length < maxItems) {
       next.push(ringItem(mainBead.slug));
       length += mainBead.sizeMm;
     }
@@ -120,19 +165,30 @@ export function useBracelet(rules: BraceletRules, beads: Bead[]) {
 
   // Đổi toàn bộ hạt trầm trên vòng sang loại khác, charm giữ nguyên chỗ. Số hạt tính lại cho vừa tay
   function swapMain(slug: string) {
+    rebuild(slug, wraps, targetMm);
+  }
+
+  // Dựng lại vòng toàn hạt này: một tầng thì đủ dài theo cổ tay, chuỗi thì đủ 108 hạt
+  function rebuild(slug: string, n: number, target: number) {
     const bead = bySlug.get(slug);
     if (!bead) return;
     const kept = ring.filter((item) => bySlug.get(item.slug)?.kind !== "BEAD");
     const keptMm = kept.reduce((sum, item) => sum + (bySlug.get(item.slug)?.sizeMm ?? 0), 0);
-    const count = Math.max(1, Math.round((targetMm - keptMm) / bead.sizeMm));
+    const count = n > 1 ? rules.mala.beads : Math.max(1, Math.round((target - keptMm) / bead.sizeMm));
     // Charm rải đều giữa các hạt trầm như vị trí cũ
     const next: RingItem[] = Array.from({ length: count }, () => ringItem(slug));
     ring.forEach((item, i) => {
       if (bySlug.get(item.slug)?.kind === "BEAD") return;
       next.splice(Math.round((i / Math.max(ring.length, 1)) * next.length), 0, item);
     });
-    setRing(next.slice(0, rules.maxBeads));
+    setRing(next.slice(0, n > 1 ? rules.mala.beads + rules.mala.maxCharms : rules.maxBeads));
     setSelected(null);
+  }
+
+  function setWraps(n: number) {
+    if (!mainBead || n === wraps) return;
+    setWrapsState(n);
+    rebuild(n > 1 ? (malaBead(n, targetMm, mainBead)?.slug ?? mainBead.slug) : mainBead.slug, n, targetMm);
   }
 
   // Đổi cỡ tay thì thêm bớt hạt chính cho vừa luôn, khách không phải tự đếm
@@ -151,11 +207,13 @@ export function useBracelet(rules: BraceletRules, beads: Bead[]) {
     const last = history.at(-1);
     if (!last) return;
     setHistory(history.slice(0, -1));
-    setRingState(last);
+    setRingState(last.ring);
+    setWrapsState(last.wraps);
     setSelected(null);
   }
 
   function reset() {
+    setWrapsState(1);
     setRing(initialRing());
     setSelected(null);
   }
@@ -170,13 +228,14 @@ export function useBracelet(rules: BraceletRules, beads: Bead[]) {
       cord,
       fit,
       wristCm,
+      ...(mala ? { wraps, ...(accent ? { accent } : {}) } : {}),
     });
     showToast({ title: "Đã thêm vòng vào giỏ", desc: "Bạn có thể đặt hàng hoặc thiết kế thêm vòng khác.", action: { href: cartHref, label: "Xem giỏ hàng" } });
   }
 
   return {
     rules, beads, ring, sceneItems, ringBeads, counts, lines, selected, setSelected,
-    wristCm, setWristCm, fit, setFit, cord, setCord,
+    wristCm, setWristCm, fit, setFit, cord, setCord, wraps, setWraps, turns, accent: mala && accent, setAccent, accentCount, accentVnd,
     lengthMm, targetMm, easeCm, mainBead, totalVnd, problem, canUndo: history.length > 0,
     insert, move, removeAt, autoFill, swapMain, undo, reset, addToCart,
   };

@@ -5,7 +5,7 @@ import { launchDateLabel } from "@/lib/launch";
 import { formatVnd } from "@/lib/site";
 import { MinusIcon, PlusIcon } from "../icons";
 import { Button } from "../ui/button";
-import { BraceletOptions } from "./bracelet-options";
+import { BraceletOptions, BraceletStyle } from "./bracelet-options";
 import type { BraceletState } from "./use-bracelet";
 
 const stepButton = "inline-flex size-11 flex-none items-center justify-center rounded-md border border-line-strong hover:border-wood disabled:opacity-50";
@@ -65,8 +65,9 @@ export function WristSize({ state, compact }: { state: BraceletState; compact?: 
         </p>
         {mainBead && (
           <p className="text-right text-sm text-ink-2 tabular-nums">
-            ≈ {Math.round(targetMm / mainBead.sizeMm)} hạt
+            {state.wraps > 1 ? `${rules.mala.beads} hạt` : `≈ ${Math.round(targetMm / mainBead.sizeMm)} hạt`}
             <span className="block">loại {mainBead.sizeMm} mm</span>
+            {state.wraps > 1 && <span className="block">quấn {state.wraps} vòng</span>}
           </p>
         )}
       </div>
@@ -80,6 +81,9 @@ export function BraceletSummary({ state, salesOpen }: { state: BraceletState; sa
 
   return (
     <div className="flex flex-col gap-6">
+      <section className="rounded-xl border border-line bg-surface p-5">
+        <BraceletStyle state={state} />
+      </section>
       <WristSize state={state} />
 
       <section aria-labelledby="thiet-ke" className="flex flex-col gap-3">
@@ -95,6 +99,12 @@ export function BraceletSummary({ state, salesOpen }: { state: BraceletState; sa
               <dd className="text-right">{formatVnd(vnd)}</dd>
             </div>
           ))}
+          {state.accentCount > 0 && (
+            <>
+              <dt className="text-ink-2">Hạt chủ và tua ({state.accentCount} hạt)</dt>
+              <dd className="text-right">{formatVnd(state.accentVnd)}</dd>
+            </>
+          )}
           {rules.feeVnd > 0 && (
             <>
               <dt className="text-ink-2">Công xâu vòng</dt>

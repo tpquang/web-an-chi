@@ -22,6 +22,8 @@ export type QuoteLine = {
     cordName?: string;
     fitName?: string;
     wristCm: number;
+    wraps?: number;
+    accent?: boolean;
     lengthMm: number;
   } | null;
 };

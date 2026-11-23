@@ -283,6 +283,8 @@ export type BraceletRules = {
   maxLengthMm: number;
   minBeads: number;
   maxBeads: number;
+  // Chuỗi 108 hạt quấn nhiều vòng quanh cổ tay
+  mala: { beads: number; wraps: number[]; maxCharms: number; maxLengthMm: number; accentBeads: number };
   feeVnd: number;
   leadTime: string;
   cords: { id: string; name: string }[];

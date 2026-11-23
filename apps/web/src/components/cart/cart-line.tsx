@@ -88,7 +88,7 @@ export function CartLine({ line, disabled }: { line: QuoteLine; disabled?: boole
 function BraceletSummary({ design }: { design: NonNullable<QuoteLine["design"]> }) {
   return (
     <p className="mt-1 text-sm text-ink-2">
-      Dài {(design.lengthMm / 10).toLocaleString("vi-VN")} cm · Cổ tay {design.wristCm.toLocaleString("vi-VN")} cm · {design.fitName} ·{" "}
+      {design.wraps ? `Quấn ${design.wraps} vòng · ` : ""}{design.accent ? "Có hạt chủ và tua · " : ""}Dài {(design.lengthMm / 10).toLocaleString("vi-VN")} cm · Cổ tay {design.wristCm.toLocaleString("vi-VN")} cm · {design.fitName} ·{" "}
       {design.cordName}
     </p>
   );

@@ -102,8 +102,8 @@ export async function quoteCart(items: CartItems) {
       const stock = maxBuildable(design, beadBySlug, reserved);
       for (const [bead, count] of countBeads(design)) reserved.set(bead, (reserved.get(bead) ?? 0) + count * Math.min(quantity, stock));
       const problem: LineProblem | null =
-        priced.lengthMm > braceletRules.maxLengthMm ? "TOO_LONG"
-        : priced.lengthMm < design.wristCm * 10 ? "TOO_SHORT"
+        priced.lengthMm > (design.wraps ? braceletRules.mala.maxLengthMm : braceletRules.maxLengthMm) ? "TOO_LONG"
+        : priced.lengthMm < design.wristCm * 10 * (design.wraps ?? 1) ? "TOO_SHORT"
         : stock === 0 ? "OUT_OF_STOCK"
         : quantity > stock ? "NOT_ENOUGH"
         : null;

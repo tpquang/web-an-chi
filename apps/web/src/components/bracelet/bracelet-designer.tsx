@@ -6,7 +6,7 @@ import type { Bead, BraceletRules } from "@/lib/api";
 import { cm } from "@/lib/bracelet";
 import { launchDateLabel } from "@/lib/launch";
 import { formatVnd } from "@/lib/site";
-import { CloseIcon, ResetIcon, SpinIcon, UndoIcon } from "../icons";
+import { CloseIcon, HandIcon, ResetIcon, SpinIcon, UndoIcon } from "../icons";
 import { useLaunch } from "../launch/launch-clock";
 import { Button, buttonClass } from "../ui/button";
 import { Tag } from "../ui/tag";
@@ -43,7 +43,7 @@ const intro = [
   "Xem giá ngay, shop xâu vòng theo đúng thứ tự bạn đặt.",
 ];
 const action =
-  "inline-flex size-11 items-center justify-center gap-2 rounded-full border border-line-strong bg-surface/90 text-ink transition-colors duration-(--d-fast) hover:border-wood disabled:opacity-50 aria-pressed:border-wood aria-pressed:text-wood lg:size-auto lg:min-h-11 lg:bg-transparent lg:px-5";
+  "inline-flex size-11 items-center justify-center gap-2 rounded-full border border-line-strong bg-surface/90 text-ink transition-colors duration-(--d-fast) hover:border-wood disabled:opacity-50 aria-pressed:border-wood aria-pressed:text-wood lg:size-auto lg:min-h-11 lg:bg-transparent lg:px-3 lg:text-sm lg:whitespace-nowrap";
 
 export function BraceletDesigner({
   rules,
@@ -73,6 +73,8 @@ export function BraceletDesigner({
   const [open, setOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [spinning, setSpinning] = useState(false);
+  // Xem vòng đeo trên bàn tay mẫu, phóng theo cỡ cổ tay khách nhập
+  const [onHand, setOnHand] = useState(false);
   // Chip đi theo con trỏ khi kéo hạt từ kho; vào khung 3D thì chip mờ đi, nhường cho hạt 3D
   const [dragging, setDragging] = useState<{
     bead: Bead;
@@ -271,7 +273,7 @@ export function BraceletDesigner({
           <BeadPicker
             state={state}
             onBeadPointer={onBeadPointer}
-            options={<BraceletOptions state={state} />}
+            options={<BraceletOptions state={state} withStyle />}
           />
         </div>
 
@@ -290,7 +292,11 @@ export function BraceletDesigner({
               onSelect={setSelected}
               onMove={state.move}
               onRemove={state.removeAt}
-              label={`Vòng ${ring.length} hạt, dài ${cm(lengthMm)} cm`}
+              label={`${state.wraps > 1 ? `Chuỗi ${ring.length} hạt quấn ${state.wraps} vòng` : `Vòng ${ring.length} hạt`}, dài ${cm(lengthMm)} cm${onHand ? ", đeo trên bàn tay mẫu" : ""}`}
+              wraps={state.wraps}
+              accent={state.accent}
+              onHand={onHand}
+              wristCm={state.wristCm}
             />
             {/* Số hạt góc trái, cỡ hạt và chiều dài góc phải, để giữa vòng trống cho hạt */}
             <dl className="pointer-events-none absolute inset-x-3 top-3 flex items-start justify-between gap-2 text-sm tabular-nums">
@@ -306,6 +312,7 @@ export function BraceletDesigner({
                 <dd>
                   {mainBead ? `${mainBead.sizeMm} mm · ` : ""}
                   {cm(lengthMm)} cm
+                  {state.wraps > 1 ? ` · ≈ ${state.turns.toLocaleString("vi-VN", { maximumFractionDigits: 1 })} vòng` : ""}
                 </dd>
               </div>
             </dl>
@@ -349,7 +356,7 @@ export function BraceletDesigner({
           </div>
 
           {/* Điện thoại: hàng nút tròn ở trên khung, ngay dưới hai nhãn số hạt. Máy tính: hàng nút có chữ dưới vòng */}
-          <div className="absolute top-14 left-1/2 flex -translate-x-1/2 gap-3 lg:static lg:translate-x-0 lg:justify-center lg:gap-3">
+          <div className="absolute top-14 left-1/2 flex -translate-x-1/2 gap-3 lg:static lg:translate-x-0 lg:justify-center lg:gap-2">
             <button
               type="button"
               onClick={state.undo}
@@ -357,7 +364,7 @@ export function BraceletDesigner({
               className={action}
             >
               <UndoIcon />
-              <span className="sr-only lg:not-sr-only">Hoàn tác</span>
+              <span className="sr-only lg:not-sr-only lg:whitespace-nowrap">Hoàn tác</span>
             </button>
             <button
               type="button"
@@ -366,11 +373,23 @@ export function BraceletDesigner({
               className={action}
             >
               <SpinIcon />
-              <span className="sr-only lg:not-sr-only">Xoay vòng</span>
+              <span className="sr-only lg:not-sr-only lg:whitespace-nowrap">Xoay vòng</span>
+            </button>
+            <button
+              type="button"
+              aria-pressed={onHand}
+              onClick={() => {
+                setOnHand(!onHand);
+                setSelected(null);
+              }}
+              className={action}
+            >
+              <HandIcon />
+              <span className="sr-only lg:not-sr-only lg:whitespace-nowrap">Đeo thử</span>
             </button>
             <button type="button" onClick={state.reset} className={action}>
               <ResetIcon />
-              <span className="sr-only lg:not-sr-only">Làm mới</span>
+              <span className="sr-only lg:not-sr-only lg:whitespace-nowrap">Làm mới</span>
             </button>
           </div>
           <p
@@ -378,7 +397,7 @@ export function BraceletDesigner({
             className="sr-only lg:not-sr-only lg:text-center lg:text-sm lg:text-ink-3"
           >
             Chọn loại trầm để đổi cả vòng, kéo hạt hoặc charm thả vào vị trí
-            trên vòng. Gắp hạt trên vòng kéo ra xa để bỏ, kéo chỗ trống để xoay.
+            trên vòng. Bấm Đeo thử để xem vòng trên bàn tay theo cỡ cổ tay của bạn. Gắp hạt trên vòng kéo ra xa để bỏ, kéo chỗ trống để xoay.
             Bàn phím: mũi tên để chọn hạt, Shift + mũi tên để dời, Delete để
             xoá.
           </p>

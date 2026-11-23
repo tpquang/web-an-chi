@@ -5,6 +5,9 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import type { Bead } from "@/lib/api";
+import { floatingCoil, type Coil } from "./coil";
+import { loadHand, wornCoil, type Hand } from "./hand-model";
+import { buildTassel, GURU_SCALE, type Tassel } from "./tassel";
 
 const beadTextureUrl = (texture: NonNullable<Bead["texture"]>) => `/api/bead-textures/${texture.id}?v=${texture.version}`;
 
@@ -31,7 +34,23 @@ type Props = {
   onMove(from: number, to: number): void;
   onRemove(index: number): void;
   label: string;
+  // Số vòng quấn: 1 là vòng một tầng, 3 hoặc 4 là chuỗi 108 hạt
+  wraps: number;
+  // Chuỗi có hạt chủ và dây tua
+  accent: boolean;
+  // Xem vòng đeo trên bàn tay, chỉ xoay xem, không sửa hạt
+  onHand: boolean;
+  wristCm: number;
 };
+
+// Camera nhìn bàn tay: hơi cao hơn cổ tay để thấy cả bàn tay lẫn vòng
+const HAND_TARGET = new THREE.Vector3(0, 5, 0);
+const HAND_DISTANCE = 42;
+// Khoảng zoom cho phép [gần nhất, xa nhất], đơn vị cm
+const RING_ZOOM = [3, 30] as const;
+const HAND_ZOOM = [8, 80] as const;
+// Góc đặt hạt chủ: phía trước, hướng về camera
+const PHASE = Math.PI / 2;
 
 // Đơn vị trong cảnh là cm, vòng nằm trên mặt phẳng y = 0
 const MM = 0.1;
@@ -49,16 +68,18 @@ const FINGER_OFFSET = 56;
 // Chạm trượt hạt nhỏ trong khoảng này vẫn tính là chạm trúng hạt gần nhất, tính bằng px
 const PICK_SLOP = { mouse: 8, touch: 28 };
 
+const Z_AXIS = new THREE.Vector3(0, 0, 1);
 const damp = (x: number, target: number, rate: number, dt: number) => target + (x - target) * Math.exp(-rate * dt);
 function dampAngle(a: number, target: number, rate: number, dt: number) {
   const d = Math.atan2(Math.sin(target - a), Math.cos(target - a));
   return a + d * (1 - Math.exp(-rate * dt));
 }
 
-function layout(sizes: number[]) {
-  const total = sizes.reduce((sum, size) => sum + size, 0) || 1;
-  const radius = Math.max((total * MM) / (2 * Math.PI), MIN_RADIUS);
-  let angle = START;
+// lead: phần dây hạt chủ chiếm ở đầu chuỗi (mm), các hạt xếp tiếp sau
+function layout(sizes: number[], wraps = 1, lead = 0) {
+  const total = sizes.reduce((sum, size) => sum + size, 0) + lead || 1;
+  const radius = Math.max((total * MM) / (2 * Math.PI * wraps), MIN_RADIUS);
+  let angle = START + (lead / total) * Math.PI * 2;
   const mids = sizes.map((size) => {
     const span = (size / total) * Math.PI * 2;
     angle += span;
@@ -168,6 +189,8 @@ type Entry = {
   tiltZ: number;
   delay: number;
   leaving: boolean;
+  // Đang bị kéo: vị trí theo mặt phẳng, không theo đường quấn
+  free: boolean;
 };
 
 type Zone = { hit: THREE.Vector3 | null; insert: number | null; inside: boolean };
@@ -185,9 +208,10 @@ function setOpacity(mat: THREE.MeshStandardMaterial, opacity: number) {
   }
 }
 
-export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletScene({ items, selected, onSelect, onMove, onRemove, label }, ref) {
+export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletScene({ items, selected, onSelect, onMove, onRemove, label, wraps, accent, onHand, wristCm }, ref) {
   const host = useRef<HTMLDivElement>(null);
   const [removing, setRemoving] = useState(false);
+  const [handState, setHandState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const api = useRef<{
     renderer: THREE.WebGLRenderer;
     camera: THREE.PerspectiveCamera;
@@ -195,6 +219,22 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
     group: THREE.Group;
     cord: THREE.Mesh<THREE.TorusGeometry, THREE.MeshStandardMaterial>;
     cordRadius: number;
+    // Dây của vòng quấn nhiều vòng hoặc đeo trên tay
+    tube: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
+    scene: THREE.Scene;
+    wraps: number;
+    accent: boolean;
+    onHand: boolean;
+    hand: Hand | null;
+    handScale: number;
+    coil: Coil | null;
+    coilKey: string;
+    // Hạt trầm dùng nhiều nhất, làm hạt chủ và hạt tua cho chuỗi 108 hạt
+    main: Bead | null;
+    tassel: Tassel | null;
+    tasselMat: THREE.Material | null;
+    cordColor: string;
+    targetGoal: THREE.Vector3;
     entries: Map<number, Entry>;
     keys: number[];
     radius: number;
@@ -214,8 +254,10 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
     const s = api.current!;
     const mesh = new THREE.Mesh(geometry(bead), material(bead));
     mesh.userData.key = key;
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
     s.group.add(mesh);
-    return { key, bead, mesh, a: START, r: s.radius, y: 0, s: 0, glow: 0, opacity: 1, tiltX: 0, tiltZ: 0, delay: 0, leaving: false };
+    return { key, bead, mesh, a: START, r: s.radius, y: 0, s: 0, glow: 0, opacity: 1, tiltX: 0, tiltZ: 0, delay: 0, leaving: false, free: false };
   }
 
   function dispose(entry: Entry) {
@@ -238,6 +280,9 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    // Bóng hạt đổ lên da và lên nhau
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     el.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
@@ -245,7 +290,13 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.add(new THREE.HemisphereLight(0xfff4e6, 0x3a2a1f, 0.9));
     const sun = new THREE.DirectionalLight(0xffe2c0, 1.6);
-    sun.position.set(4, 8, 5);
+    sun.position.set(6, 12, 9);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 40 });
+    sun.shadow.bias = -0.0004;
+    sun.shadow.normalBias = 0.02;
+    sun.shadow.radius = 3;
     scene.add(sun);
 
     const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
@@ -253,8 +304,8 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.enablePan = false;
-    controls.minDistance = 4;
-    controls.maxDistance = 22;
+    controls.minDistance = RING_ZOOM[0];
+    controls.maxDistance = RING_ZOOM[1];
     controls.maxPolarAngle = Math.PI * 0.62;
 
     const group = new THREE.Group();
@@ -263,20 +314,29 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
     const cord = new THREE.Mesh(new THREE.TorusGeometry(MIN_RADIUS, 0.035, 8, 120).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: cordColor, roughness: 0.9 }));
     cord.visible = false;
     scene.add(cord);
+    const tube = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshStandardMaterial({ color: cordColor, roughness: 0.9 }));
+    tube.visible = false;
+    tube.castShadow = true;
+    scene.add(tube);
 
     api.current = {
       renderer, camera, controls, group, cord, cordRadius: MIN_RADIUS,
+      tube, scene, wraps: 1, accent: false, onHand: false, hand: null, handScale: 1, coil: null, coilKey: "", main: null, tassel: null, tasselMat: null, cordColor, targetGoal: new THREE.Vector3(),
       entries: new Map(), keys: [], radius: MIN_RADIUS, camGoal: null,
       selectedKey: null, hoverKey: null, ring: null, stock: null, spawn: null, tempKey: 0,
     };
     const s = api.current;
+    // Người dùng tự xoay hoặc zoom thì camera thôi tự chạy về khoảng cách định sẵn
+    controls.addEventListener("start", () => {
+      s.camGoal = null;
+    });
 
     const resize = () => {
       const { width, height } = el.getBoundingClientRect();
       renderer.setSize(width, height, false);
       camera.aspect = width / Math.max(height, 1);
       camera.updateProjectionMatrix();
-      if (api.current) api.current.camGoal = camDistance(api.current.radius, camera.aspect);
+      if (api.current) api.current.camGoal = api.current.onHand ? HAND_DISTANCE * Math.max(1, 1 / camera.aspect) : camDistance(api.current.radius, camera.aspect);
     };
     const observer = new ResizeObserver(resize);
     observer.observe(el);
@@ -284,6 +344,8 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
 
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const clock = new THREE.Clock();
+    const turn = new THREE.Quaternion();
+    const lastCam = new THREE.Quaternion();
     const prev = new THREE.Vector3();
 
     renderer.setAnimationLoop(() => {
@@ -299,7 +361,26 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
       const gapAt = (s.ring?.moved ? s.ring.zone.insert : s.stock?.zone.insert) ?? -1;
       const sizes = order.map((key) => s.entries.get(key)!.bead.sizeMm);
       if (gapBead && gapAt >= 0) sizes.splice(gapAt, 0, gapBead.sizeMm);
-      const { radius, mids } = layout(sizes);
+      const lead = s.wraps > 1 && s.accent && s.main ? s.main.sizeMm * GURU_SCALE : 0;
+      const { radius, mids } = layout(sizes, s.wraps, lead);
+
+      // Vòng quấn nhiều vòng hoặc đeo trên tay: hạt chạy theo đường dây tính sẵn
+      const coiled = s.wraps > 1 || (s.onHand && !!s.hand);
+      if (coiled) {
+        const lengthCm = (sizes.reduce((sum, size) => sum + size, 0) + lead) * MM;
+        const beadRadius = Math.max(...sizes, 6) * MM * 0.5;
+        const key = `${s.onHand && s.hand ? s.handScale.toFixed(4) : "f"}|${s.wraps}|${lengthCm.toFixed(2)}|${beadRadius}|${s.main?.slug}|${lead}`;
+        if (key !== s.coilKey && sizes.length) {
+          s.coilKey = key;
+          // Dời đầu chuỗi nửa vòng thì phải xoay ngược nửa vòng để hạt chủ vẫn quay về phía camera
+          const phase = s.wraps > 1 ? PHASE - Math.PI : PHASE;
+          s.coil = s.onHand && s.hand ? wornCoil(s.hand, s.handScale, lengthCm, s.wraps, beadRadius, phase) : floatingCoil(lengthCm, s.wraps, beadRadius, phase);
+          placeTassel(lead, lengthCm);
+          s.tube.geometry.dispose();
+          s.tube.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(s.coil.points, true), s.coil.points.length, 0.035, 6, true);
+        }
+      } else s.coil = null;
+      if (s.tassel) s.tassel.group.visible = !!s.coil && lead > 0 && order.length > 0;
 
       order.forEach((key, i) => {
         const e = s.entries.get(key)!;
@@ -309,6 +390,7 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
           return;
         }
         e.mesh.visible = true;
+        e.free = false;
         const on = key === s.selectedKey;
         e.a = dampAngle(e.a, mids[gapAt >= 0 && i >= gapAt ? i + 1 : i], rate(RATE_IN), dt);
         e.r = damp(e.r, radius, rate(RATE_IN), dt);
@@ -323,6 +405,7 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
       // Hạt đang gắp bám theo ngón tay, nghiêng nhẹ theo hướng kéo
       const follow = (e: Entry, zone: Zone, show: boolean) => {
         e.mesh.visible = true;
+        e.free = true;
         const out = zone.insert === null;
         if (zone.hit) {
           prev.set(Math.cos(e.a) * e.r, 0, Math.sin(e.a) * e.r);
@@ -375,8 +458,9 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
 
       // Dây co giãn theo vòng; chỉ dựng lại hình khi bán kính đổi đủ nhiều
       const showCord = order.length > 0 || gapAt >= 0;
-      s.cord.visible = showCord;
-      if (showCord) {
+      s.cord.visible = showCord && !s.coil;
+      s.tube.visible = showCord && !!s.coil;
+      if (showCord && !s.coil) {
         s.cordRadius = damp(s.cordRadius, radius, rate(RATE_IN), dt);
         if (Math.abs((s.cord.userData.built ?? MIN_RADIUS) - s.cordRadius) > 0.002) {
           s.cord.geometry.dispose();
@@ -386,21 +470,81 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
       }
 
       // Vòng to thì lùi camera dần dần để vẫn thấy trọn
+      // Chuyển giữa xem vòng và xem trên tay: tâm nhìn trượt theo, camera giữ hướng
+      if (!controls.target.equals(s.targetGoal)) {
+        const before = controls.target.clone();
+        controls.target.set(damp(before.x, s.targetGoal.x, rate(6), dt), damp(before.y, s.targetGoal.y, rate(6), dt), damp(before.z, s.targetGoal.z, rate(6), dt));
+        camera.position.add(controls.target.clone().sub(before));
+        if (controls.target.distanceTo(s.targetGoal) < 0.005) controls.target.copy(s.targetGoal);
+      }
       if (s.camGoal !== null) {
-        const dist = camera.position.length();
+        // Đích nằm ngoài khoảng zoom thì controls kéo ngược lại mãi, camera không tới đích và người dùng không zoom được
+        s.camGoal = THREE.MathUtils.clamp(s.camGoal, controls.minDistance, controls.maxDistance);
+        const offset = camera.position.clone().sub(controls.target);
+        const dist = offset.length();
         const nextDist = damp(dist, s.camGoal, rate(6), dt);
-        camera.position.multiplyScalar(nextDist / dist);
+        camera.position.copy(controls.target).add(offset.multiplyScalar(nextDist / dist));
         if (Math.abs(nextDist - s.camGoal) < 0.01) s.camGoal = null;
       }
 
       controls.update();
+      // Dây tua: góc camera vừa xoay quanh tâm nhìn được coi như vòng bị xoay ngược lại, dây tua trễ theo quán tính
+      if (s.tassel?.group.visible) {
+        turn.copy(camera.quaternion).multiply(lastCam.clone().invert());
+        s.tassel.step(dt, still ? null : turn, controls.target);
+      }
+      lastCam.copy(camera.quaternion);
       renderer.render(scene, camera);
     });
 
+    // Hạt chủ, nút chặn và dây tua của chuỗi 108 hạt, dựng lại khi đổi loại hạt
+    function placeTassel(lead: number, lengthCm: number) {
+      if (!lead || !s.main || !s.coil) return;
+      if (s.tassel?.slug !== s.main.slug) {
+        s.tassel?.dispose();
+        s.tasselMat?.dispose();
+        s.tasselMat = material(s.main);
+        // Dây tua và nút thắt màu nâu sẫm theo màu hạt, không theo màu chữ giao diện (sáng lên ở chế độ tối)
+        s.tassel = buildTassel(s.main.slug, s.main.sizeMm, s.tasselMat, `#${new THREE.Color(s.main.color).multiplyScalar(0.28).getHexString()}`);
+        scene.add(s.tassel.group);
+      }
+      const p = new THREE.Vector3();
+      const t = new THREE.Vector3();
+      s.coil.at((lead * MM) / 2 / lengthCm + coilOffset(), p, t);
+      const hand = s.onHand ? s.hand : null;
+      const scale = s.handScale;
+      // Đeo trên tay: dây tua rủ xuống gặp da thì nằm áp lên da, không xuyên qua
+      s.tassel.place(p, t, (q, radius) => {
+        if (!hand) return;
+        const min = hand.skin(Math.atan2(q.z, q.x), q.y / scale) * scale + radius;
+        const cur = Math.hypot(q.x, q.z);
+        if (cur < min && cur > 0) {
+          q.x *= min / cur;
+          q.z *= min / cur;
+        }
+      });
+    }
+
+    // Đầu chuỗi (hạt chủ) nằm giữa vòng dưới cùng, cách xa đoạn vắt chéo ở cuối dây nửa vòng
+    function coilOffset() {
+      return s.wraps > 1 ? 0.5 / s.wraps : 0;
+    }
+
+    const at = new THREE.Vector3();
+    const tangent = new THREE.Vector3();
+    const tilt = new THREE.Quaternion();
+    const tiltEuler = new THREE.Euler();
     function apply(e: Entry) {
-      e.mesh.position.set(Math.cos(e.a) * e.r, e.y, Math.sin(e.a) * e.r);
-      // Trục lỗ xâu theo tiếp tuyến của vòng
-      e.mesh.rotation.set(e.tiltZ, -e.a, -e.tiltX, "YXZ");
+      if (s.coil && !e.free) {
+        // Phân số chiều dài dây tính từ điểm đầu vòng, lỗ xâu theo hướng dây
+        s.coil.at((e.a - START) / (Math.PI * 2) + coilOffset(), at, tangent);
+        e.mesh.position.copy(at).y += e.y;
+        e.mesh.quaternion.setFromUnitVectors(Z_AXIS, tangent).multiply(tilt.setFromEuler(tiltEuler.set(e.tiltZ, 0, -e.tiltX)));
+      } else {
+        e.mesh.position.set(Math.cos(e.a) * e.r, e.y, Math.sin(e.a) * e.r);
+        // Trục lỗ xâu theo tiếp tuyến của vòng
+        e.mesh.rotation.set(e.tiltZ, -e.a, -e.tiltX, "YXZ");
+      }
       e.mesh.scale.setScalar(Math.max(e.s, 0.0001));
       e.mesh.material.emissiveIntensity = e.glow * 0.55;
       setOpacity(e.mesh.material, e.opacity);
@@ -414,6 +558,11 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
       if (s.spawn) dispose(s.spawn.entry);
       cord.geometry.dispose();
       cord.material.dispose();
+      tube.geometry.dispose();
+      tube.material.dispose();
+      s.hand?.dispose();
+      s.tassel?.dispose();
+      s.tasselMat?.dispose();
       controls.dispose();
       pmrem.dispose();
       renderer.dispose();
@@ -433,7 +582,12 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
         retire(e);
       }
     }
-    const { radius, mids } = layout(items.map((item) => item.bead.sizeMm));
+    // Hạt chính: loại hạt trầm xuất hiện nhiều nhất
+    const tally = new Map<string, { bead: Bead; n: number }>();
+    for (const { bead } of items) if (bead.kind === "BEAD") tally.set(bead.slug, { bead, n: (tally.get(bead.slug)?.n ?? 0) + 1 });
+    s.main = [...tally.values()].sort((a, b) => b.n - a.n)[0]?.bead ?? null;
+    const lead = s.wraps > 1 && s.accent && s.main ? s.main.sizeMm * GURU_SCALE : 0;
+    const { radius, mids } = layout(items.map((item) => item.bead.sizeMm), s.wraps, lead);
     const fresh = items.filter((item) => !s.entries.has(item.key));
     let stagger = 0;
     items.forEach(({ key, bead }, i) => {
@@ -469,8 +623,50 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
     });
     s.keys = items.map((item) => item.key);
     s.radius = radius;
-    s.camGoal = camDistance(radius, s.camera.aspect);
+    if (!s.onHand) s.camGoal = camDistance(radius, s.camera.aspect);
   }, [items]);
+
+  // Đổi số vòng quấn hoặc bật xem trên tay
+  useEffect(() => {
+    const s = api.current;
+    if (!s) return;
+    s.wraps = wraps;
+    s.accent = accent;
+    s.coilKey = "";
+    const show = onHand && !!s.hand;
+    s.onHand = onHand;
+    if (s.hand) s.hand.mesh.visible = show;
+    s.handScale = s.hand ? wristCm / s.hand.wristCm : 1;
+    // Da sáng và phản xạ nhiều hơn gỗ nên hạ phơi sáng khi xem trên tay để không chói
+    s.renderer.toneMappingExposure = onHand ? 0.62 : 1;
+    if (onHand) {
+      s.targetGoal.copy(HAND_TARGET);
+      s.camGoal = HAND_DISTANCE * Math.max(1, 1 / s.camera.aspect);
+      s.controls.minDistance = HAND_ZOOM[0];
+      s.controls.maxDistance = HAND_ZOOM[1];
+      // Không cho nhìn từ dưới cẳng tay lên (thấy mặt cắt mô hình): chỉ quay quanh hoặc nhìn từ trên xuống
+      s.controls.minPolarAngle = 0;
+      s.controls.maxPolarAngle = Math.PI * 0.5;
+    } else {
+      s.targetGoal.set(0, 0, 0);
+      s.camGoal = camDistance(s.radius, s.camera.aspect);
+      s.controls.minDistance = RING_ZOOM[0];
+      s.controls.maxDistance = RING_ZOOM[1];
+      s.controls.maxPolarAngle = Math.PI * 0.62;
+    }
+    if (onHand && !s.hand && handState === "idle") {
+      setHandState("loading");
+      loadHand()
+        .then((hand) => {
+          const current = api.current;
+          if (!current) return hand.dispose();
+          current.hand = hand;
+          current.scene.add(hand.mesh);
+          setHandState("ready");
+        })
+        .catch(() => setHandState("error"));
+    }
+  }, [wraps, accent, onHand, wristCm, handState]);
 
   useEffect(() => {
     const s = api.current;
@@ -504,6 +700,23 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
     if (!z.hit || !z.inside) return z;
     const order = s.keys.filter((key) => key !== without);
     if (!order.length) return { ...z, insert: 0 };
+    // Vòng quấn nhiều vòng: góc không đủ để biết vị trí, nên chèn cạnh hạt gần con trỏ nhất trên màn hình
+    if (s.coil) {
+      const px = touch ? clientY - FINGER_OFFSET : clientY;
+      const p = new THREE.Vector3();
+      const screen = (key: number) => {
+        const mesh = s.entries.get(key)?.mesh;
+        if (!mesh) return Infinity;
+        p.setFromMatrixPosition(mesh.matrixWorld).project(s.camera);
+        return Math.hypot(rect.left + ((p.x + 1) / 2) * rect.width - clientX, rect.top + ((1 - p.y) / 2) * rect.height - px);
+      };
+      const dists = order.map(screen);
+      const i = dists.indexOf(Math.min(...dists));
+      if (dists[i] > 60) return z;
+      const next = dists[(i + 1) % order.length];
+      const prev = dists[(i - 1 + order.length) % order.length];
+      return { ...z, insert: next < prev ? i + 1 : i };
+    }
     const dist = Math.hypot(z.hit.x, z.hit.z);
     if (Math.abs(dist - s.radius) > Math.max(1.3, s.radius * 0.6)) return z;
     let angle = Math.atan2(z.hit.z, z.hit.x);
@@ -517,7 +730,7 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
     dragOver(bead, clientX, clientY, touch) {
       const s = api.current;
       if (!s) return false;
-      if (!bead) {
+      if (!bead || s.onHand) {
         if (s.stock) retire(s.stock.ghost);
         s.stock = null;
         return false;
@@ -589,6 +802,8 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
 
     const down = (event: PointerEvent) => {
       if (event.button !== 0) return;
+      // Trên tay chỉ xoay xem
+      if (s.onHand) return;
       // Ngón thứ hai chạm vào thì nhường cho thao tác chụm phóng to
       if (s.ring) return;
       const key = pick(event.clientX, event.clientY, event.pointerType === "touch");
@@ -668,6 +883,11 @@ export const BraceletScene = forwardRef<SceneHandle, Props>(function BraceletSce
       >
         Thả ra để bỏ hạt này
       </p>
+      {onHand && handState !== "ready" && (
+        <p role="status" className="pointer-events-none absolute inset-x-0 top-1/2 z-10 -translate-y-1/2 text-center text-sm text-ink-3">
+          {handState === "error" ? "Chưa tải được bàn tay mẫu. Bạn thử lại sau." : "Đang tải bàn tay mẫu…"}
+        </p>
+      )}
     </div>
   );
 });
