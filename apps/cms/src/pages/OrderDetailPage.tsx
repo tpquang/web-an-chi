@@ -11,9 +11,10 @@ import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { dayToIso, formatDateTime, formatVnd, isoToDay } from "../lib/format";
 import { options, orderStatus, paymentMethod, paymentStatus, salesChannel, type OrderStatus, type PaymentStatus } from "../lib/labels";
-import type { Order } from "../lib/types";
+import type { BraceletDesignSnapshot, Order } from "../lib/types";
 import { useLoad } from "../lib/use-load";
 import { useSubmit } from "../lib/use-submit";
+import { PreorderConvert } from "../components/PreorderConvert";
 
 export function OrderDetailPage() {
   const { id } = useParams();
@@ -75,7 +76,10 @@ export function OrderDetailPage() {
           <DataTable head={<tr><th className={th}>Sản phẩm</th><th className={`${th} text-right`}>Đơn giá</th><th className={`${th} text-right`}>Số lượng</th><th className={`${th} text-right`}>Thành tiền</th></tr>}>
             {order.items.map((item) => (
               <tr key={item.id}>
-                <td className={td}>{item.productName}</td>
+                <td className={td}>
+                  {item.productName}
+                  {item.design && <DesignDetails design={item.design} />}
+                </td>
                 <td className={tdMoney}>{formatVnd(item.unitPriceVnd)}</td>
                 <td className={tdMoney}>{item.quantity}</td>
                 <td className={tdMoney}>{formatVnd(item.unitPriceVnd * item.quantity)}</td>
@@ -93,12 +97,13 @@ export function OrderDetailPage() {
               <dd><a href={`tel:${order.customerPhone}`} className="hover:text-wood">{order.customerPhone}</a></dd>
               {order.customerEmail && (<><dt className="text-ink-3">Email</dt><dd>{order.customerEmail}</dd></>)}
               <dt className="text-ink-3">Địa chỉ</dt>
-              <dd>{order.address}</dd>
+              <dd>{order.address || <span className="text-ink-3">Chưa có. Đơn đặt chờ chỉ có tên và số điện thoại, gọi khách để hỏi địa chỉ.</span>}</dd>
               {order.note && (<><dt className="text-ink-3">Ghi chú</dt><dd>{order.note}</dd></>)}
             </dl>
           </Panel>
         </div>
-        <div className="xl:col-span-4">
+        <div className="flex flex-col gap-6 xl:col-span-4">
+          {order.status === "PREORDER" && <PreorderConvert order={order} onDone={reload} disabled={!editable} />}
           <Panel title="Xử lý đơn">
             <div className="flex flex-col gap-4">
               <Field label="Trạng thái đơn"><Select value={status} onChange={(v) => setStatus(v as OrderStatus)} options={options(orderStatus)} disabled={submitting || !editable} /></Field>
@@ -111,11 +116,33 @@ export function OrderDetailPage() {
                 <dt className="text-ink-2">Giá vốn</dt><dd className="text-right tabular-nums">{formatVnd(costVnd)}</dd>
                 <dt className="text-ink-2">Lãi của đơn</dt><dd className={`text-right font-semibold tabular-nums ${profitVnd < 0 ? "text-err" : ""}`}>{formatVnd(profitVnd)}</dd>
               </dl>
-              {editable && <Button onClick={save} loading={submitting} disabled={!changed} className="mt-2">Cập nhật đơn</Button>}
+              {/* Đơn đặt chờ: nút chính là "Chuyển thành đơn chính", nút cập nhật lùi xuống nút viền */}
+              {editable && <Button onClick={save} loading={submitting} disabled={!changed} variant={order.status === "PREORDER" ? "outline" : "primary"} className="mt-2">Cập nhật đơn</Button>}
             </div>
           </Panel>
         </div>
       </div>
     </>
+  );
+}
+
+// Chi tiết vòng tự thiết kế dưới tên sản phẩm: cỡ, dây, quà tặng, lời nhắn thiệp, yêu cầu của khách
+function DesignDetails({ design }: { design: BraceletDesignSnapshot }) {
+  const parts = [
+    design.wristCm && `Cổ tay ${design.wristCm.toLocaleString("vi-VN")} cm`,
+    design.lengthMm && `dài ${(design.lengthMm / 10).toLocaleString("vi-VN")} cm`,
+    design.wraps && `quấn ${design.wraps} vòng`,
+    design.accent && "có hạt chủ và tua",
+    design.fitName,
+    design.cordName,
+  ].filter(Boolean);
+  const gift = [design.gift?.box && "Hộp quà", design.gift?.wrap && "Bọc quà", design.gift && design.gift.card !== undefined && "Kèm thiệp"].filter(Boolean);
+  return (
+    <div className="mt-1 flex flex-col gap-0.5 text-sm text-ink-3">
+      {parts.length > 0 && <p>{parts.join(" · ")}</p>}
+      {gift.length > 0 && <p className="font-medium text-ink">{gift.join(" · ")}</p>}
+      {design.gift?.card && <p>Lời nhắn trên thiệp: “{design.gift.card}”</p>}
+      {design.note && <p>Yêu cầu: {design.note}</p>}
+    </div>
   );
 }

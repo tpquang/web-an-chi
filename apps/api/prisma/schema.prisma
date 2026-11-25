@@ -14,6 +14,9 @@ enum PublishStatus {
 }
 
 enum OrderStatus {
+  // Đặt chờ: khách đặt trước ngày mở bán, chỉ cần tên và số điện thoại. Chưa trừ kho;
+  // shop gọi lại rồi chuyển sang trạng thái khác thì mới trừ kho
+  PREORDER
   PENDING
   CONFIRMED
   SHIPPING

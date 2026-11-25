@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "../components/ui/Button";
-import { Field, Input, MoneyInput, Textarea } from "../components/ui/Field";
+import { Field, Input, MoneyInput, Switch, Textarea } from "../components/ui/Field";
 import { PageHeader, Panel } from "../components/ui/Page";
 import { ErrorState, Skeleton } from "../components/ui/States";
 import { showToast } from "../components/ui/Toast";
@@ -23,6 +23,7 @@ type Store = {
   shipping: { flatFeeVnd: number; freeFromVnd: number | null; eta: string };
   returnPolicy: string;
   bank?: { bankName: string; accountNumber: string; accountName: string };
+  preorderEnabled?: boolean;
 };
 
 type TextKey = "name" | "phone" | "email" | "address" | "openingHours" | "facebookUrl" | "zaloUrl" | "youtubeUrl" | "tiktokUrl" | "shopeeUrl" | "returnPolicy";
@@ -33,6 +34,7 @@ type Values = Record<TextKey, string> & {
   bankName: string;
   accountNumber: string;
   accountName: string;
+  preorderEnabled: boolean;
 };
 
 function toValues(s: Store): Values {
@@ -54,6 +56,7 @@ function toValues(s: Store): Values {
     bankName: s.bank?.bankName ?? "",
     accountNumber: s.bank?.accountNumber ?? "",
     accountName: s.bank?.accountName ?? "",
+    preorderEnabled: s.preorderEnabled !== false,
   };
 }
 
@@ -73,6 +76,7 @@ function toInput(v: Values): Store {
     returnPolicy: v.returnPolicy,
     shipping: { flatFeeVnd: v.flatFeeVnd ?? 0, freeFromVnd: v.freeFromVnd, eta: v.eta },
     bank: hasBank ? { bankName: v.bankName, accountNumber: v.accountNumber, accountName: v.accountName } : undefined,
+    preorderEnabled: v.preorderEnabled,
   };
 }
 
@@ -152,6 +156,13 @@ export function StorePage() {
             <div data-field="shipping.eta"><Field label="Thời gian giao" error={errors["shipping.eta"]}><Input {...text("eta")} maxLength={60} placeholder="2–4 ngày làm việc" /></Field></div>
             <div data-field="returnPolicy"><Field label="Chính sách đổi trả" hint="Ghi số ngày và điều kiện đổi." error={errors.returnPolicy}><Textarea {...text("returnPolicy")} maxLength={600} /></Field></div>
           </div>
+        </Panel>
+
+        <Panel title="Đặt chờ">
+          <p className="-mt-2 mb-3 text-sm text-ink-2">
+            Trước ngày mở bán, trang sản phẩm và trang thiết kế vòng có nút “Đặt chờ”: khách để lại tên và số điện thoại, đơn vào danh sách với trạng thái “Đặt chờ”, chưa trừ kho. Tắt thì nút ẩn đi và không nhận đơn đặt chờ mới; đơn đã có vẫn giữ nguyên. Web cập nhật sau khoảng một phút.
+          </p>
+          <Switch checked={values.preorderEnabled} onChange={(v) => set("preorderEnabled", v)} label={values.preorderEnabled ? "Đang nhận đặt chờ" : "Đang tắt đặt chờ"} disabled={submitting} />
         </Panel>
 
         <Panel title="Tài khoản nhận chuyển khoản">

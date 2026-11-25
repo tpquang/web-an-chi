@@ -262,21 +262,28 @@ export async function placeOrder(input: z.infer<typeof checkoutInput>, accountId
   }
 }
 
-// Huỷ đơn: trả lại đúng số đã trừ theo sổ kho của đơn. Mở lại đơn đã huỷ: trừ lại theo đơn
+// Đơn giữ kho khi không phải Huỷ hay Đặt chờ. Ra khỏi trạng thái giữ kho: trả lại đúng số đã trừ theo sổ kho của đơn.
+// Vào trạng thái giữ kho (mở lại đơn huỷ, chốt đơn đặt chờ): trừ kho theo đơn, thiếu hàng thì báo lỗi
+const holdsStock = (status: OrderStatus) => status !== OrderStatus.CANCELLED && status !== OrderStatus.PREORDER;
+
 export async function changeOrderStatus(id: string, status: OrderStatus) {
-  return prisma.$transaction(async (tx) => {
-    const order = await tx.order.findUniqueOrThrow({ where: { id }, include: { items: true } });
-    const wasCancelled = order.status === OrderStatus.CANCELLED;
-    const willCancel = status === OrderStatus.CANCELLED;
+  return prisma.$transaction((tx) => changeOrderStatusTx(tx, id, status));
+}
 
-    if (willCancel && !wasCancelled) await returnOrderStock(tx, order.id, `Huỷ đơn ${order.code}`);
-    if (wasCancelled && !willCancel) {
-      const items = order.items.map((item) => ({ productId: item.productId, beads: beadList(item.design), quantity: item.quantity, label: item.productName }));
-      await applyStock(tx, await stockNeeds(tx, items), -1, { orderId: order.id, note: `Mở lại đơn ${order.code}` });
-    }
+// Bản chạy trong transaction có sẵn, để chuyển đơn đặt chờ thành đơn chính cập nhật thông tin và trừ kho cùng lúc
+export async function changeOrderStatusTx(tx: Prisma.TransactionClient, id: string, status: OrderStatus) {
+  const order = await tx.order.findUniqueOrThrow({ where: { id }, include: { items: true } });
+  const held = holdsStock(order.status);
+  const willHold = holdsStock(status);
 
-    return tx.order.update({ where: { id }, data: { status } });
-  });
+  if (held && !willHold) await returnOrderStock(tx, order.id, `${status === OrderStatus.CANCELLED ? "Huỷ" : "Chuyển về đặt chờ"} đơn ${order.code}`);
+  if (!held && willHold) {
+    const items = order.items.map((item) => ({ productId: item.productId, beads: beadList(item.design), quantity: item.quantity, label: item.productName }));
+    const note = order.status === OrderStatus.PREORDER ? `Chốt đơn đặt chờ ${order.code}` : `Mở lại đơn ${order.code}`;
+    await applyStock(tx, await stockNeeds(tx, items), -1, { orderId: order.id, note });
+  }
+
+  return tx.order.update({ where: { id }, data: { status } });
 }
 
 // Đọc lại danh sách hạt từ bản lưu trong đơn vòng tự thiết kế

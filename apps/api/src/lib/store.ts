@@ -21,6 +21,8 @@ const storeSchema = z.object({
   bank: z
     .object({ bankName: z.string(), accountNumber: z.string(), accountName: z.string() })
     .optional(),
+  // Nhận đơn đặt chờ trước ngày mở bán. Chưa lưu lần nào thì coi như bật
+  preorderEnabled: z.boolean().optional(),
 });
 
 export type Store = z.infer<typeof storeSchema>;
@@ -59,6 +61,8 @@ export async function getStore(): Promise<Store> {
   const parsed = storeSchema.safeParse(row?.value);
   return parsed.success ? parsed.data : fallback;
 }
+
+export const preorderOn = (store: Store) => store.preorderEnabled !== false;
 
 export function shippingFee(store: Store, subtotalVnd: number) {
   const { flatFeeVnd, freeFromVnd } = store.shipping;

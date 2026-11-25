@@ -5,6 +5,7 @@ import { customerIdFrom } from "../../lib/auth.js";
 import { prisma } from "../../lib/prisma.js";
 import { getStore } from "../../lib/store.js";
 import { HttpError } from "../../middleware/errors.js";
+import { placePreorder, preorderInput } from "./orders.preorder.js";
 import { cartItems, checkoutInput, phoneField, placeOrder, quoteCart } from "./orders.service.js";
 
 export const ordersRouter = Router();
@@ -16,6 +17,12 @@ ordersRouter.post("/cart/quote", async (req, res) => {
 
 ordersRouter.post("/orders", async (req, res) => {
   const { order, created } = await placeOrder(checkoutInput.parse(req.body), customerIdFrom(req));
+  res.status(created ? 201 : 200).json({ data: { code: order.code } });
+});
+
+// Đặt chờ trước ngày mở bán: chỉ cần tên và số điện thoại
+ordersRouter.post("/preorders", async (req, res) => {
+  const { order, created } = await placePreorder(preorderInput.parse(req.body));
   res.status(created ? 201 : 200).json({ data: { code: order.code } });
 });
 

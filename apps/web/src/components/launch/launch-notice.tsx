@@ -4,6 +4,8 @@ import { braceletHref, postsHref } from "@/lib/links";
 import { Button } from "../ui/button";
 import { Eyebrow } from "../ui/layout";
 import { Tag } from "../ui/tag";
+import { PreorderButton } from "../preorder/preorder-button";
+import type { PreorderItem } from "../preorder/preorder-dialog";
 import { LaunchCountdown, LaunchGate } from "./launch-clock";
 
 // Các khối "chờ ngày mở bán". Server tính trạng thái lúc dựng trang, LaunchGate tự chuyển đúng giờ ở trình duyệt.
@@ -78,7 +80,8 @@ export function LaunchStrip({ children }: { children: ReactNode }) {
 }
 
 // Trang sản phẩm: thay chỗ nút "Thêm vào giỏ"
-export function ProductLaunchPanel() {
+// item null: shop đang tắt đặt chờ ở CMS, chỉ hiện đếm ngược
+export function ProductLaunchPanel({ item }: { item: PreorderItem | null }) {
   return (
     <section aria-labelledby="mo-ban" className="flex flex-col gap-4 rounded-3xl border border-edge bg-surface p-5">
       <div>
@@ -86,10 +89,13 @@ export function ProductLaunchPanel() {
           Chờ ngày mở bán
         </h2>
         <p className="mt-1 text-sm text-ink-2">
-          Sản phẩm này nhận đơn từ ngày {launchDateLabel}. Bạn có thể xem trước giá, thông số và cách dùng ở bên dưới.
+          {item
+            ? `Shop giao hàng từ ngày ${launchDateLabel}. Bạn có thể đặt chờ ngay: để lại tên và số điện thoại, shop gọi lại chốt đơn, chưa cần thanh toán.`
+            : `Sản phẩm này nhận đơn từ ngày ${launchDateLabel}. Bạn có thể xem trước giá, thông số và cách dùng ở bên dưới.`}
         </p>
       </div>
       <LaunchCountdown />
+      {item && <PreorderButton item={item} block />}
     </section>
   );
 }

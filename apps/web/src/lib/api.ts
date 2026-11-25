@@ -106,6 +106,8 @@ export type Store = {
   youtubeUrl?: string;
   shipping: { flatFeeVnd: number; freeFromVnd: number | null; eta: string };
   returnPolicy: string;
+  // Bật tắt ở CMS > Cài đặt cửa hàng. Chưa lưu lần nào thì coi như bật
+  preorderEnabled?: boolean;
 };
 
 export type Paged<T> = { data: T[]; meta: { page: number; limit: number; total: number; totalPages: number } };
@@ -113,7 +115,7 @@ export type Paged<T> = { data: T[]; meta: { page: number; limit: number; total: 
 export type OrderSummary = {
   code: string;
   createdAt: string;
-  status: "PENDING" | "CONFIRMED" | "SHIPPING" | "COMPLETED" | "CANCELLED";
+  status: "PREORDER" | "PENDING" | "CONFIRMED" | "SHIPPING" | "COMPLETED" | "CANCELLED";
   paymentMethod: "COD" | "BANK_TRANSFER";
   paymentStatus: "UNPAID" | "PAID" | "REFUNDED";
   subtotalVnd: number;

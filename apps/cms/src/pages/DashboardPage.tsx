@@ -243,7 +243,7 @@ function OperationsSection() {
     <div className="grid gap-5 lg:grid-cols-3">
       <Panel title="Đơn mới" className="lg:col-span-2">
         <div className="mb-3 flex flex-wrap gap-2">
-          {(["PENDING", "CONFIRMED", "SHIPPING", "CANCELLED"] as const).map((s) => (
+          {(["PREORDER", "PENDING", "CONFIRMED", "SHIPPING", "CANCELLED"] as const).map((s) => (
             <Link key={s} to={`/orders?status=${s}`} className="rounded-sm border border-line px-3 py-1 text-xs hover:border-wood">
               {orderStatus[s].label}: <span className="font-semibold">{d.ordersByStatus[s] ?? 0}</span>
             </Link>

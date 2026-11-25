@@ -116,9 +116,15 @@ Không mở popup chồng popup. Hành động căn phải, nút chính ngoài c
 
 Chọn loại: popup cho việc ngắn cần quyết định, drawer cho nội dung dài cần vẫn thấy trang phía sau, như giỏ hàng.
 
+Web: `components/ui/modal.tsx` (11/2026). Dưới 720px là sheet trượt từ đáy, bo trên `rounded-t-3xl`; từ 720px là hộp giữa màn hình `md:max-w-md` (`wide`: `md:max-w-2xl`). Vào bằng `starting:` (mờ dần và trượt 24px, `--d-modal`), chỉ render khi mở. Form trong modal: nút phụ trái, nút chính phải.
+
 ## Drawer
 
 Trượt từ cạnh, rộng `min(360px, 88vw)`, cộng thêm `env(safe-area-inset-*)`. Đóng bằng nút đóng, bấm nền, Esc hoặc chọn link. Trên trang có header `backdrop-filter`, drawer phải render ngoài `<header>`.
+
+**Giỏ hàng (11/2026):** nút giỏ trên header là `<button>` mở `CartDrawer` từ phải, rộng `min(440px, 92vw)`, lớp `--z-modal` (nằm trên sheet thiết kế vòng vì gắn sau trong body). Trạng thái mở ở `lib/cart-drawer.ts`; nơi nào lưu hàng vào giỏ mà cần khách thấy ngay thì gọi `openCartDrawer()` thay toast. Trong bảng: dòng hàng (`CartLine`), tạm tính, nút chính "Đặt hàng", nút viền "Xem giỏ hàng". Trang `/gio-hang` vẫn giữ.
+
+**Nút chat khi giỏ mở:** từ 720px nút "Nhắn shop" nổi lên `--z-popover`, dời sang trái bảng giỏ; dưới 720px ẩn nút nổi, đáy bảng giỏ có link "Nhắn shop". Bấm thì đóng giỏ rồi mở chat (`openChatFromCart`), không để khung chat nằm dưới bảng.
 
 ## Trạng thái
 
@@ -148,6 +154,7 @@ Phép thử: nhãn đọc như "hiện cái gì" thì dùng checkbox, đọc nh�
 | `QuantityInput` | Hai nút 44px và ô số, không vượt tồn kho, nói rõ khi chạm giới hạn |
 | `CartLine` | Ảnh 72px, tên, đơn giá, số lượng, thành tiền căn phải, nút xoá có nhãn |
 | `OrderSummary` | Tạm tính, phí giao, tổng. Tổng serif 600 và `aria-live="polite"` |
+| `PreorderButton`, `PreorderDialog` | Trước ngày mở bán và khi CMS bật đặt chờ: nút "Đặt chờ" thay nút mua, mở modal hỏi họ tên, số điện thoại, ghi chú. Xong hiện mã đơn và câu shop sẽ gọi lại, không chuyển trang. Quy tắc ở `anchi-growth` mục Đặt chờ |
 
 ## Bố cục trang
 

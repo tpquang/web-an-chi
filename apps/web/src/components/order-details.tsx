@@ -4,6 +4,7 @@ import { formatDate, formatVnd } from "@/lib/site";
 import { Tag, type Tone } from "./ui/tag";
 
 const statusTone: Record<OrderSummary["status"], Tone> = {
+  PREORDER: "wood",
   PENDING: "warn",
   CONFIRMED: "info",
   SHIPPING: "info",

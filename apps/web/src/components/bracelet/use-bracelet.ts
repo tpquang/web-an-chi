@@ -3,8 +3,8 @@
 import { useMemo, useState } from "react";
 import type { Bead, BraceletRules } from "@/lib/api";
 import { cm } from "@/lib/bracelet";
-import { cart } from "@/lib/cart";
-import { cartHref } from "@/lib/links";
+import { type BraceletDesign, type BraceletGift, cart } from "@/lib/cart";
+import { openCartDrawer } from "@/lib/cart-drawer";
 import { showToast } from "../ui/toast";
 import type { SceneItem } from "./bracelet-scene";
 
@@ -38,7 +38,10 @@ export function useBracelet(rules: BraceletRules, beads: Bead[]) {
   // 1 là vòng một tầng; 3 hoặc 4 là chuỗi 108 hạt quấn quanh cổ tay
   const [wraps, setWrapsState] = useState(1);
   // Chuỗi có hạt chủ và hai dây tua, khách tự tick
-  const [accent, setAccent] = useState(false);
+  const [accent, setAccent] = useState(true);
+  // Ghi chú cho shop: quà tặng và yêu cầu khác
+  const [gift, setGift] = useState<BraceletGift>({});
+  const [note, setNote] = useState("");
   const mala = wraps > 1;
 
   // Mọi thay đổi vòng đi qua đây để hoàn tác được
@@ -66,7 +69,8 @@ export function useBracelet(rules: BraceletRules, beads: Bead[]) {
   const charmCount = ring.length - beadCount;
   // Số vòng chuỗi quấn được trên cổ tay này
   const turns = lengthMm / Math.max(targetMm, 1);
-  const maxItems = mala ? rules.mala.beads + rules.mala.maxCharms : rules.maxBeads;
+  // Tối đa rules.maxBeads (200) hạt và charm trên một vòng; chuỗi còn giới hạn số charm
+  const maxItems = mala ? Math.min(rules.maxBeads, rules.mala.beads + rules.mala.maxCharms) : rules.maxBeads;
   // Hạt chính là hạt trầm dùng nhiều nhất, để tự lấp đầy và ước số hạt
   const mainBead = ringBeads.filter((bead) => bead.kind === "BEAD").sort((a, b) => (counts.get(b.slug) ?? 0) - (counts.get(a.slug) ?? 0))[0] ?? firstBead;
 
@@ -181,7 +185,21 @@ export function useBracelet(rules: BraceletRules, beads: Bead[]) {
       if (bySlug.get(item.slug)?.kind === "BEAD") return;
       next.splice(Math.round((i / Math.max(ring.length, 1)) * next.length), 0, item);
     });
-    setRing(next.slice(0, n > 1 ? rules.mala.beads + rules.mala.maxCharms : rules.maxBeads));
+    setRing(next.slice(0, n > 1 ? Math.min(rules.maxBeads, rules.mala.beads + rules.mala.maxCharms) : rules.maxBeads));
+    setSelected(null);
+  }
+
+  // Form khởi tạo: dựng vòng mới toàn hạt đã chọn theo loại vòng và cỡ tay. Vẫn đi qua setRing để hoàn tác được
+  function setup({ wraps: n, slug, wrist, fitId }: BraceletSetupValues) {
+    const bead = bySlug.get(slug);
+    if (!bead) return;
+    const ease = rules.fits.find((f) => f.id === fitId)?.easeCm ?? easeCm;
+    const target = Math.round((wrist + ease) * 10);
+    const count = n > 1 ? rules.mala.beads : Math.min(rules.maxBeads, Math.max(rules.minBeads, Math.round(target / bead.sizeMm)));
+    setWrapsState(n);
+    setWristCmState(wrist);
+    setFitState(fitId);
+    setRing(Array.from({ length: count }, () => ringItem(slug)));
     setSelected(null);
   }
 
@@ -218,27 +236,51 @@ export function useBracelet(rules: BraceletRules, beads: Bead[]) {
     setSelected(null);
   }
 
-  function addToCart() {
+  // Chỉ gửi phần quà tặng khách đã chọn; thiệp không có lời nhắn vẫn tính là có thiệp
+  const card = gift.card === undefined ? undefined : gift.card.trim();
+  const giftValue = gift.box || gift.wrap || card !== undefined ? { ...(gift.box ? { box: true } : {}), ...(gift.wrap ? { wrap: true } : {}), ...(card !== undefined ? { card } : {}) } : null;
+
+  // Lưu vòng vào giỏ rồi mở bảng giỏ hàng bên phải để khách thấy ngay. Vòng chưa hợp lệ thì báo lý do
+  // Thiết kế gửi đi (giỏ hàng hoặc đặt chờ). Vòng chưa hợp lệ thì báo lý do và trả null
+  function design(title: string): BraceletDesign | null {
     if (problem) {
-      showToast({ type: "error", title: "Vòng chưa đặt được", desc: problem });
-      return;
+      showToast({ type: "error", title, desc: problem });
+      return null;
     }
-    cart.addBracelet({
+    return {
       beads: ring.map((item) => item.slug),
       cord,
       fit,
       wristCm,
       ...(mala ? { wraps, ...(accent ? { accent } : {}) } : {}),
-    });
-    showToast({ title: "Đã thêm vòng vào giỏ", desc: "Bạn có thể đặt hàng hoặc thiết kế thêm vòng khác.", action: { href: cartHref, label: "Xem giỏ hàng" } });
+      ...(giftValue ? { gift: giftValue } : {}),
+      ...(note.trim() ? { note: note.trim() } : {}),
+    };
+  }
+
+  function addToCart() {
+    const value = design("Vòng chưa lưu được");
+    if (!value) return;
+    cart.addBracelet(value);
+    openCartDrawer();
+  }
+
+  // Trước ngày mở bán: món đặt chờ là chính vòng đang thiết kế
+  function preorderItem() {
+    const value = design("Vòng chưa đặt chờ được");
+    if (!value) return null;
+    const name = mala ? `Chuỗi ${rules.mala.beads} hạt ${mainBead?.material.toLowerCase() ?? ""} quấn ${wraps} vòng` : `Vòng tự thiết kế ${mainBead?.material.toLowerCase() ?? ""} ${ring.length} hạt`;
+    return { slug: "vong-dat-cho", name: name.replace(/s+/g, " "), priceVnd: totalVnd, design: value };
   }
 
   return {
     rules, beads, ring, sceneItems, ringBeads, counts, lines, selected, setSelected,
     wristCm, setWristCm, fit, setFit, cord, setCord, wraps, setWraps, turns, accent: mala && accent, setAccent, accentCount, accentVnd,
     lengthMm, targetMm, easeCm, mainBead, totalVnd, problem, canUndo: history.length > 0,
-    insert, move, removeAt, autoFill, swapMain, undo, reset, addToCart,
+    insert, move, removeAt, autoFill, swapMain, undo, reset, addToCart, preorderItem, setup, gift, setGift, note, setNote,
   };
 }
+
+export type BraceletSetupValues = { wraps: number; slug: string; wrist: number; fitId: string };
 
 export type BraceletState = ReturnType<typeof useBracelet>;

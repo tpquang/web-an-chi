@@ -160,7 +160,7 @@ export default async function ProductPage({ params }: Props) {
               {product.stock > 0 ? <Tag tone="ok">Còn {product.stock} sản phẩm</Tag> : <Tag>Hết hàng</Tag>}
             </SalesGate>
           </div>
-          <SalesGate waiting={<ProductLaunchPanel />}>
+          <SalesGate waiting={<ProductLaunchPanel item={store.preorderEnabled !== false ? { slug: product.slug, name: product.name, priceVnd: product.priceVnd } : null} />}>
             <AddToCart slug={product.slug} stock={product.stock} />
           </SalesGate>
           <p className="text-sm text-ink-2">

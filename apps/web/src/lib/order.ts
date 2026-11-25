@@ -1,5 +1,6 @@
 // Nhãn hiển thị cho khách, dùng chung giữa trang đơn hàng và tra cứu
 export const orderStatusLabel = {
+  PREORDER: "Đặt chờ",
   PENDING: "Chờ xác nhận",
   CONFIRMED: "Đã xác nhận",
   SHIPPING: "Đang giao",

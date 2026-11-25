@@ -16,22 +16,16 @@ type Props = {
 
 const segment =
   "min-h-11 flex-1 rounded-md px-2 text-sm font-medium whitespace-nowrap text-ink-2 transition-colors duration-(--d-fast) hover:text-ink aria-pressed:bg-wood aria-pressed:text-on-wood";
-const chip =
-  "min-h-11 flex-1 rounded-md border border-line-strong text-sm tabular-nums transition-colors duration-(--d-fast) hover:border-wood aria-pressed:border-wood aria-pressed:bg-wood-soft aria-pressed:font-medium aria-pressed:text-wood";
 
 export function BeadPicker({ state, onBeadPointer, options }: Props) {
-  const { beads, mainBead, counts, insert, swapMain } = state;
+  const { beads, mainBead, counts, insert } = state;
   const [tab, setTab] = useState<BeadTab | "options">("tram");
 
+  // Cỡ hạt và loại trầm chính đã chọn ở form khởi tạo. Ở đây chỉ thêm từng hạt: chạm thì thêm một hạt, kéo thì thả vào chỗ muốn.
+  // Không có thao tác dựng lại cả vòng từ một hạt; muốn đổi thì bấm "Cài đặt lại"
   const tram = beads.filter((bead) => beadTab(bead) === "tram");
-  const sizes = [...new Set(tram.map((bead) => bead.sizeMm))].sort((a, b) => a - b);
   const main = mainBead && beadTab(mainBead) === "tram" ? mainBead : tram[0];
   const shown = tab === "tram" ? tram.filter((bead) => bead.sizeMm === main?.sizeMm) : beads.filter((bead) => tab !== "options" && beadTab(bead) === tab);
-
-  function pickSize(size: number) {
-    const same = tram.find((bead) => bead.material === main?.material && bead.sizeMm === size) ?? tram.find((bead) => bead.sizeMm === size);
-    if (same) swapMain(same.slug);
-  }
 
   return (
     <div className="flex min-w-0 flex-col gap-3 lg:gap-6">
@@ -51,56 +45,66 @@ export function BeadPicker({ state, onBeadPointer, options }: Props) {
         <div className="max-h-[38dvh] overflow-y-auto lg:hidden">{options}</div>
       ) : (
         <>
-          {tab === "tram" && sizes.length > 1 && (
-            <div className="order-1 flex items-center gap-2 lg:order-none lg:flex-col lg:items-stretch">
-              <p className="w-16 flex-none text-sm text-ink-3 lg:w-auto lg:text-xs lg:tracking-widest lg:uppercase">Cỡ hạt</p>
-              <div role="group" aria-label="Cỡ hạt" className="flex flex-1 gap-2">
-                {sizes.map((size) => (
-                  <button key={size} type="button" aria-pressed={main?.sizeMm === size} onClick={() => pickSize(size)} className={chip}>
-                    {size} mm
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
           <div className="flex flex-col gap-2">
-            <p className="hidden text-xs tracking-widest text-ink-3 uppercase lg:block">{tab === "tram" ? "Loại trầm · kéo hạt vào vòng" : "Kéo hạt vào vòng"}</p>
+            <p className="hidden text-xs tracking-widest text-ink-3 uppercase lg:block">{tab === "tram" ? `Hạt ${main?.sizeMm ?? ""} mm · kéo hạt vào vòng` : "Kéo hạt vào vòng"}</p>
             <ul
               className={
                 tab === "tram"
-                  ? "grid grid-cols-3 gap-2 lg:grid-cols-1"
-                  : "-mx-(--page-gutter) flex snap-x scroll-px-(--page-gutter) gap-2 overflow-x-auto px-(--page-gutter) [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-1 lg:overflow-visible lg:px-0"
+                  ? "grid grid-cols-3 gap-2 lg:grid-cols-1 lg:gap-4"
+                  : "-mx-(--page-gutter) flex snap-x scroll-px-(--page-gutter) gap-2 overflow-x-auto px-(--page-gutter) [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-1 lg:gap-4 lg:overflow-visible lg:px-0"
               }
             >
               {shown.map((bead) => {
-                const pressed = tab === "tram" ? main?.slug === bead.slug : undefined;
-                const onTap = () => (tab === "tram" ? swapMain(bead.slug) : insert(bead.slug));
+                const onTap = () => insert(bead.slug);
                 return (
                   <li key={bead.slug} className={tab === "tram" ? "min-w-0" : "w-28 flex-none snap-start lg:w-auto"}>
+                    {/* Hạt đứng riêng như hạt thật có bóng đổ, nhãn mô tả treo bên cạnh. Máy tính: hạt ở mép phải, sát khung vòng,
+                        để thấy rõ là kéo hạt sang vòng. Con trỏ hình bàn tay báo kéo được */}
                     <button
                       type="button"
-                      aria-pressed={pressed}
                       onPointerDown={(e) => onBeadPointer(bead, e, onTap)}
                       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onTap())}
                       onContextMenu={(e) => e.preventDefault()}
                       disabled={bead.stock === 0}
-                      className="flex h-full w-full touch-pan-x flex-col items-center gap-1.5 rounded-lg border border-line bg-surface p-2.5 text-center transition-colors duration-(--d-fast) select-none [-webkit-touch-callout:none] hover:border-wood disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:border-wood aria-pressed:bg-wood-soft lg:touch-none lg:flex-row lg:gap-3 lg:p-3 lg:text-left"
+                      className="group flex h-full w-full cursor-grab touch-pan-x flex-col items-center gap-2 rounded-lg border border-line bg-surface p-2.5 text-center select-none [-webkit-touch-callout:none] active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50 aria-pressed:border-wood aria-pressed:bg-wood-soft lg:touch-none lg:flex-row-reverse lg:gap-0 lg:border-0 lg:bg-transparent lg:p-0 lg:text-left lg:aria-pressed:bg-transparent"
                     >
-                      {bead.texture?.thumb ? (
-                        // Ảnh chụp chính hạt 3D lúc lưu ảnh vân ở CMS; chưa có thì hiện chấm màu
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={`/api/bead-textures/${bead.texture.id}/thumb?v=${bead.texture.version}`} alt="" width={44} height={44} loading="lazy" decoding="async" className="size-9 flex-none lg:size-11" />
-                      ) : (
-                        <span aria-hidden className="size-9 flex-none rounded-full shadow-e1 lg:size-11" style={{ background: bead.color }} />
-                      )}
-                      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <span className="relative flex size-11 flex-none items-center justify-center lg:size-16">
+                        {/* Bóng đổ mềm dưới hạt, hạt nhấc lên khi rê chuột thì bóng loang ra */}
+                        <span
+                          aria-hidden
+                          className="absolute -bottom-1 left-1/2 h-2 w-4/5 -translate-x-1/2 rounded-full bg-ink opacity-25 blur-sm transition-all duration-(--d-base) group-hover:w-full group-hover:opacity-15 motion-reduce:transition-none"
+                        />
+                        {bead.texture?.thumb ? (
+                          // Ảnh chụp chính hạt 3D lúc lưu ảnh vân ở CMS; chưa có thì hiện chấm màu
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={`/api/bead-textures/${bead.texture.id}/thumb?v=${bead.texture.version}`}
+                            alt=""
+                            width={64}
+                            height={64}
+                            loading="lazy"
+                            decoding="async"
+                            draggable={false}
+                            className="relative size-full transition-transform duration-(--d-base) ease-(--ease-out) group-hover:-translate-y-1 motion-reduce:transition-none"
+                          />
+                        ) : (
+                          <span
+                            aria-hidden
+                            className="relative size-4/5 rounded-full transition-transform duration-(--d-base) ease-(--ease-out) group-hover:-translate-y-1 motion-reduce:transition-none"
+                            style={{ background: bead.color }}
+                          />
+                        )}
+                      </span>
+                      {/* Dây nối từ nhãn sang hạt */}
+                      <span aria-hidden className="hidden h-px w-4 flex-none bg-line-strong group-aria-pressed:bg-wood lg:block" />
+                      <span className="flex min-w-0 flex-1 flex-col gap-0.5 lg:rounded-lg lg:border lg:border-line lg:bg-surface lg:px-3 lg:py-2 lg:shadow-e1 lg:transition-colors lg:duration-(--d-fast) lg:group-hover:border-wood lg:group-aria-pressed:border-wood lg:group-aria-pressed:bg-wood-soft">
                         <span className="line-clamp-2 text-sm leading-tight font-medium">{tab === "tram" ? bead.material : beadTitle(bead)}</span>
                         {bead.note && <span className="hidden text-xs text-ink-3 lg:line-clamp-2">{bead.note}</span>}
                         <span className="text-xs text-wood tabular-nums lg:text-sm">
                           {bead.stock === 0 ? "Hết hàng" : formatVnd(bead.priceVnd)}
-                          <span className="hidden text-ink-3 lg:inline"> / hạt{counts.get(bead.slug) ? ` · dùng ${counts.get(bead.slug)}` : ""}</span>
+                          <span className="hidden text-ink-3 lg:inline"> / hạt</span>
                         </span>
+                        {counts.get(bead.slug) ? <span className="hidden text-xs text-ink-3 lg:block">Đang dùng {counts.get(bead.slug)} hạt</span> : null}
                       </span>
                     </button>
                   </li>

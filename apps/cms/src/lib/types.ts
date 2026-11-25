@@ -135,7 +135,7 @@ export type Order = OrderRow & {
   platformFeeVnd: number;
   paidAt: string | null;
   customerId: string | null;
-  items: { id: string; productName: string; unitPriceVnd: number; unitCostVnd: number; quantity: number; product: { slug: string } | null }[];
+  items: { id: string; productName: string; unitPriceVnd: number; unitCostVnd: number; quantity: number; product: { slug: string } | null; design: BraceletDesignSnapshot | null }[];
 };
 
 export type Customer = Omit<CustomerRow, "spentVnd" | "lastOrderAt" | "_count"> & { orders: OrderRow[] };
@@ -148,4 +148,17 @@ export type FeaturedSummary = {
   products: { id: string; name: string; status: PublishStatus }[];
   posts: { id: string; title: string; status: PublishStatus }[];
   limit: { products: number; posts: number };
+};
+
+// Vòng tự thiết kế lưu kèm dòng đơn: đủ để thợ làm đúng vòng và chuẩn bị quà
+export type BraceletDesignSnapshot = {
+  beadDetails?: { slug: string; name: string; sizeMm: number }[];
+  cordName?: string;
+  fitName?: string;
+  wristCm?: number;
+  wraps?: number;
+  accent?: boolean;
+  lengthMm?: number;
+  gift?: { box?: boolean; wrap?: boolean; card?: string };
+  note?: string;
 };

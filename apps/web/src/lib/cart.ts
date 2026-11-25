@@ -12,7 +12,11 @@ export type BraceletDesign = {
   wraps?: number;
   // Chuỗi có hạt chủ và tua
   accent?: boolean;
+  // Ghi chú cho shop: hộp quà, bọc quà, thiệp (card là lời nhắn trên thiệp), yêu cầu khác
+  gift?: BraceletGift;
+  note?: string;
 };
+export type BraceletGift = { box?: boolean; wrap?: boolean; card?: string };
 // Vòng tự thiết kế: slug là mã băm của thiết kế, hai vòng giống hệt nhau gộp thành một dòng
 export type CartItem = { slug: string; quantity: number; design?: BraceletDesign };
 
@@ -20,7 +24,7 @@ export const BRACELET_PREFIX = "vong-";
 
 function designKey(design: BraceletDesign) {
   // Vòng một tầng giữ nguyên mã cũ để giỏ đã lưu không đổi
-  const text = JSON.stringify([design.beads, design.cord, design.fit, design.wristCm, ...(design.wraps ? [design.wraps] : []), ...(design.accent ? ["accent"] : [])]);
+  const text = JSON.stringify([design.beads, design.cord, design.fit, design.wristCm, ...(design.wraps ? [design.wraps] : []), ...(design.accent ? ["accent"] : []), ...(design.gift || design.note ? [design.gift ?? null, design.note ?? null] : [])]);
   let hash = 2166136261;
   for (let i = 0; i < text.length; i++) hash = Math.imul(hash ^ text.charCodeAt(i), 16777619);
   return BRACELET_PREFIX + (hash >>> 0).toString(36);

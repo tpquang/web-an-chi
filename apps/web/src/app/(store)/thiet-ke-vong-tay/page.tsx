@@ -1,6 +1,6 @@
 import { BraceletDesigner } from "@/components/bracelet/bracelet-designer";
 import { PageFrame, PageHeader } from "@/components/ui/layout";
-import { getBracelet } from "@/lib/api";
+import { getBracelet, getStore } from "@/lib/api";
 import { LaunchStrip } from "@/components/launch/launch-notice";
 import { isPreLaunch } from "@/lib/launch";
 import { braceletHref } from "@/lib/links";
@@ -12,7 +12,7 @@ export function generateMetadata() {
 }
 
 export default async function BraceletPage() {
-  const { rules, beads } = await getBracelet();
+  const [{ rules, beads }, store] = await Promise.all([getBracelet(), getStore()]);
 
   return (
     <PageFrame>
@@ -25,7 +25,7 @@ export default async function BraceletPage() {
         ]}
       />
       <LaunchStrip>Bạn có thể thử phối hạt và xem giá trước. Vòng thiết kế đặt được từ ngày này.</LaunchStrip>
-      <BraceletDesigner rules={rules} beads={beads} salesOpen={!isPreLaunch()} />
+      <BraceletDesigner rules={rules} beads={beads} salesOpen={!isPreLaunch()} preorder={store.preorderEnabled !== false} />
     </PageFrame>
   );
 }

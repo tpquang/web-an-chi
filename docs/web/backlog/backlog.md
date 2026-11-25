@@ -11,11 +11,16 @@
 - [ ] Câu chuyện và nguồn hàng thật cho trang `/gioi-thieu` (hiện chỉ nêu nguyên tắc)
 - [ ] Xác minh số điện thoại bằng OTP khi tạo tài khoản; hiện dùng mã đơn cũ để xác nhận chủ số
 - [ ] Nơi hosting và nơi lưu ảnh
+- [ ] Phí hộp quà, giấy bọc quà cho vòng tự thiết kế: hiện chưa tính, chỉ ghi "shop báo phí khi gọi xác nhận"
+- [ ] Chuỗi 108 hạt có bắt buộc hạt chủ và tua không (hiện mặc định có, khách bỏ tick được)
+- [ ] Vòng đơn có cần dài hơn 30 cm không (giới hạn 200 hạt chỉ chạm được với chuỗi)
+- [ ] Sản phẩm hộp tròn: nhãn in ghi 30 nụ, dữ liệu sản phẩm vẫn ghi 25 nụ
+- [ ] Trang sản phẩm thường: thêm vào giỏ có mở bảng giỏ hàng như vòng tự thiết kế không (hiện vẫn toast)
 
 ## P0
 
 - [ ] Thông báo đơn mới cho shop (Zalo, email hoặc Telegram)
-- [ ] Rate limit cho `POST /orders` và `orders/lookup`
+- [ ] Rate limit cho `POST /orders`, `POST /preorders` và `orders/lookup`
 - [ ] Trang chính sách và giới thiệu, link ở footer
 
 ## P1

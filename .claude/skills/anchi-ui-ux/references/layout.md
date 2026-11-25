@@ -69,6 +69,19 @@ Theo mẫu thiết kế: nền kem, tấm bo lớn, một khối tối. Thứ t�
 
 Không đưa số liệu chưa kiểm chứng như "10K+ khách hài lòng" hay ảnh đại diện khách vào banner, theo `anchi-brand`.
 
+## Thiết kế vòng tay (11/2026)
+
+| Phần | Dưới 960 | Từ 960 |
+|---|---|---|
+| Cài đặt | Form theo bước: Loại vòng → Hạt trầm (cỡ rồi loại) → Cổ tay và kiểu đeo. Thanh tiến trình 3 vạch. Bước mới trượt 24px và hiện dần (`--d-page`), tiến vào từ phải, lùi vào từ trái. "Quay lại" bên trái, nút tiến luôn ở mép phải | Một hàng gọn trên khu thiết kế: Loại vòng, Cỡ hạt, Loại trầm, nút viền "Dựng lại vòng". Đổi lựa chọn chưa thay vòng, bấm nút mới dựng lại |
+| Thiết kế | Sheet toàn màn hình, kho hạt ở đáy | Cột trái 4: kho hạt, hạt chủ và tua (chuỗi, mặc định có), cổ tay, khối chốt vòng (tạm tính, nút lưu vào giỏ hoặc đặt chờ), Ghi chú, chi tiết hạt. Cột phải 8: vòng 3D tỉ lệ 4:3, dính khi cuộn |
+
+- Bấm hạt trong kho chỉ thêm một hạt; không có thao tác dựng lại cả vòng từ một hạt. Đổi loại vòng, cỡ hạt, loại trầm đi qua phần cài đặt.
+- Ô cổ tay gọn hai dòng ("Cổ tay 15 cm", "Khuyên dùng 16,5 cm (22 hạt 8 mm)"), nút cài đặt mở phần chỉnh số đo và kiểu đeo. Chuỗi quấn nhiều vòng không hiện "Khuyên dùng".
+- Ghi chú gồm loại dây, hộp quà, bọc giấy quà, thiệp kèm lời nhắn (tối đa 200 chữ), yêu cầu khác (tối đa 300 chữ). Lưu kèm thiết kế vào đơn và hiện ở CMS chi tiết đơn.
+- Hạt trong kho: hạt đứng riêng có bóng đổ, nhãn mô tả treo bên trái nối bằng một đường mảnh, con trỏ bàn tay (`cursor-grab`). Khi đeo thử ghi rõ "Tay mẫu: cổ tay N cm".
+- Một vòng tối đa 200 hạt và charm (`braceletRules.maxBeads`); vòng đơn còn giới hạn dài 30 cm.
+
 ## Thẳng hàng
 
 Breadcrumb, tiêu đề trang và mọi khối nội dung dùng chung một mép trái. Breadcrumb chữ 13px, cách H1 12px, vùng bấm tối thiểu 24px, dấu `/` màu `line-strong`, mục cuối một dòng.

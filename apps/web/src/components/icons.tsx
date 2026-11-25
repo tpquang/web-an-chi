@@ -49,6 +49,15 @@ export const MinusIcon = (p: P) => (
   </Icon>
 );
 
+// Hai thanh trượt: mở phần cài đặt chi tiết
+export const SlidersIcon = (p: P) => (
+  <Icon {...p}>
+    <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
+    <circle cx="15" cy="7" r="2" />
+    <circle cx="9" cy="17" r="2" />
+  </Icon>
+);
+
 export const PlusIcon = (p: P) => (
   <Icon {...p}>
     <path d="M12 5v14M5 12h14" />
@@ -76,6 +85,14 @@ export const ExternalIcon = (p: P) => (
 export const CheckIcon = (p: P) => (
   <Icon {...p}>
     <path d="m5 12.5 4.5 4.5L19 7.5" />
+  </Icon>
+);
+
+// Dấu hỏi trong vòng tròn: mở hướng dẫn
+export const HelpIcon = (p: P) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.4M12 16.5v.01" />
   </Icon>
 );
 

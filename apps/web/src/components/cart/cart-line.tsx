@@ -90,6 +90,13 @@ function BraceletSummary({ design }: { design: NonNullable<QuoteLine["design"]> 
     <p className="mt-1 text-sm text-ink-2">
       {design.wraps ? `Quấn ${design.wraps} vòng · ` : ""}{design.accent ? "Có hạt chủ và tua · " : ""}Dài {(design.lengthMm / 10).toLocaleString("vi-VN")} cm · Cổ tay {design.wristCm.toLocaleString("vi-VN")} cm · {design.fitName} ·{" "}
       {design.cordName}
+      {giftText(design.gift) && <span className="block">{giftText(design.gift)}</span>}
+      {design.gift?.card && <span className="block">Lời nhắn trên thiệp: “{design.gift.card}”</span>}
+      {design.note && <span className="block">Ghi chú: {design.note}</span>}
     </p>
   );
+}
+
+function giftText(gift?: { box?: boolean; wrap?: boolean; card?: string }) {
+  return [gift?.box && "Hộp quà", gift?.wrap && "Bọc quà", gift?.card && "Kèm thiệp"].filter(Boolean).join(" · ");
 }

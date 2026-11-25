@@ -17,7 +17,7 @@
 | `/dang-nhap`, `/dang-ky` | Đăng nhập, tạo tài khoản | App | noindex, số điện thoại và mật khẩu |
 | `/tai-khoan` | Tài khoản | App | noindex, đơn đã đặt, sửa thông tin giao hàng |
 
-**`components/ui`:** `Button` (thêm variant `light`), `IconButton`, `Badge`, `Field`, `Input`, `Textarea`, `Checkbox`, `RadioGroup`, `QuantityInput`, `Price`, `Tag`, `Toast`, `Spinner`, `Skeleton`, `EmptyState`, `ErrorState`, `Alert`, `PageFrame`, `PageHeader`, `Section` (có `eyebrow`), `Eyebrow`, `PageBreadcrumb`, `Pagination`.
+**`components/ui`:** `Button` (thêm variant `light`), `IconButton`, `Modal`, `Badge`, `Field`, `Input`, `Textarea`, `Checkbox`, `RadioGroup`, `QuantityInput`, `Price`, `Tag`, `Toast`, `Spinner`, `Skeleton`, `EmptyState`, `ErrorState`, `Alert`, `PageFrame`, `PageHeader`, `Section` (có `eyebrow`), `Eyebrow`, `PageBreadcrumb`, `Pagination`.
 
 **Header:** logo, Giới thiệu, Sản phẩm, Bài viết, Giỏ hàng, Đăng nhập hoặc Tài khoản, đổi theme. Dưới 720px còn logo, giỏ và nút mở menu dạng drawer (`MobileMenu`). Header dính ở mọi độ rộng.
 
@@ -26,6 +26,12 @@
 **Thành phần bán hàng:** `ProductCard`, `ProductGrid`, `ProductImage` (ô có dấu logo khi chưa có ảnh thật), `AddToCart`, `CartButton`, `CartLine`, `OrderSummary`, `MarketplaceLinks`, `PostCard`, `TopicNav`, `PostBody`.
 
 **Chờ ngày mở bán (tạm thời, tới 12/12/2026):** giờ mở bán ở `lib/launch.ts`, đổi bằng `NEXT_PUBLIC_LAUNCH_AT` rồi build lại. Trước giờ này: `src/proxy.ts` chuyển tạm (307, đang tắt bằng `REDIRECT_TO_COUNTDOWN = false` để test) `/san-pham`, `/san-pham/*`, `/danh-muc/*` về `/countdown` (trang đếm ngược, noindex); trang chủ ẩn khối sản phẩm nổi bật và có khối đếm ngược dưới banner (`HomeLaunch`); `/thiet-ke-vong-tay` có dải đếm ngược đầu trang (`LaunchStrip`). Dải đếm ngược ở trang danh sách và khối thay nút mua ở trang sản phẩm vẫn còn trong code, phòng khi bỏ chuyển hướng; trang thiết kế vòng vẫn cho phối hạt, xem giá nhưng không có nút thêm vào giỏ; `POST /api/orders` trả 403. Server tính trạng thái lúc dựng trang, `LaunchGate` ở trình duyệt tự mở đúng giờ nên không cần deploy lại vào ngày mở bán. Các trang nội dung, tài khoản, tra cứu đơn, chat không đổi. Sau ngày mở bán gỡ `components/launch` và các chỗ gọi.
+
+**Giỏ hàng dạng bảng (11/2026):** nút giỏ trên header mở `CartDrawer` bên phải; lưu vòng tự thiết kế cũng mở bảng này. Trang `/gio-hang` giữ nguyên cho xem đầy đủ.
+
+**Thiết kế vòng `/thiet-ke-vong-tay`:** điện thoại vào bằng form khởi tạo theo bước (`BraceletSetup`), máy tính có hàng cài đặt gọn `SetupBar` trên khu thiết kế. Bố cục chi tiết ở skill `anchi-ui-ux` `layout.md` mục Thiết kế vòng tay.
+
+**Đặt chờ:** `PreorderButton`, `PreorderDialog` (`components/preorder`), route handler `/api/preorders`. Hiện trước ngày mở bán khi CMS bật đặt chờ.
 
 **Chat với shop:** nút "Nhắn shop" góc phải dưới (`ChatLauncher`), khung chat chỉ tải khi mở. Ẩn ở giỏ và đặt hàng nếu khách chưa từng chat, để khu đặt hàng gọn. Khách điền tên, số điện thoại (không bắt buộc) và câu hỏi; đã đăng nhập thì điền sẵn.
 

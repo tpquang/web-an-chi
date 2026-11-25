@@ -6,7 +6,8 @@ export const braceletRules = {
   wristCm: { min: 15, max: 25 },
   maxLengthMm: 300,
   minBeads: 8,
-  maxBeads: 60,
+  // Giới hạn chung số hạt và charm trên một vòng, kể cả chuỗi. Vòng đơn còn bị giới hạn bởi maxLengthMm
+  maxBeads: 200,
   // Chuỗi 108 hạt quấn 4 vòng: đúng 108 hạt trầm, gắn thêm vài charm.
   // Kèm hạt chủ, nút chặn và hai dây tua mỗi dây 3 hạt cùng loại trầm
   // accentBeads: tuỳ chọn hạt chủ và tua (1 hạt chủ + 2 dây × 3 hạt) tính thêm chừng này hạt trầm chính
@@ -32,13 +33,22 @@ const fitIds = braceletRules.fits.map((f) => f.id) as [FitId, ...FitId[]];
 
 export const braceletDesign = z
   .object({
-    beads: z.array(z.string().min(1).max(80)).min(braceletRules.minBeads).max(braceletRules.mala.beads + braceletRules.mala.maxCharms),
+    beads: z.array(z.string().min(1).max(80)).min(braceletRules.minBeads).max(braceletRules.maxBeads),
     cord: z.enum(cordIds),
     fit: z.enum(fitIds),
     wristCm: z.number().min(braceletRules.wristCm.min).max(braceletRules.wristCm.max),
     wraps: z.literal(4).optional(),
     // Chuỗi có hạt chủ và hai dây tua
     accent: z.boolean().optional(),
+    // Ghi chú cho shop: hộp quà, bọc quà, thiệp kèm lời nhắn, yêu cầu khác. Chưa tính phí, shop báo khách nếu có
+    gift: z
+      .object({
+        box: z.boolean().optional(),
+        wrap: z.boolean().optional(),
+        card: z.string().trim().max(200).optional(),
+      })
+      .optional(),
+    note: z.string().trim().max(300).optional(),
   })
   .refine((d) => (d.wraps ? d.beads.length >= braceletRules.mala.beads : d.beads.length <= braceletRules.maxBeads), {
     message: "Số hạt không hợp với kiểu vòng",

@@ -23,7 +23,7 @@ Khách mua trầm hương sợ nhất là mua phải hàng giả. Lời mời n�
 |---|---|---|
 | 1 | Đang xem danh mục | Thẻ sản phẩm, không nút mua trên thẻ |
 | 2 | Đang xem sản phẩm | "Thêm vào giỏ" là nút primary, gần giá |
-| 3 | Vừa thêm vào giỏ | Toast có lối vào giỏ, tối đa 3 sản phẩm hợp dùng kèm |
+| 3 | Vừa thêm vào giỏ | Toast có lối vào giỏ, tối đa 3 sản phẩm hợp dùng kèm. Vòng tự thiết kế mở bảng giỏ hàng bên phải thay toast |
 | 4 | Đã mua | Hướng dẫn dùng và bảo quản, không mời mua ngay |
 
 - Luôn ghi giá thật bằng VND. Phí giao hàng hiện trước bước cuối.
@@ -79,6 +79,16 @@ An Chi là site bán hàng, nên **không đặt quảng cáo bên thứ ba** nh
 - Không truyền tên, điện thoại, địa chỉ qua URL hay vào công cụ phân tích.
 - Nhắc qua email, Zalo chỉ gửi người đã đồng ý riêng, tối đa 2 tin mỗi tháng, theo dịp có thật, có cách huỷ.
 - Không chọn sẵn ô đồng ý nhận tiếp thị.
+
+## 6a. Đặt chờ (11/2026)
+
+Trước ngày mở bán, khách đặt trước bằng nút "Đặt chờ" ở trang sản phẩm và trang thiết kế vòng.
+
+- Chỉ hỏi họ tên và số điện thoại (bắt buộc), ghi chú tuỳ chọn. Không hỏi địa chỉ, không có ô đồng ý tiếp thị. Ghi rõ số điện thoại chỉ dùng để gọi lại về đơn đặt chờ.
+- Nói rõ chưa phải thanh toán và shop sẽ gọi lại chốt địa chỉ, phí giao. Không hứa giữ hàng hay ưu đãi khi chưa có thật.
+- Đơn vào CMS với trạng thái "Đặt chờ", chưa trừ kho, không tính vào báo cáo lợi nhuận. Shop chuyển thành đơn chính ở chi tiết đơn thì mới trừ kho.
+- Chủ shop bật tắt ở CMS > Cài đặt cửa hàng. Tắt thì web chỉ còn đồng hồ đếm ngược.
+- Đo bằng sự kiện `begin_preorder` (mở form) và `preorder` (gửi xong, chỉ mã đơn và giá trị, không gửi tên hay số điện thoại).
 
 ## 7. Giữ chân
 

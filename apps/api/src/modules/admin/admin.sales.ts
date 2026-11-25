@@ -8,6 +8,7 @@ import { HttpError } from "../../middleware/errors.js";
 import { prisma } from "../../lib/prisma.js";
 import { pageQuery } from "../../lib/text.js";
 import { changeOrderStatus, orderCode, phoneField } from "../orders/orders.service.js";
+import { convertPreorder, convertPreorderInput } from "../orders/orders.preorder.js";
 
 export const adminSalesRouter = Router();
 
@@ -133,6 +134,12 @@ const orderPatch = z.object({
   shippingCostVnd: vnd.optional(),
   externalCode: optionalText,
   note: optionalText,
+});
+
+// Đơn đặt chờ thành đơn chính: ghi địa chỉ, phí giao, thanh toán, chuyển "Chờ xác nhận" và trừ kho
+adminSalesRouter.post("/orders/:id/convert", async (req, res) => {
+  await convertPreorder(req.params.id, convertPreorderInput.parse(req.body));
+  res.json({ data: await prisma.order.findUniqueOrThrow({ where: { id: req.params.id } }) });
 });
 
 adminSalesRouter.patch("/orders/:id", async (req, res) => {

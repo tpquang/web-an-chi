@@ -24,6 +24,8 @@ export type QuoteLine = {
     wristCm: number;
     wraps?: number;
     accent?: boolean;
+    gift?: { box?: boolean; wrap?: boolean; card?: string };
+    note?: string;
     lengthMm: number;
   } | null;
 };

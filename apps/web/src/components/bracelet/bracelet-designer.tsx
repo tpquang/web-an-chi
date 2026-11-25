@@ -6,15 +6,17 @@ import type { Bead, BraceletRules } from "@/lib/api";
 import { cm } from "@/lib/bracelet";
 import { launchDateLabel } from "@/lib/launch";
 import { formatVnd } from "@/lib/site";
-import { CloseIcon, HandIcon, ResetIcon, SpinIcon, UndoIcon } from "../icons";
+import { CloseIcon, HandIcon, HelpIcon, ResetIcon, SpinIcon, UndoIcon } from "../icons";
 import { useLaunch } from "../launch/launch-clock";
 import { Button, buttonClass } from "../ui/button";
 import { Tag } from "../ui/tag";
 import { BeadPicker } from "./bead-picker";
 import { BraceletOptions } from "./bracelet-options";
+import { PreorderButton } from "../preorder/preorder-button";
+import { BraceletSetup, SetupBar } from "./bracelet-setup";
 import { BraceletSummary, WristSize } from "./bracelet-summary";
 import type { SceneHandle } from "./bracelet-scene";
-import { useBracelet } from "./use-bracelet";
+import { type BraceletSetupValues, useBracelet } from "./use-bracelet";
 
 // three.js chỉ nạp ở trang này và sau khi có trình duyệt
 const BraceletScene = dynamic(
@@ -37,11 +39,6 @@ const chipTransform = (x: number, y: number, touch: boolean) =>
 
 const desktop = "(min-width: 960px)";
 const SHEET_HASH = "#thiet-ke";
-const intro = [
-  "Chọn loại trầm và cỡ hạt, vòng tự đủ số hạt theo cổ tay.",
-  "Kéo thêm charm bạc, vàng hoặc hạt đá vào đúng chỗ bạn muốn.",
-  "Xem giá ngay, shop xâu vòng theo đúng thứ tự bạn đặt.",
-];
 const action =
   "inline-flex size-11 items-center justify-center gap-2 rounded-full border border-line-strong bg-surface/90 text-ink transition-colors duration-(--d-fast) hover:border-wood disabled:opacity-50 aria-pressed:border-wood aria-pressed:text-wood lg:size-auto lg:min-h-11 lg:bg-transparent lg:px-3 lg:text-sm lg:whitespace-nowrap";
 
@@ -49,11 +46,14 @@ export function BraceletDesigner({
   rules,
   beads,
   salesOpen: initialOpen,
+  preorder,
 }: {
   rules: BraceletRules;
   beads: Bead[];
   // Server tính lúc dựng trang; trước ngày mở bán chỉ cho thử thiết kế, chưa thêm vào giỏ
   salesOpen: boolean;
+  // Shop bật nhận đặt chờ ở CMS: trước ngày mở bán thì có nút "Đặt chờ" thay nút lưu vào giỏ
+  preorder: boolean;
 }) {
   const state = useBracelet(rules, beads);
   const { open: salesOpen } = useLaunch(initialOpen);
@@ -75,6 +75,18 @@ export function BraceletDesigner({
   const [spinning, setSpinning] = useState(false);
   // Xem vòng đeo trên bàn tay mẫu, phóng theo cỡ cổ tay khách nhập
   const [onHand, setOnHand] = useState(false);
+  // Hướng dẫn trên điện thoại: chỉ hiện khi bấm nút dấu hỏi
+  const [help, setHelp] = useState(false);
+  const helpButton = useRef<HTMLButtonElement>(null);
+  const closeHelp = () => {
+    setHelp(false);
+    helpButton.current?.focus();
+  };
+  // Chưa qua form khởi tạo thì chỉ hiện form
+  const [configured, setConfigured] = useState(false);
+  const configuredRef = useRef(false);
+  configuredRef.current = configured;
+  const wristLabel = `${state.wristCm.toLocaleString("vi-VN")} cm`;
   // Chip đi theo con trỏ khi kéo hạt từ kho; vào khung 3D thì chip mờ đi, nhường cho hạt 3D
   const [dragging, setDragging] = useState<{
     bead: Bead;
@@ -89,7 +101,12 @@ export function BraceletDesigner({
 
   // Sheet mở thì có #thiet-ke trên URL, để nút Back của điện thoại đóng sheet thay vì rời trang
   useEffect(() => {
-    const sync = () => setOpen(window.location.hash === SHEET_HASH);
+    // Chưa khởi tạo vòng mà URL có sẵn #thiet-ke thì bỏ hash, không mở sheet
+    const sync = () => {
+      const hash = window.location.hash === SHEET_HASH;
+      if (hash && !configuredRef.current) window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      setOpen(hash && configuredRef.current);
+    };
     sync();
     window.addEventListener("popstate", sync);
     return () => window.removeEventListener("popstate", sync);
@@ -111,6 +128,28 @@ export function BraceletDesigner({
       document.documentElement.style.overflow = "";
     };
   }, [open]);
+
+  function startDesign(values: BraceletSetupValues) {
+    state.setup(values);
+    setConfigured(true);
+    setOnHand(false);
+    // Điện thoại vào thẳng sheet thiết kế; máy tính hiện ba cột ngay trong trang
+    if (!window.matchMedia(desktop).matches) openSheet();
+  }
+
+  function restart() {
+    if (window.matchMedia(desktop).matches) {
+      const bar = document.getElementById("cai-dat-vong");
+      bar?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+      bar?.focus({ preventScroll: true });
+      return;
+    }
+    if (window.location.hash === SHEET_HASH) window.history.back();
+    setOpen(false);
+    setHelp(false);
+    setSelected(null);
+    setConfigured(false);
+  }
 
   function openSheet() {
     window.history.pushState(null, "", SHEET_HASH);
@@ -202,29 +241,35 @@ export function BraceletDesigner({
 
   return (
     <>
-      {/* Điện thoại: trang giới thiệu ngắn, bấm nút mới mở sheet thiết kế */}
-      <div className="flex flex-col gap-6 lg:hidden">
-        <ol className="flex flex-col gap-3 text-ink-2">
-          {intro.map((step, i) => (
-            <li key={step} className="flex gap-3">
-              <span
-                aria-hidden
-                className="inline-flex size-7 flex-none items-center justify-center rounded-full bg-wood-soft text-sm font-semibold text-wood"
-              >
-                {i + 1}
-              </span>
-              {step}
-            </li>
-          ))}
-        </ol>
-        <button ref={opener} type="button" onClick={openSheet} aria-expanded={open} className={buttonClass({ size: "lg", block: true })}>
-          Bắt đầu thiết kế vòng
-        </button>
+      {/* Bước đầu: form khởi tạo vòng theo bước, xong mới vào thiết kế (cả điện thoại và máy tính) */}
+      {!configured && (
+        <div className="lg:hidden">
+          <BraceletSetup state={state} onDone={startDesign} />
+        </div>
+      )}
+      <div className="hidden lg:block">
+        <SetupBar state={state} />
       </div>
+
+      {/* Điện thoại sau khi khởi tạo: tóm tắt vòng, mở lại sheet thiết kế hoặc cài đặt lại */}
+      {configured && (
+        <div className="flex flex-col gap-3 lg:hidden">
+          <p className="text-ink-2">
+            {state.wraps > 1 ? `Chuỗi ${ring.length} hạt quấn ${state.wraps} vòng` : `Vòng ${ring.length} hạt`}
+            {mainBead ? `, ${mainBead.material} ${mainBead.sizeMm} mm` : ""}, cổ tay {wristLabel}.
+          </p>
+          <button ref={opener} type="button" onClick={openSheet} aria-expanded={open} className={buttonClass({ size: "lg", block: true })}>
+            Tiếp tục thiết kế
+          </button>
+          <Button size="lg" variant="outline" block onClick={restart}>
+            Cài đặt lại vòng
+          </Button>
+        </div>
+      )}
       <div
         inert={!isDesktop && !open}
         onKeyDown={(e) => e.key === "Escape" && !isDesktop && open && close()}
-        className={`fixed inset-0 z-(--z-modal) flex flex-col bg-paper pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] transition-transform motion-reduce:transition-none lg:static lg:z-auto lg:grid lg:translate-y-0 lg:grid-cols-12 lg:gap-6 lg:bg-transparent lg:p-0 lg:transition-none ${
+        className={`fixed inset-0 z-(--z-modal) flex flex-col bg-paper pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] transition-transform motion-reduce:transition-none lg:static lg:z-auto lg:grid lg:translate-y-0 lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:gap-6 lg:bg-transparent lg:p-0 lg:transition-none ${
           open
             ? "translate-y-0 duration-(--d-sheet) ease-(--ease-ios)"
             : "translate-y-full duration-(--d-slow) ease-(--ease-exit)"
@@ -252,10 +297,10 @@ export function BraceletDesigner({
           </p>
           {salesOpen ? (
             <Button onClick={state.addToCart} className="rounded-full">
-              Thêm vào giỏ
+              Lưu vào giỏ
             </Button>
           ) : (
-            <Tag tone="wood">Mở bán {launchDateLabel}</Tag>
+            preorder ? <PreorderButton item={state.preorderItem} size="md" className="rounded-full" /> : <Tag tone="wood">Mở bán {launchDateLabel}</Tag>
           )}
         </div>
         <div className="flex flex-col gap-2 px-(--page-gutter) pt-3 lg:hidden">
@@ -269,21 +314,21 @@ export function BraceletDesigner({
         </div>
 
         {/* Kho hạt: đáy sheet trên điện thoại, cột trái trên máy tính */}
-        <div className="order-last rounded-t-2xl border-t border-line bg-surface px-(--page-gutter) pt-4 pb-3 lg:order-none lg:col-span-3 lg:self-start lg:rounded-xl lg:border lg:p-5">
+        <div className="order-last rounded-t-2xl border-t border-line bg-surface px-(--page-gutter) pt-4 pb-3 lg:order-none lg:col-span-4 lg:col-start-1 lg:row-start-1 lg:self-start lg:rounded-xl lg:border lg:p-5">
           <BeadPicker
             state={state}
             onBeadPointer={onBeadPointer}
-            options={<BraceletOptions state={state} withStyle />}
+            options={<BraceletOptions state={state} />}
           />
         </div>
 
         {/* Vòng 3D ở giữa */}
-        <div className="relative flex min-h-0 flex-1 flex-col gap-4 lg:col-span-5 lg:self-start">
+        <div className="relative flex min-h-0 flex-1 flex-col gap-4 lg:sticky lg:top-24 lg:col-span-8 lg:col-start-5 lg:row-span-2 lg:row-start-1 lg:self-start">
           <div
             tabIndex={0}
             onKeyDown={onSceneKey}
             aria-describedby="huong-dan-vong"
-            className="relative min-h-0 flex-1 overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wood lg:aspect-square lg:max-h-[70vh] lg:w-full lg:flex-none lg:rounded-xl lg:border lg:border-line lg:bg-paper-2"
+            className="relative min-h-0 flex-1 overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-wood lg:aspect-4/3 lg:max-h-[72vh] lg:w-full lg:flex-none lg:rounded-xl lg:border lg:border-line lg:bg-paper-2"
           >
             <BraceletScene
               ref={scene}
@@ -292,7 +337,7 @@ export function BraceletDesigner({
               onSelect={setSelected}
               onMove={state.move}
               onRemove={state.removeAt}
-              label={`${state.wraps > 1 ? `Chuỗi ${ring.length} hạt quấn ${state.wraps} vòng` : `Vòng ${ring.length} hạt`}, dài ${cm(lengthMm)} cm${onHand ? ", đeo trên bàn tay mẫu" : ""}`}
+              label={`${state.wraps > 1 ? `Chuỗi ${ring.length} hạt quấn ${state.wraps} vòng` : `Vòng ${ring.length} hạt`}, dài ${cm(lengthMm)} cm${onHand ? `, đeo trên bàn tay mẫu cổ tay ${wristLabel}` : ""}`}
               wraps={state.wraps}
               accent={state.accent}
               onHand={onHand}
@@ -316,6 +361,13 @@ export function BraceletDesigner({
                 </dd>
               </div>
             </dl>
+
+            {/* Tay mẫu phóng theo số đo cổ tay khách nhập, ghi rõ cỡ để khách không nhầm là tay thật */}
+            {onHand && !selectedBead && (
+              <p aria-hidden className="pointer-events-none absolute bottom-3 left-3 rounded-full bg-surface/90 px-3 py-1 text-sm shadow-e1 tabular-nums">
+                Tay mẫu: cổ tay <span className="font-semibold">{wristLabel}</span>
+              </p>
+            )}
 
             {/* Thanh hạt đang chọn nổi ở đáy khung để khung không đổi cao khi chọn hạt */}
             {selectedBead && selected !== null && (
@@ -387,25 +439,64 @@ export function BraceletDesigner({
               <HandIcon />
               <span className="sr-only lg:not-sr-only lg:whitespace-nowrap">Đeo thử</span>
             </button>
-            <button type="button" onClick={state.reset} className={action}>
+            {/* Mở lại form khởi tạo, giá trị đang dùng điền sẵn */}
+            <button type="button" onClick={restart} aria-label="Cài đặt lại vòng" className={action}>
               <ResetIcon />
-              <span className="sr-only lg:not-sr-only lg:whitespace-nowrap">Làm mới</span>
+              <span aria-hidden className="hidden lg:inline lg:whitespace-nowrap">Cài đặt lại</span>
+            </button>
+            {/* Điện thoại: hướng dẫn gấp vào nút, máy tính đã có đoạn hướng dẫn dưới vòng */}
+            <button
+              ref={helpButton}
+              type="button"
+              aria-expanded={help}
+              aria-controls="huong-dan-vong-mobile"
+              aria-label="Hướng dẫn thiết kế vòng"
+              onClick={() => setHelp(!help)}
+              className={`${action} aria-expanded:border-wood aria-expanded:text-wood lg:hidden`}
+            >
+              <HelpIcon />
             </button>
           </div>
+          {help && (
+            <div
+              id="huong-dan-vong-mobile"
+              role="region"
+              aria-label="Hướng dẫn thiết kế vòng"
+              onKeyDown={(e) => {
+                if (e.key !== "Escape") return;
+                e.stopPropagation();
+                closeHelp();
+              }}
+              className="absolute inset-x-3 top-28 flex items-start gap-2 rounded-lg border border-line bg-surface p-4 text-sm text-ink-2 shadow-e2 lg:hidden"
+            >
+              <ul className="flex-1 list-disc space-y-1.5 pl-4">
+                <li>Chạm hạt hoặc charm để thêm vào vòng, hoặc kéo thả vào đúng vị trí trên vòng.</li>
+                <li>Bấm Đeo thử để xem vòng trên bàn tay theo cỡ cổ tay của bạn.</li>
+                <li>Kéo hạt trên vòng ra xa để bỏ, kéo chỗ trống để xoay.</li>
+              </ul>
+              <button
+                type="button"
+                onClick={closeHelp}
+                aria-label="Đóng hướng dẫn"
+                className="-mt-2 -mr-2 inline-flex size-11 flex-none items-center justify-center rounded-full text-ink-3 hover:bg-paper-2 hover:text-ink"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+          )}
           <p
             id="huong-dan-vong"
             className="sr-only lg:not-sr-only lg:text-center lg:text-sm lg:text-ink-3"
           >
-            Chọn loại trầm để đổi cả vòng, kéo hạt hoặc charm thả vào vị trí
-            trên vòng. Bấm Đeo thử để xem vòng trên bàn tay theo cỡ cổ tay của bạn. Gắp hạt trên vòng kéo ra xa để bỏ, kéo chỗ trống để xoay.
+            Kéo hạt hoặc charm thả vào vị trí trên vòng, hoặc bấm để thêm vào sau hạt đang chọn. Muốn đổi loại vòng, cỡ hạt hay cổ tay thì bấm Cài đặt lại. Bấm Đeo thử để xem vòng trên bàn tay theo cỡ cổ tay của bạn. Gắp hạt trên vòng kéo ra xa để bỏ, kéo chỗ trống để xoay.
             Bàn phím: mũi tên để chọn hạt, Shift + mũi tên để dời, Delete để
             xoá.
           </p>
         </div>
 
         {/* Cột phải trên máy tính: cỡ tay, tóm tắt, giá */}
-        <div className="hidden lg:col-span-4 lg:block lg:self-start">
-          <BraceletSummary state={state} salesOpen={salesOpen} />
+        <div className="hidden lg:col-span-4 lg:col-start-1 lg:row-start-2 lg:block lg:self-start">
+          <BraceletSummary state={state} salesOpen={salesOpen} preorder={preorder} />
         </div>
 
         {dragging && (
