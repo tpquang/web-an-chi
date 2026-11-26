@@ -11,7 +11,7 @@ export async function GET() {
   if (!site.indexable) return new Response("Not found", { status: 404 });
   const [allCategories, allPosts, pages] = await Promise.all([getCategories(), getPosts({ limit: 100 }), getSeoPages()]);
   // Bỏ trang đã tắt "Hiện trên Google" trong CMS
-  const categories = allCategories.filter((c) => !c.noindex);
+  const categories = allCategories.filter((c) => !c.noindex && (c._count?.products ?? 0) > 0);
   const posts = allPosts.data.filter((p) => !p.noindex);
   const shown = (key: string) => !pages[key]?.noindex;
   const line = (name: string, path: string, note?: string | null) => `- [${name}](${absoluteUrl(path)})${note ? `: ${note}` : ""}`;

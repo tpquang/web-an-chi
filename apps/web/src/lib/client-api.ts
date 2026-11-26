@@ -41,6 +41,8 @@ export type Quote = {
   preorder?: boolean;
   // Trước ngày mở bán mà shop tắt đặt chờ
   preorderClosed?: boolean;
+  // Cách thanh toán được: chuyển khoản (shop có tài khoản), cọc trước khi trả khi nhận hàng
+  payment: { bankTransfer: boolean; deposit: { percent: number; amountVnd: number; reasons: string[] } | null; holdHours: number };
 };
 
 export type ApiFailure = {

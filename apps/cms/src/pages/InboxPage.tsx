@@ -60,6 +60,7 @@ export function InboxPage() {
   useEffect(
     () =>
       subscribeInbox((event) => {
+        if (event.type === "order") return;
         const row = event.data.conversation as ConversationRow;
         if (event.type === "message" && event.data.message) {
           const message = event.data.message as ChatMessage;

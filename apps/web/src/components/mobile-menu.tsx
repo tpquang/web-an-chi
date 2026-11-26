@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { cartHref, orderLookupHref } from "@/lib/links";
 import { mainNav } from "@/lib/nav";
 import { useCartCount } from "@/lib/cart";
+import { openCartDrawer } from "@/lib/cart-drawer";
 import { BrandMark } from "./brand-mark";
 import { CloseIcon } from "./icons";
 import { isActive } from "./site-header";
@@ -42,7 +43,6 @@ export function MobileMenu({ onClose, account }: Props) {
 
   const links = [
     ...mainNav,
-    { href: cartHref, label: count ? `Giỏ hàng (${count})` : "Giỏ hàng" },
     account,
     { href: orderLookupHref, label: "Tra cứu đơn hàng" },
   ];
@@ -82,6 +82,20 @@ export function MobileMenu({ onClose, account }: Props) {
                 </Link>
               </li>
             ))}
+            {/* Giỏ hàng mở bảng trượt như nút trên header, không sang trang /gio-hang */}
+            <li>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  openCartDrawer();
+                }}
+                aria-haspopup="dialog"
+                className={`flex min-h-12 w-full items-center rounded-xl px-3 text-left text-lg hover:bg-paper-2 ${pathname === cartHref ? "font-medium text-wood" : ""}`}
+              >
+                {count ? `Giỏ hàng (${count})` : "Giỏ hàng"}
+              </button>
+            </li>
           </ul>
         </nav>
         <div className="flex items-center justify-between border-t border-line px-5 py-3">

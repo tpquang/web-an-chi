@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { announceSession } from "@/lib/account-client";
+import { composeAddress, parseAddress, useDivisions } from "@/lib/address";
 import { cart } from "@/lib/cart";
 import {
   clearDraft,
+  emptyCheckout,
   fieldOrder,
   loadDraft,
   saveDraft,
@@ -14,37 +16,41 @@ import {
   type CheckoutErrors,
   type CheckoutField,
   type CheckoutValues,
-  emptyCheckout,
 } from "@/lib/checkout";
 import { postJson } from "@/lib/client-api";
-import { cartHref, checkoutHref, loginHref, orderHref, productsHref } from "@/lib/links";
+import { cartHref, checkoutHref, loginHref, orderHref, policyHref, productsHref } from "@/lib/links";
 import { paymentOptions } from "@/lib/order";
 import { trackEvent } from "@/lib/track";
 import { useQuote } from "@/lib/use-quote";
-import { PreorderNote } from "../cart/preorder-note";
 import { useSignedIn } from "@/lib/use-signed-in";
-import { OrderSummary } from "../cart/order-summary";
 import { CartSkeleton } from "../cart/cart-view";
+import { OrderSummary } from "../cart/order-summary";
+import { PreorderNote } from "../cart/preorder-note";
 import { Button } from "../ui/button";
-import { Checkbox, Field, Input, Textarea } from "../ui/field";
+import { Field, Input } from "../ui/field";
 import { RadioGroup } from "../ui/radio-group";
-import { EmptyState, ErrorState } from "../ui/states";
 import { Spinner } from "../ui/spinner";
-import { DevQuickFill } from "./dev-quick-fill";
+import { EmptyState, ErrorState } from "../ui/states";
 import { showToast } from "../ui/toast";
+import { AddressFields } from "./address-fields";
+import { DevQuickFill } from "./dev-quick-fill";
 
+// Bố cục: cột trái thông tin giao hàng và cách thanh toán; cột phải tóm tắt đơn kèm nút Đặt hàng (dính khi cuộn).
+// Điện thoại: form trước, tóm tắt và nút Đặt hàng ở cuối để khách xem lại đơn rồi mới bấm
 export function CheckoutForm() {
   const router = useRouter();
   const { items, state, reload } = useQuote();
+  const divisions = useDivisions();
   const [values, setValues] = useState<CheckoutValues>(emptyCheckout);
   const [errors, setErrors] = useState<CheckoutErrors>({});
-  const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const inFlight = useRef(false);
   const done = useRef(false);
   // Một khoá cho cả phiên đặt hàng: gửi lại sau lỗi mạng không tạo đơn thứ hai
   const idempotencyKey = useRef<string>("");
-  const refs = useRef<Partial<Record<CheckoutField, HTMLInputElement | HTMLTextAreaElement | null>>>({});
+  const refs = useRef<Partial<Record<CheckoutField, HTMLElement | null>>>({});
+  // Địa chỉ dạng chuỗi (tài khoản, khách mẫu) chờ danh sách tỉnh để tách ra ba ô
+  const pendingAddress = useRef<string | null>(null);
 
   const signedIn = useSignedIn();
 
@@ -64,6 +70,23 @@ export function CheckoutForm() {
     setValues(loadDraft());
   }, []);
 
+  function fillAddress(text: string) {
+    pendingAddress.current = text;
+    if (divisions.data) applyPendingAddress(divisions.data);
+  }
+
+  function applyPendingAddress(provinces: NonNullable<typeof divisions.data>) {
+    const text = pendingAddress.current;
+    pendingAddress.current = null;
+    const parsed = text ? parseAddress(text, provinces) : null;
+    // Không tách được (địa chỉ cũ ghi tay) thì để khách chọn lại, không đoán
+    if (parsed) setValues((prev) => (prev.provinceCode ? prev : { ...prev, ...parsed }));
+  }
+
+  useEffect(() => {
+    if (divisions.data && pendingAddress.current) applyPendingAddress(divisions.data);
+  }, [divisions.data]);
+
   // Đã đăng nhập: điền những ô còn trống bằng thông tin tài khoản, không ghi đè thứ khách vừa gõ
   useEffect(() => {
     if (!signedIn) return;
@@ -76,22 +99,21 @@ export function CheckoutForm() {
       .then((body: { data: { name: string; phone: string; email: string | null; address: string | null } } | null) => {
         if (!body) return;
         const { name, phone, email, address } = body.data;
-        setValues((prev) => ({
-          ...prev,
-          name: prev.name || name,
-          phone: prev.phone || phone,
-          email: prev.email || (email ?? ""),
-          address: prev.address || (address ?? ""),
-        }));
+        setValues((prev) => ({ ...prev, name: prev.name || name, phone: prev.phone || phone, email: prev.email || (email ?? "") }));
+        if (address) fillAddress(address);
       })
       .catch(() => {});
   }, [signedIn]);
 
-  function update<K extends keyof CheckoutValues>(key: K, value: CheckoutValues[K]) {
-    const next = { ...values, [key]: value };
+  function update(patch: Partial<CheckoutValues>) {
+    const next = { ...values, ...patch };
     setValues(next);
     saveDraft(next);
-    if (key in errors) setErrors((prev) => ({ ...prev, [key]: undefined }));
+    const touched: CheckoutField[] = [];
+    if ("provinceCode" in patch) touched.push("province");
+    if ("wardCode" in patch) touched.push("ward");
+    for (const key of ["name", "phone", "email", "street", "note"] as const) if (key in patch) touched.push(key);
+    if (touched.some((key) => errors[key])) setErrors((prev) => ({ ...prev, ...Object.fromEntries(touched.map((key) => [key, undefined])) }));
   }
 
   function focusFirst(found: CheckoutErrors) {
@@ -99,40 +121,50 @@ export function CheckoutForm() {
     if (first) refs.current[first]?.focus();
   }
 
+  const bindRef = (field: CheckoutField) => (el: HTMLElement | null) => {
+    refs.current[field] = el;
+  };
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (inFlight.current) return;
+    if (inFlight.current || state.status !== "ready") return;
     const found = validateCheckout(values);
     setErrors(found);
     if (Object.keys(found).length > 0) {
       focusFirst(found);
       return;
     }
+    const province = divisions.data?.find((p) => p.code === values.provinceCode);
+    const ward = province?.wards.find((w) => w.code === values.wardCode);
+    const { quote } = state;
 
     inFlight.current = true;
     setSubmitting(true);
     try {
       const result = await postJson<{ code: string }>("/api/orders", {
         idempotencyKey: idempotencyKey.current,
-        customer: { name: values.name, phone: values.phone, email: values.email, address: values.address, note: values.note },
-        marketingConsent: consent,
-        paymentMethod: values.paymentMethod,
+        customer: { name: values.name, phone: values.phone, email: values.email, address: composeAddress(values.street, ward, province), note: values.note },
+        paymentMethod: paymentMethodFor(values, quote),
         items,
+        // Giá đổi trong lúc khách điền form thì API báo PRICE_CHANGED thay vì tự tính giá mới
+        expectedTotalVnd: quote.totalVnd,
       });
       if (result.ok) {
         done.current = true;
-        if (state.status === "ready") {
-          const { quote } = state;
-          trackEvent("purchase", {
-            transaction_id: result.data.code,
-            value: quote.totalVnd,
-            shipping: quote.shippingVnd,
-            items: quote.lines.map((line) => ({ item_id: line.slug, item_name: line.product?.name, quantity: line.quantity, price: line.product?.unitPriceVnd })),
-          });
-        }
+        trackEvent("purchase", {
+          transaction_id: result.data.code,
+          value: quote.totalVnd,
+          shipping: quote.shippingVnd,
+          items: quote.lines.map((line) => ({ item_id: line.slug, item_name: line.product?.name, quantity: line.quantity, price: line.product?.unitPriceVnd })),
+        });
         cart.clear();
         clearDraft();
         router.replace(orderHref(result.data.code));
+        return;
+      }
+      if (result.code === "PRICE_CHANGED") {
+        showToast({ type: "error", title: "Giá vừa thay đổi", desc: "Shop đã cập nhật tổng tiền. Bạn xem lại rồi bấm Đặt hàng lần nữa." });
+        reload();
         return;
       }
       if (result.code === "CART_CHANGED") {
@@ -142,8 +174,10 @@ export function CheckoutForm() {
       }
       const serverErrors: CheckoutErrors = {};
       for (const issue of result.issues ?? []) {
-        const field = issue.path[1] as CheckoutField;
-        if (issue.path[0] === "customer" && fieldOrder.includes(field)) serverErrors[field] = issue.message;
+        if (issue.path[0] !== "customer") continue;
+        // API kiểm địa chỉ đã ghép; lỗi báo vào ô số nhà, tên đường
+        const field = (issue.path[1] === "address" ? "street" : issue.path[1]) as CheckoutField;
+        if (fieldOrder.includes(field)) serverErrors[field] = issue.message;
       }
       setErrors(serverErrors);
       if (Object.keys(serverErrors).length > 0) focusFirst(serverErrors);
@@ -175,25 +209,19 @@ export function CheckoutForm() {
   if (state.status === "error") return <ErrorState title="Chưa tải được giỏ hàng" desc={state.error} onRetry={reload} />;
 
   const { quote } = state;
-  const bind = (field: CheckoutField) => ({
-    value: values[field],
-    disabled: submitting,
-    ref: (el: HTMLInputElement | HTMLTextAreaElement | null) => {
-      refs.current[field] = el;
-    },
-  });
+  const paymentMethod = paymentMethodFor(values, quote);
+  const depositVnd = paymentMethod === "COD" ? quote.payment.deposit?.amountVnd : undefined;
 
   return (
     <form onSubmit={handleSubmit} noValidate className="grid gap-8 lg:grid-cols-12 lg:gap-6">
-      <div className="order-last flex flex-col gap-8 lg:order-first lg:col-span-7">
+      <div className="flex flex-col gap-8 lg:col-span-7">
         {process.env.NODE_ENV === "development" && (
           <DevQuickFill
             disabled={submitting}
-            onFill={(patch) => {
-              const next = { ...values, ...patch };
-              setValues(next);
-              saveDraft(next);
+            onFill={({ address, ...patch }) => {
+              update({ ...patch, provinceCode: null, wardCode: null, street: "" });
               setErrors({});
+              if (address) fillAddress(address);
             }}
           />
         )}
@@ -208,54 +236,46 @@ export function CheckoutForm() {
             </p>
           )}
           <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Họ tên người nhận" error={errors.name}>
-              <Input {...bind("name")} onChange={(e) => update("name", e.target.value)} autoComplete="name" />
+            <Field label="Họ tên người nhận" required error={errors.name}>
+              <Input ref={bindRef("name")} value={values.name} onChange={(e) => update({ name: e.target.value })} autoComplete="name" />
             </Field>
-            <Field label="Số điện thoại" hint="Để shop gọi xác nhận đơn." error={errors.phone}>
-              <Input {...bind("phone")} onChange={(e) => update("phone", e.target.value)} inputMode="tel" autoComplete="tel" placeholder="VD: 0901 234 567" />
+            <Field label="Số điện thoại" required error={errors.phone}>
+              <Input ref={bindRef("phone")} value={values.phone} onChange={(e) => update({ phone: e.target.value })} inputMode="tel" autoComplete="tel" placeholder="VD: 0901 234 567" />
             </Field>
           </div>
-          <Field label="Địa chỉ nhận hàng" hint="Số nhà, đường, phường hoặc xã, quận hoặc huyện, tỉnh." error={errors.address}>
-            <Textarea {...bind("address")} onChange={(e) => update("address", e.target.value)} autoComplete="street-address" rows={3} />
-          </Field>
-          <Field label="Email" optional hint="Shop gửi xác nhận đơn qua email nếu bạn nhập." error={errors.email}>
-            <Input {...bind("email")} onChange={(e) => update("email", e.target.value)} type="email" inputMode="email" autoComplete="email" />
-          </Field>
-          <Field label="Ghi chú cho shop" optional error={errors.note}>
-            <Textarea {...bind("note")} onChange={(e) => update("note", e.target.value)} placeholder="VD: Giao giờ hành chính" />
-          </Field>
+          <AddressFields
+            values={values}
+            provinces={divisions.data}
+            failed={divisions.failed}
+            onRetry={divisions.retry}
+            errors={errors}
+            disabled={submitting}
+            onChange={update}
+            refs={{ province: bindRef("province"), ward: bindRef("ward"), street: bindRef("street") }}
+          />
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Email" error={errors.email}>
+              <Input ref={bindRef("email")} value={values.email} onChange={(e) => update({ email: e.target.value })} type="email" inputMode="email" autoComplete="email" />
+            </Field>
+            <Field label="Ghi chú cho shop" error={errors.note}>
+              <Input ref={bindRef("note")} value={values.note} onChange={(e) => update({ note: e.target.value })} maxLength={500} placeholder="VD: Giao giờ hành chính" />
+            </Field>
+          </div>
         </fieldset>
 
         <RadioGroup
           name="paymentMethod"
           label="Cách thanh toán"
-          value={values.paymentMethod}
-          options={paymentOptions}
-          onChange={(value) => update("paymentMethod", value)}
+          value={paymentMethod}
+          options={paymentOptions(quote.payment, quote.totalVnd)}
+          onChange={(value) => update({ paymentMethod: value })}
           disabled={submitting}
         />
-
-        <div className="flex flex-col gap-6">
-          <Checkbox
-            checked={consent}
-            disabled={submitting}
-            onChange={(e) => setConsent(e.target.checked)}
-            label="Nhận tin nhắc theo dịp lễ qua Zalo hoặc email, tối đa 2 tin mỗi tháng. Bạn huỷ được bất cứ lúc nào."
-          />
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <Button type="submit" size="lg" loading={submitting} disabled={!quote.canCheckout} className="sm:min-w-56">
-              Đặt hàng
-            </Button>
-            {!quote.canCheckout && !quote.preorderClosed && <p className="text-sm text-err">Giỏ có sản phẩm cần sửa. Bạn quay lại giỏ hàng để xem.</p>}
-          </div>
-          <PreorderNote quote={quote} />
-          <p className="text-sm text-ink-3">Shop chỉ dùng tên, số điện thoại và địa chỉ để giao đơn này.</p>
-        </div>
       </div>
 
       <div className="lg:col-span-5">
         <div className="lg:sticky lg:top-24">
-          <OrderSummary quote={quote} busy={state.refreshing}>
+          <OrderSummary quote={quote} busy={state.refreshing} depositVnd={depositVnd}>
             <ul className="flex flex-col gap-2 border-t border-line pt-4 text-sm">
               {quote.lines.map((line) => (
                 <li key={line.slug} className="flex justify-between gap-4">
@@ -265,12 +285,34 @@ export function CheckoutForm() {
                 </li>
               ))}
             </ul>
-            <Button href={cartHref} variant="text" className="mt-3">
-              Sửa giỏ hàng
-            </Button>
+            <div className="mt-5 flex flex-col gap-3">
+              <PreorderNote quote={quote} />
+              {!quote.canCheckout && !quote.preorderClosed && (
+                <p role="alert" className="text-sm text-err">
+                  Giỏ có sản phẩm cần sửa. Bạn quay lại giỏ hàng để xem.
+                </p>
+              )}
+              <Button type="submit" size="lg" block loading={submitting} disabled={!quote.canCheckout}>
+                Đặt hàng
+              </Button>
+              <p className="text-sm text-ink-3">
+                Bạn huỷ được tới khi shop xác nhận đơn.{" "}
+                <Link href={`${policyHref}#huy-don`} className="text-wood underline-offset-4 hover:underline">
+                  Chính sách huỷ đơn
+                </Link>
+              </p>
+              <Button href={cartHref} variant="text" className="self-start">
+                Sửa giỏ hàng
+              </Button>
+            </div>
           </OrderSummary>
         </div>
       </div>
     </form>
   );
+}
+
+// Shop chưa có tài khoản ngân hàng mà bản nháp cũ chọn chuyển khoản thì về trả khi nhận hàng
+function paymentMethodFor(values: CheckoutValues, quote: { payment: { bankTransfer: boolean } }) {
+  return values.paymentMethod === "BANK_TRANSFER" && !quote.payment.bankTransfer ? "COD" : values.paymentMethod;
 }

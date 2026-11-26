@@ -50,26 +50,22 @@ export function CartView() {
     <div className="grid gap-8 lg:grid-cols-12 lg:gap-6">
       <ul aria-label="Sản phẩm trong giỏ" className="divide-y divide-line border-y border-line lg:col-span-7">
         {quote.lines.map((line) => (
-          <CartLine key={line.slug} line={line} />
+          <CartLine key={line.slug} line={line} preorder={quote.preorder} />
         ))}
       </ul>
       <div className="lg:col-span-5">
         <div className="lg:sticky lg:top-24">
           <OrderSummary quote={quote} busy={refreshing}>
+            <PreorderNote quote={quote} className="mb-3" />
             {quote.canCheckout ? (
               <Button href={checkoutHref} size="lg" block>
-                Đặt hàng
+                Thanh toán
               </Button>
-            ) : (
-              <>
-                <Button size="lg" block disabled>
-                  Đặt hàng
-                </Button>
-                {!quote.preorderClosed && <p className="mt-2 text-sm text-err">Bạn sửa các sản phẩm được đánh dấu trong giỏ trước khi đặt hàng.</p>}
-              </>
+            ) : quote.preorderClosed ? null : (
+              <p role="alert" className="text-sm text-err">
+                Bạn sửa các sản phẩm được đánh dấu trong giỏ trước khi thanh toán.
+              </p>
             )}
-            <p className="mt-3 text-sm text-ink-3">Không cần tạo tài khoản. Shop gọi xác nhận trước khi giao.</p>
-            <PreorderNote quote={quote} className="mt-3" />
           </OrderSummary>
         </div>
       </div>

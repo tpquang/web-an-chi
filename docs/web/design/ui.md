@@ -10,14 +10,14 @@
 | `/chu-de/[slug]` | Chủ đề bài viết | List | |
 | `/bai-viet/[slug]` | Bài viết | Read | Mục lục khi bài trên 1.200 chữ, sản phẩm trong bài, bài cùng chủ đề |
 | `/gio-hang` | Giỏ hàng | App | noindex, footer không có link ra sàn |
-| `/thanh-toan` | Đặt hàng | App | noindex, COD hoặc chuyển khoản |
-| `/don-hang/[code]` | Đơn đã đặt | App | noindex, thông tin chuyển khoản, việc tiếp theo |
-| `/tra-cuu-don-hang` | Tra cứu đơn | App | noindex, cần mã đơn và số điện thoại |
+| `/thanh-toan` | Đặt hàng | App | noindex. Trái: người nhận, địa chỉ ba ô, email và ghi chú, cách thanh toán; ô bắt buộc có sao đỏ, không có dòng gợi ý dưới ô, lỗi chỉ hiện khi bấm Đặt hàng. Phải: tóm tắt đơn có nút Đặt hàng (dính khi cuộn; điện thoại nằm cuối form). Không có ô nhận tin tiếp thị |
+| `/don-hang/[code]` | Đơn đã đặt | App | noindex. Khối trạng thái (`components/order/order-status.tsx`): tiến trình 4 bước, hạn chuyển khoản, mã vận đơn, câu chính sách huỷ theo trạng thái, nút Huỷ đơn mở form tại chỗ (lý do chọn sẵn, số điện thoại). Thông tin chuyển khoản có hạn; việc tiếp theo chỉ khi đơn còn chờ |
+| `/tra-cuu-don-hang` | Tra cứu đơn | App | noindex, cần mã đơn và số điện thoại. Cùng khối trạng thái, huỷ không hỏi lại số điện thoại |
 | `/gioi-thieu` | Giới thiệu | Read | Nguyên tắc bán hàng, giao hàng, liên hệ. Chỉ nêu điều kiểm tra được |
 | `/dang-nhap`, `/dang-ky` | Đăng nhập, tạo tài khoản | App | noindex, số điện thoại và mật khẩu |
 | `/tai-khoan` | Tài khoản | App | noindex, đơn đã đặt, sửa thông tin giao hàng |
 
-**`components/ui`:** `Button` (thêm variant `light`), `IconButton`, `Modal`, `Badge`, `Field`, `Input`, `Textarea`, `Checkbox`, `RadioGroup`, `QuantityInput`, `Price`, `Tag`, `Toast`, `Spinner`, `Skeleton`, `EmptyState`, `ErrorState`, `Alert`, `PageFrame`, `PageHeader`, `Section` (có `eyebrow`), `Eyebrow`, `PageBreadcrumb`, `Pagination`.
+**`components/ui`:** `Button` (thêm variant `light`), `IconButton`, `Select` (có ô tìm không dấu), `Badge`, `Field`, `Input`, `Textarea`, `Checkbox`, `RadioGroup`, `QuantityInput`, `Price`, `Tag`, `Toast`, `Spinner`, `Skeleton`, `EmptyState`, `ErrorState`, `PageFrame`, `PageHeader`, `Section` (có `eyebrow`), `Eyebrow`, `PageBreadcrumb`, `Pagination`.
 
 **Header:** logo, Giới thiệu, Sản phẩm, Bài viết, Giỏ hàng, Đăng nhập hoặc Tài khoản, đổi theme. Dưới 720px còn logo, giỏ và nút mở menu dạng drawer (`MobileMenu`). Header dính ở mọi độ rộng.
 
@@ -25,15 +25,19 @@
 
 **Thành phần bán hàng:** `ProductCard`, `ProductGrid`, `ProductImage` (ô có dấu logo khi chưa có ảnh thật), `AddToCart`, `CartButton`, `CartLine`, `OrderSummary`, `MarketplaceLinks`, `PostCard`, `TopicNav`, `PostBody`.
 
-**Chờ ngày mở bán (tạm thời, tới 12/12/2026):** giờ mở bán ở `lib/launch.ts`, đổi bằng `NEXT_PUBLIC_LAUNCH_AT` rồi build lại. Trước giờ này: `src/proxy.ts` chuyển tạm (307, đang tắt bằng `REDIRECT_TO_COUNTDOWN = false` để test) `/san-pham`, `/san-pham/*`, `/danh-muc/*` về `/countdown` (trang đếm ngược, noindex); trang chủ ẩn khối sản phẩm nổi bật và có khối đếm ngược dưới banner (`HomeLaunch`); `/thiet-ke-vong-tay` có dải đếm ngược đầu trang (`LaunchStrip`). Dải đếm ngược ở trang danh sách và khối thay nút mua ở trang sản phẩm vẫn còn trong code, phòng khi bỏ chuyển hướng; trang thiết kế vòng vẫn cho phối hạt, xem giá nhưng không có nút thêm vào giỏ; `POST /api/orders` trả 403. Server tính trạng thái lúc dựng trang, `LaunchGate` ở trình duyệt tự mở đúng giờ nên không cần deploy lại vào ngày mở bán. Các trang nội dung, tài khoản, tra cứu đơn, chat không đổi. Sau ngày mở bán gỡ `components/launch` và các chỗ gọi.
+**Chờ ngày mở bán:** giờ mở bán sửa ở CMS > Thông tin cửa hàng, mục Mở bán và đặt chờ (`launchAt` trong setting `store`, trống là đã mở bán). Root layout đọc qua `getStore` (cache 60 giây) rồi đưa xuống `LaunchProvider`; component client dùng `useLaunch`, `useLaunchLabel`, server dùng `launchAtOf`, `isPreLaunch` ở `lib/launch.ts`. Trước giờ này: trang chủ ẩn khối sản phẩm nổi bật và có khối đếm ngược dưới banner (`HomeLaunch`); `/san-pham`, `/danh-muc/*`, `/thiet-ke-vong-tay` có dải đếm ngược (`LaunchStrip`); trang sản phẩm có khối `ProductLaunchPanel` thay khối mua, Product schema ghi `PreOrder`. Cờ "Chuyển trang sản phẩm về đếm ngược" (`countdownRedirect`) bật thì `src/proxy.ts` chuyển tạm (307) `/san-pham`, `/san-pham/*`, `/danh-muc/*` về `/countdown` (noindex); proxy tự đọc cài đặt, nhớ 60 giây. API tự quyết đơn là đơn đặt chờ theo cùng giờ này. `LaunchGate` ở trình duyệt tự mở đúng giờ nên không cần deploy vào ngày mở bán; sau giờ mở bán `/countdown` chuyển 308 về trang chủ. Các trang nội dung, tài khoản, tra cứu đơn, chat không đổi.
 
-**Giỏ hàng dạng bảng (11/2026):** nút giỏ trên header mở `CartDrawer` bên phải; lưu vòng tự thiết kế cũng mở bảng này. Trang `/gio-hang` giữ nguyên cho xem đầy đủ.
+**Giỏ hàng dạng bảng (11/2026):** `CartLayer` ở root layout. Mọi nút giỏ (header, tab mờ cạnh phải màn máy tính, menu điện thoại) và mọi lần thêm vào giỏ đều mở bảng trượt từ phải; đóng thì trượt ra, điện thoại vuốt sang phải để đóng. Nút "Thanh toán" ở đáy bảng. Trước ngày mở bán, khi nhận đặt chờ, trang sản phẩm và giỏ không giới hạn số lượng theo tồn kho (tối đa 99 mỗi dòng). Quy cách ở skill `anchi-ui-ux` `components.md` mục Drawer. Trang `/gio-hang` giữ nguyên cho xem đầy đủ.
 
 **Thiết kế vòng `/thiet-ke-vong-tay`:** điện thoại vào bằng form khởi tạo theo bước (`BraceletSetup`), máy tính có hàng cài đặt gọn `SetupBar` trên khu thiết kế. Bố cục chi tiết ở skill `anchi-ui-ux` `layout.md` mục Thiết kế vòng tay.
 
 **Đặt chờ:** không có nút hay form riêng. Trước ngày mở bán (CMS bật đặt chờ) trang sản phẩm và thiết kế vòng vẫn có nút thêm vào giỏ; `PreorderNote` (`components/cart/preorder-note.tsx`) hiện dưới giỏ hàng, bảng giỏ và trang thanh toán.
 
+**Đặt cọc:** cách thanh toán ở trang thanh toán lấy từ báo giá (`quote.payment`, `paymentOptions` ở `lib/order.ts`): chưa có tài khoản ngân hàng thì chỉ có trả khi nhận hàng; đơn phải cọc thì lựa chọn trả khi nhận hàng đổi thành "Đặt cọc N%, còn lại trả khi nhận hàng", ghi rõ hai số tiền. Trang đơn và tra cứu đơn hiện khối "Chuyển khoản tiền cọc" với đúng số tiền cọc. Quy tắc ở `anchi-growth` mục 6b.
+
 **Chat với shop:** nút "Nhắn shop" góc phải dưới (`ChatLauncher`), khung chat chỉ tải khi mở. Ẩn ở giỏ và đặt hàng nếu khách chưa từng chat, để khu đặt hàng gọn. Khách điền tên, số điện thoại (không bắt buộc) và câu hỏi; đã đăng nhập thì điền sẵn.
+
+**Địa chỉ nhận hàng (11/2026):** theo địa giới từ 01/07/2025, không còn quận, huyện: Tỉnh, thành phố → Phường, xã (hai `Select` có tìm không dấu) → Số nhà, tên đường. Dữ liệu tĩnh `public/data/dia-gioi-2025.json` (34 tỉnh, 3.321 xã, nguồn provinces.open-api.vn v2, khoảng 26 KB nén), tải ở trang thanh toán qua `lib/address.ts`. Gửi API vẫn là một chuỗi "số nhà đường, xã, tỉnh"; địa chỉ đã lưu ở tài khoản được tách lại nếu khớp đúng tên xã và tỉnh, không khớp thì để khách chọn. Sửa danh sách khi Nhà nước đổi địa giới.
 
 **Giỏ hàng:** chỉ lưu slug và số lượng trong `localStorage` (`lib/cart.ts`); giá và tồn kho luôn hỏi lại API. Dữ liệu form đặt hàng giữ trong `sessionStorage` của tab, đóng tab thì mất.
 

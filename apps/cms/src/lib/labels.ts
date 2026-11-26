@@ -1,6 +1,8 @@
 export type PublishStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
-export type OrderStatus = "PREORDER" | "PENDING" | "CONFIRMED" | "SHIPPING" | "COMPLETED" | "CANCELLED";
-export type PaymentStatus = "UNPAID" | "PAID" | "REFUNDED";
+export type OrderStatus = "PREORDER" | "PENDING" | "CONFIRMED" | "SHIPPING" | "COMPLETED" | "CANCELLED" | "RETURNED";
+export type CancelActor = "CUSTOMER" | "STAFF" | "SYSTEM";
+export type OrderEventType = "CREATED" | "STATUS" | "PAYMENT" | "REFUND" | "NOTE";
+export type PaymentStatus = "UNPAID" | "DEPOSITED" | "PAID" | "REFUNDED";
 export type PaymentMethod = "COD" | "BANK_TRANSFER";
 export type ProductType = "RETAIL" | "SUPPLY" | "CUSTOM";
 
@@ -49,12 +51,32 @@ export const orderStatus: Record<OrderStatus, { label: string; tone: Tone }> = {
   PENDING: { label: "Chờ xác nhận", tone: "warn" },
   CONFIRMED: { label: "Đã xác nhận", tone: "info" },
   SHIPPING: { label: "Đang giao", tone: "info" },
-  COMPLETED: { label: "Hoàn tất", tone: "ok" },
+  COMPLETED: { label: "Đã giao", tone: "ok" },
   CANCELLED: { label: "Đã huỷ", tone: "neutral" },
+  // Khách không nhận hoặc trả lại: kho đã cộng lại, không tính doanh thu
+  RETURNED: { label: "Hoàn hàng", tone: "err" },
 };
+
+export const cancelActor: Record<CancelActor, string> = { CUSTOMER: "Khách huỷ", STAFF: "Shop huỷ", SYSTEM: "Hệ thống huỷ" };
+
+// Nút chuyển trạng thái ở chi tiết đơn, theo trạng thái đích
+export const transitionAction: Partial<Record<OrderStatus, { label: string; desc: string }>> = {
+  PENDING: { label: "Chuyển sang chờ xác nhận", desc: "Trừ kho theo đơn." },
+  CONFIRMED: { label: "Xác nhận đơn", desc: "Đã gọi khách chốt đơn. Hệ thống thôi đếm hạn thanh toán." },
+  SHIPPING: { label: "Giao cho vận chuyển", desc: "Ghi đơn vị vận chuyển và mã vận đơn để khách tra cứu." },
+  COMPLETED: { label: "Đã giao xong", desc: "Đơn trả khi nhận hàng được ghi đã thu đủ." },
+  RETURNED: { label: "Hoàn hàng", desc: "Khách không nhận hoặc trả lại. Kho được cộng lại." },
+};
+
+// Lý do huỷ chọn nhanh, vẫn sửa được
+export const cancelReasons = ["Khách đổi ý", "Không liên lạc được khách", "Khách không chuyển khoản", "Hết hàng", "Sai thông tin giao hàng", "Khách đặt trùng đơn"];
+
+// Đơn vị vận chuyển hay dùng, ô vẫn gõ được tên khác
+export const carriers = ["Giao Hàng Tiết Kiệm", "Giao Hàng Nhanh", "Viettel Post", "J&T Express", "Ninja Van", "VNPost", "Shop tự giao"];
 
 export const paymentStatus: Record<PaymentStatus, { label: string; tone: Tone }> = {
   UNPAID: { label: "Chưa thanh toán", tone: "warn" },
+  DEPOSITED: { label: "Đã nhận cọc", tone: "info" },
   PAID: { label: "Đã thanh toán", tone: "ok" },
   REFUNDED: { label: "Đã hoàn tiền", tone: "neutral" },
 };

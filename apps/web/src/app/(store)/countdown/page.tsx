@@ -1,26 +1,28 @@
 import { LaunchCountdown, LaunchGate } from "@/components/launch/launch-clock";
 import { Button } from "@/components/ui/button";
 import { Eyebrow, PageFrame } from "@/components/ui/layout";
-import { countdownHref, isPreLaunch, launchDateLabel } from "@/lib/launch";
+import { getStore } from "@/lib/api";
+import { countdownHref, launchAtOf, launchLabel } from "@/lib/launch";
 import { braceletHref, postsHref, productsHref } from "@/lib/links";
 import { pageMeta } from "@/lib/seo";
 
 // Trang tạm, không cho index
-export function generateMetadata() {
+export async function generateMetadata() {
+  const launchDateLabel = launchLabel(launchAtOf(await getStore()));
   return pageMeta({
     title: "Chờ ngày mở bán",
-    description: `An Chi Trầm Hương nhận đơn từ ngày ${launchDateLabel}.`,
+    description: `An Chi Trầm Hương mở bán ngày ${launchDateLabel}. Trong lúc chờ, bạn đặt chờ sản phẩm, thử thiết kế vòng tay trầm hương hoặc đọc bài viết về trầm.`,
     path: countdownHref,
     noindex: true,
   });
 }
 
-export default function CountdownPage() {
+export default async function CountdownPage() {
+  const launchDateLabel = launchLabel(launchAtOf(await getStore()));
   return (
     <PageFrame>
       <section aria-labelledby="mo-ban" className="mt-6 rounded-3xl bg-surface p-6 md:mt-10 lg:p-12">
         <LaunchGate
-          initialOpen={!isPreLaunch()}
           waiting={
             <>
               <Eyebrow>Sắp mở bán</Eyebrow>

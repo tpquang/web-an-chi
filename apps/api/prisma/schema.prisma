@@ -14,14 +14,32 @@ enum PublishStatus {
 }
 
 enum OrderStatus {
-  // Đặt chờ: khách đặt trước ngày mở bán, chỉ cần tên và số điện thoại. Chưa trừ kho;
-  // shop gọi lại rồi chuyển sang trạng thái khác thì mới trừ kho
+  // Đặt chờ ("Chờ chuẩn bị"): khách đặt trước ngày mở bán. Chưa trừ kho;
+  // shop chuyển sang trạng thái khác thì mới trừ kho
   PREORDER
   PENDING
   CONFIRMED
   SHIPPING
   COMPLETED
   CANCELLED
+  // Giao không thành (khách không nhận) hoặc khách trả lại sau khi nhận. Trả kho, không tính doanh thu
+  RETURNED
+}
+
+// Ai huỷ đơn
+enum CancelActor {
+  CUSTOMER
+  STAFF
+  SYSTEM
+}
+
+// Loại dòng trong lịch sử đơn
+enum OrderEventType {
+  CREATED
+  STATUS
+  PAYMENT
+  REFUND
+  NOTE
 }
 
 enum PaymentMethod {
@@ -31,6 +49,8 @@ enum PaymentMethod {
 
 enum PaymentStatus {
   UNPAID
+  // Đã nhận tiền cọc, phần còn lại thu khi giao
+  DEPOSITED
   PAID
   REFUNDED
 }
@@ -91,6 +111,8 @@ model Product {
   origin            String?
   // Hiện ở mục sản phẩm nổi bật trang chủ, tối đa 4 sản phẩm
   featured          Boolean            @default(false)
+  // Hàng đặt làm hoặc giá trị cao: đơn có sản phẩm này phải đặt cọc (khi shop bật cọc theo sản phẩm)
+  requiresDeposit   Boolean            @default(false)
   // Link gian hàng của chính sản phẩm này trên sàn, để trống nếu không bán ở đó
   // Mô hình 3D xem cạnh ảnh ở trang sản phẩm. Để trống thì chỉ có ảnh
   model3d           Product3DModel?
@@ -220,10 +242,25 @@ model Order {
   subtotalVnd     Int
   shippingVnd     Int
   totalVnd        Int
+  // Tiền cọc khách chuyển khoản trước (đơn trả khi nhận hàng lúc shop bật đặt cọc). 0 là không cọc
+  depositVnd      Int           @default(0)
   paymentMethod   PaymentMethod
   paymentStatus   PaymentStatus @default(UNPAID)
   // Ngày nhận tiền thật, nhập tay khi đối soát
   paidAt          DateTime?
+  // Tổng tiền shop đã nhận (cọc, chuyển khoản, tiền thu hộ). paymentStatus suy ra từ số này
+  paidVnd         Int           @default(0)
+  // Hạn chuyển khoản (cả đơn hoặc tiền cọc). Quá hạn chưa nhận tiền thì hệ thống tự huỷ. Trống là không có hạn
+  paymentDueAt    DateTime?
+  // Tiền phải hoàn cho khách khi huỷ, hoàn hàng. refundedAt có giá trị là đã hoàn xong
+  refundVnd       Int           @default(0)
+  refundedAt      DateTime?
+  cancelReason    String?
+  cancelledBy     CancelActor?
+  // Đơn vị vận chuyển và mã vận đơn, nhập khi giao cho vận chuyển
+  carrier         String?
+  trackingCode    String?
+  events          OrderEvent[]
   status          OrderStatus   @default(PENDING)
   channel         SalesChannel  @default(WEB)
   // Mã đơn bên sàn, để đối soát
@@ -242,6 +279,24 @@ model Order {
 
   @@index([status, createdAt])
   @@index([customerId])
+  @@index([paymentDueAt])
+}
+
+// Lịch sử đơn: ai làm gì, lúc nào. actor là tên nhân viên, "Khách" hoặc "Hệ thống"
+model OrderEvent {
+  id         String         @id @default(cuid())
+  orderId    String
+  order      Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  type       OrderEventType
+  fromStatus OrderStatus?
+  toStatus   OrderStatus?
+  amountVnd  Int?
+  note       String?
+  actor      String
+  staffId    String?
+  createdAt  DateTime       @default(now())
+
+  @@index([orderId, createdAt])
 }
 
 model OrderItem {

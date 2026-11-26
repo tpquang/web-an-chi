@@ -4,6 +4,7 @@ import { useRef, useState, type FormEvent } from "react";
 import type { OrderSummary } from "@/lib/api";
 import { normalizePhone } from "@/lib/checkout";
 import { postJson } from "@/lib/client-api";
+import { OrderStatusCard } from "./order/order-status";
 import { BankTransferBox, OrderDetails } from "./order-details";
 import { Button } from "./ui/button";
 import { Field, Input } from "./ui/field";
@@ -66,7 +67,8 @@ export function OrderLookupForm() {
       </form>
       {order && (
         <div aria-live="polite" className="flex flex-col gap-6 lg:col-span-5">
-          {order.payment && <BankTransferBox payment={order.payment} totalVnd={order.totalVnd} />}
+          <OrderStatusCard order={order} phone={normalizePhone(phone)} onChange={(next) => setOrder({ ...order, ...next })} />
+          {order.payment && <BankTransferBox payment={order.payment} dueAt={order.paymentDueAt} />}
           <OrderDetails order={order} />
         </div>
       )}

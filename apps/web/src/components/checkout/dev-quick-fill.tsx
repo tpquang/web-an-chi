@@ -6,7 +6,7 @@ import type { CheckoutValues } from "@/lib/checkout";
 type SampleCustomer = { name: string; phone: string; email?: string; address?: string };
 
 // Nút điền nhanh khách mẫu để test giao diện. Bản build production không render khối này
-export function DevQuickFill({ onFill, disabled }: { onFill: (values: Partial<CheckoutValues>) => void; disabled?: boolean }) {
+export function DevQuickFill({ onFill, disabled }: { onFill: (values: Partial<CheckoutValues> & { address?: string }) => void; disabled?: boolean }) {
   const [customers, setCustomers] = useState<SampleCustomer[]>([]);
 
   useEffect(() => {

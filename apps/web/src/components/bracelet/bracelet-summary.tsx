@@ -1,11 +1,11 @@
 "use client";
 
 import { beadTitle, cm } from "@/lib/bracelet";
-import { launchDateLabel } from "@/lib/launch";
 import { formatVnd } from "@/lib/site";
 import { useState } from "react";
 import { MinusIcon, PlusIcon, SlidersIcon } from "../icons";
 import { Button } from "../ui/button";
+import { useLaunchLabel } from "../launch/launch-clock";
 import { BraceletAccent, BraceletNotes, FitChoice } from "./bracelet-options";
 import type { BraceletState } from "./use-bracelet";
 
@@ -104,6 +104,7 @@ export function WristSize({ state, compact }: { state: BraceletState; compact?: 
 // Cột trái máy tính, dưới kho hạt: hạt chủ, cổ tay, rồi chốt vòng (tạm tính, nút lưu vào giỏ), ghi chú, chi tiết hạt
 export function BraceletSummary({ state, salesOpen, preorder }: { state: BraceletState; salesOpen: boolean; preorder: boolean }) {
   const { lines, rules, totalVnd, addToCart, gift, note } = state;
+  const launchDateLabel = useLaunchLabel();
   // Dòng tóm tắt dưới tiêu đề Ghi chú để khách thấy đã chọn gì mà không cần mở
   const noteSummary = [
     rules.cords.find((c) => c.id === state.cord)?.name,

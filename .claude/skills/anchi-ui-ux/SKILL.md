@@ -53,6 +53,7 @@ Mọi khối trong trang chung mép trái với tiêu đề trang. Không căn g
 - Ô nhập luôn có padding ngang 12px. Khối bọc có padding thì bo góc trong và ngoài phải đồng bộ theo `foundations.md`.
 - Mỗi màn hình một nút primary. Lời mời phụ dùng nút viền hoặc link chữ.
 - Có `href` thì là link, không có thì là `<button type="button">`.
+- Mọi thứ bấm được có con trỏ bàn tay, bị khoá thì `not-allowed`. Luật chung ở `@layer base` cuối `design/tailwind-theme.css` (button, role button/switch/option/tab, summary, checkbox, radio và label bọc chúng), không cần thêm `cursor-pointer` từng nơi. Kéo thả dùng `cursor-grab`.
 - Dropdown không dùng `<select>` native. Ngày giờ không dùng `<input type="date">`, `datetime-local`, `time`.
 - Modal và panel nổi render qua portal vào `document.body`: `transform`, `filter`, `backdrop-filter` ở cha sẽ làm `position: fixed` bám sai chỗ.
 - Thành phần chỉ hiện sau tương tác thì chỉ render khi mở, để HTML server ổn định.

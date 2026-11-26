@@ -44,3 +44,24 @@
   --breakpoint-lg: 960px;
   --breakpoint-xl: 1180px;
 }
+
+/* Con trỏ bàn tay cho mọi thứ bấm được (Tailwind 4 để cursor: default cho button). Nằm ở lớp base nên class như cursor-grab vẫn thắng */
+@layer base {
+  button,
+  [role="button"],
+  [role="switch"],
+  [role="option"],
+  [role="tab"],
+  [role="menuitem"],
+  summary,
+  select,
+  input:is([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="submit"], [type="button"]),
+  label:has(input:is([type="checkbox"], [type="radio"]):not(:disabled)) {
+    cursor: pointer;
+  }
+  :is(button, [role="button"], [role="switch"], [role="option"], input, select):disabled,
+  [aria-disabled="true"],
+  label:has(input:is([type="checkbox"], [type="radio"]):disabled) {
+    cursor: not-allowed;
+  }
+}

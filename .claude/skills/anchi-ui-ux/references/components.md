@@ -65,6 +65,8 @@ Chỉ dùng cho slide giới thiệu trang chủ (`IntroSlider`). Không dùng s
 
 ## Select
 
+Web và CMS mỗi bên một bản (`components/ui/select.tsx`, `Select.tsx`), cùng hành vi. Web bo `rounded-xl` như ô nhập, dùng cho tỉnh, phường xã ở trang thanh toán.
+
 Thay `<select>` native. Panel render qua portal nên không bị `overflow: hidden` cắt, tự mở lên khi phía dưới thiếu chỗ.
 
 | Prop | Ghi chú |
@@ -122,9 +124,15 @@ Web: `components/ui/modal.tsx` (11/2026). Dưới 720px là sheet trượt từ 
 
 Trượt từ cạnh, rộng `min(360px, 88vw)`, cộng thêm `env(safe-area-inset-*)`. Đóng bằng nút đóng, bấm nền, Esc hoặc chọn link. Trên trang có header `backdrop-filter`, drawer phải render ngoài `<header>`.
 
-**Giỏ hàng (11/2026):** nút giỏ trên header là `<button>` mở `CartDrawer` từ phải, rộng `min(440px, 92vw)`, lớp `--z-modal` (nằm trên sheet thiết kế vòng vì gắn sau trong body). Trạng thái mở ở `lib/cart-drawer.ts`; nơi nào lưu hàng vào giỏ mà cần khách thấy ngay thì gọi `openCartDrawer()` thay toast. Trong bảng: dòng hàng (`CartLine`), tạm tính, nút chính "Đặt hàng", nút viền "Xem giỏ hàng". Trang `/gio-hang` vẫn giữ.
+**Giỏ hàng (11/2026):** `CartLayer` (`components/cart/cart-drawer.tsx`) gắn một lần ở root layout, ngoài header: gồm bảng giỏ và tab cạnh phải. Trạng thái ở `lib/cart-drawer.ts` có ba pha `closed`, `open`, `closing`; `closeCartDrawer()` cho bảng trượt ra (`--d-slow`, `--ease-exit`) rồi mới gỡ khỏi DOM.
 
-**Nút chat khi giỏ mở:** từ 720px nút "Nhắn shop" nổi lên `--z-popover`, dời sang trái bảng giỏ; dưới 720px ẩn nút nổi, đáy bảng giỏ có link "Nhắn shop". Bấm thì đóng giỏ rồi mở chat (`openChatFromCart`), không để khung chat nằm dưới bảng.
+- **Mở từ mọi nơi:** nút giỏ trên header, tab cạnh phải, mục "Giỏ hàng" trong menu điện thoại đều gọi `openCartDrawer()`, không sang trang. Thêm vào giỏ (trang sản phẩm, lưu vòng tự thiết kế) cũng tự mở bảng, không dùng toast.
+- **Tab cạnh phải:** chỉ từ `lg` (960px), giữa chiều cao màn hình, `--z-sticky`. Mờ `opacity-50` khi nghỉ, rê chuột hoặc focus thì 100% và trượt ra 4px. Ẩn khi bảng đang mở, ở `/gio-hang` và `/thanh-toan`. Ngoại lệ tương phản AA khi mờ do yêu cầu trực tiếp (11/2026); focus bàn phím luôn rõ 100%.
+- **Bảng:** trượt vào `--d-page` `--ease-ios`. Điện thoại kín bề ngang, từ `sm` rộng `min(440px, 92vw)` bo trái `rounded-l-3xl`. Lớp `--z-modal`. Đóng bằng nút X, Esc, bấm nền, vuốt sang phải (điện thoại, quá 96px hoặc vuốt nhanh). Giữ Tab trong bảng, focus nút đóng khi mở, trả focus khi gỡ.
+- **Bố cục:** đầu bảng là tiêu đề có số lượng, nút "Nhắn shop" (dưới `md`) và nút đóng. Giữa cuộn được: dòng hàng (`CartLine`), `PreorderNote`, link "Xem giỏ hàng đầy đủ". Đáy luôn dính dưới cùng: tạm tính, câu về phí giao, nút chính "Thanh toán" là nút cuối cùng, chừa `env(safe-area-inset-bottom)`.
+- Trang `/gio-hang` vẫn giữ.
+
+**Nút chat khi giỏ mở:** từ 720px nút "Nhắn shop" nổi lên `--z-popover`, dời sang trái bảng giỏ; dưới 720px ẩn nút nổi, đầu bảng giỏ có nút icon "Nhắn shop". Bấm thì đóng giỏ rồi mở chat (`openChatFromCart`), không để khung chat nằm dưới bảng.
 
 ## Trạng thái
 
@@ -153,8 +161,9 @@ Phép thử: nhãn đọc như "hiện cái gì" thì dùng checkbox, đọc nh�
 | `Price` | `Intl.NumberFormat('vi-VN')`, không xuống dòng. Giá gốc gạch ngang 14px `ink-3`, chỉ khi có thật |
 | `QuantityInput` | Hai nút 44px và ô số, không vượt tồn kho, nói rõ khi chạm giới hạn |
 | `CartLine` | Ảnh 72px, tên, đơn giá, số lượng, thành tiền căn phải, nút xoá có nhãn |
-| `OrderSummary` | Tạm tính, phí giao, tổng. Tổng serif 600 và `aria-live="polite"` |
-| `PreorderButton`, `PreorderDialog` | Trước ngày mở bán và khi CMS bật đặt chờ: nút "Đặt chờ" thay nút mua, mở modal hỏi họ tên, số điện thoại, ghi chú. Xong hiện mã đơn và câu shop sẽ gọi lại, không chuyển trang. Quy tắc ở `anchi-growth` mục Đặt chờ |
+| `OrderSummary` | Tạm tính, phí giao, tổng. Tổng serif 600 và `aria-live="polite"`. Trang thanh toán truyền `depositVnd` khi đơn phải cọc: thêm dòng cọc trước và trả khi nhận |
+| `PreorderNote` | Ghi chú dưới giỏ, bảng giỏ, trang thanh toán trước ngày mở bán: "Đơn đặt chờ" hoặc báo shop chưa nhận đơn. Quy tắc ở `anchi-growth` mục 6a |
+| `LaunchProvider`, `useLaunch`, `useLaunchLabel` | Giờ mở bán từ cài đặt cửa hàng, nạp ở root layout. Component client đọc qua đây, không tự tính ngày |
 
 ## Bố cục trang
 

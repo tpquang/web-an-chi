@@ -27,7 +27,7 @@ type Values = Omit<Product, "id" | "specs" | "images" | "priceVnd"> & {
 
 const empty: Values = {
   name: "", slug: "", summary: "", description: "", usage: "", specs: [], priceVnd: null, compareAtPriceVnd: null,
-  type: "RETAIL", stock: 0, origin: "", featured: false, model3d: null, shopeeUrl: "", tiktokUrl: "", status: "DRAFT", metaTitle: "", metaDescription: "", noindex: false, ogTitle: "", ogDescription: "", ogImageUrl: "",
+  type: "RETAIL", stock: 0, origin: "", featured: false, requiresDeposit: false, model3d: null, shopeeUrl: "", tiktokUrl: "", status: "DRAFT", metaTitle: "", metaDescription: "", noindex: false, ogTitle: "", ogDescription: "", ogImageUrl: "",
   categoryId: "", images: [],
 };
 
@@ -179,6 +179,7 @@ export function ProductFormPage() {
                 </div>
               )}
               <Switch checked={values.featured} onChange={(v) => set("featured", v)} label="Nổi bật ở trang chủ, tối đa 4 sản phẩm" disabled={submitting} />
+              <Switch checked={values.requiresDeposit} onChange={(v) => set("requiresDeposit", v)} label="Cần đặt cọc (hàng đặt làm, giá trị cao)" disabled={submitting} />
             </div>
           </Panel>
           <Panel title="Kênh bán khác">

@@ -1,6 +1,7 @@
 import { randomInt } from "node:crypto";
 import { z } from "zod";
 import {
+  OrderEventType,
   OrderStatus,
   PaymentMethod,
   Prisma,
@@ -9,7 +10,7 @@ import {
 import { prisma } from "../../lib/prisma.js";
 import { sellableProduct } from "../../lib/pricing.js";
 import { applyStock, stockNeeds, unitCosts, withLiveStock, type StockItem } from "../../lib/stock.js";
-import { getStore, preorderOn, shippingFee } from "../../lib/store.js";
+import { depositFor, getStore, holdHours, isPreLaunch, preorderOn, shippingFee } from "../../lib/store.js";
 import { HttpError } from "../../middleware/errors.js";
 import {
   activeBeads,
@@ -21,6 +22,7 @@ import {
   maxBuildable,
   priceBracelet,
 } from "../bracelet/bracelet.service.js";
+import { logEvent } from "./order-flow.js";
 
 export const cartItems = z
   .array(
@@ -61,8 +63,8 @@ export const checkoutInput = z.object({
   marketingConsent: z.boolean().default(false),
   paymentMethod: z.enum(PaymentMethod),
   items: cartItems,
-  // Đặt chờ trước ngày mở bán (web tự gắn theo ngày mở bán): đơn vào trạng thái "Chờ chuẩn bị", chưa trừ kho
-  preorder: z.boolean().optional(),
+  // Tổng tiền khách thấy ở trang thanh toán. Giá đổi trong lúc khách điền form thì báo lại, không tự tính giá mới
+  expectedTotalVnd: z.number().int().min(0).optional(),
 });
 
 // Hết hàng, thiếu hàng không chặn đơn đặt chờ: đơn chưa trừ kho, shop nhập thêm trước ngày giao
@@ -82,7 +84,7 @@ function mergeItems(items: CartItems) {
 
 type LineProblem = "UNAVAILABLE" | "OUT_OF_STOCK" | "NOT_ENOUGH";
 
-export async function quoteCart(items: CartItems, options: { preorder?: boolean } = {}) {
+export async function quoteCart(items: CartItems) {
   const wanted = mergeItems(items);
   const beadSlugs = [...new Set(wanted.flatMap((item) => item.design?.beads ?? []))];
   const [products, beads, store] = await Promise.all([
@@ -148,8 +150,9 @@ export async function quoteCart(items: CartItems, options: { preorder?: boolean 
     };
   });
 
-  // Đặt chờ chỉ có hiệu lực khi shop bật nhận đặt chờ ở CMS
-  const preorder = Boolean(options.preorder) && preorderOn(store);
+  // Trước giờ mở bán (CMS > Thông tin cửa hàng) đơn là đơn đặt chờ, nếu shop bật nhận đặt chờ
+  const preLaunch = isPreLaunch(store);
+  const preorder = preLaunch && preorderOn(store);
   const priced = preorder
     ? lines.map((line) =>
         line.problem && STOCK_PROBLEMS.has(line.problem) && line.product
@@ -159,16 +162,24 @@ export async function quoteCart(items: CartItems, options: { preorder?: boolean 
     : lines;
   const subtotalVnd = priced.reduce((sum, line) => sum + line.lineTotalVnd, 0);
   const shippingVnd = shippingFee(store, subtotalVnd);
+  const deposit = depositFor(store, {
+    subtotalVnd,
+    preorder,
+    custom: priced.some((line) => line.design),
+    marked: wanted.some((item) => !item.design && bySlug.get(item.slug)?.requiresDeposit),
+  });
   return {
     lines: priced,
     preorder,
     // Trước ngày mở bán mà shop tắt đặt chờ thì không nhận đơn
-    preorderClosed: Boolean(options.preorder) && !preorder,
+    preorderClosed: preLaunch && !preorder,
+    // Cách thanh toán khách chọn được. Có deposit thì trả khi nhận hàng phải chuyển khoản cọc trước số này
+    payment: { bankTransfer: Boolean(store.bank), deposit, holdHours: holdHours(store) },
     subtotalVnd,
     shippingVnd,
     totalVnd: subtotalVnd + shippingVnd,
     shipping: store.shipping,
-    canCheckout: priced.every((line) => line.problem === null) && !(options.preorder && !preorder),
+    canCheckout: priced.every((line) => line.problem === null) && !(preLaunch && !preorder),
   };
 }
 
@@ -190,12 +201,34 @@ function orderStockItems(lines: Awaited<ReturnType<typeof quoteCart>>["lines"]):
   );
 }
 
+// Đơn đang chờ chuyển tiền tối đa mỗi số điện thoại, để một người không giữ hết kho bằng đơn không trả
+const OPEN_UNPAID_PER_PHONE = 3;
+
 export async function placeOrder(input: z.infer<typeof checkoutInput>, accountId: string | null = null) {
   const existing = await prisma.order.findUnique({ where: { idempotencyKey: input.idempotencyKey } });
   if (existing) return { order: existing, created: false };
 
-  const quote = await quoteCart(input.items, { preorder: input.preorder });
+  const quote = await quoteCart(input.items);
+  if (input.expectedTotalVnd !== undefined && input.expectedTotalVnd !== quote.totalVnd) {
+    throw new HttpError(409, "Giá hoặc phí giao vừa thay đổi. Bạn xem lại tổng tiền rồi đặt hàng.", "PRICE_CHANGED");
+  }
   if (quote.preorderClosed) throw new HttpError(403, "Shop đang tạm ngừng nhận đặt chờ. Bạn nhắn shop để được tư vấn.", "PREORDER_OFF");
+  if (input.paymentMethod === PaymentMethod.BANK_TRANSFER && !quote.payment.bankTransfer) {
+    throw new HttpError(400, "Shop chưa nhận chuyển khoản. Bạn chọn trả tiền khi nhận hàng.", "NO_BANK");
+  }
+  // Chuyển khoản toàn bộ thì không cần cọc
+  const depositVnd = input.paymentMethod === PaymentMethod.COD ? (quote.payment.deposit?.amountVnd ?? 0) : 0;
+  // Có tiền phải chuyển (cả đơn hoặc cọc) thì có hạn; quá hạn hệ thống huỷ đơn, trả kho (expireUnpaidOrders)
+  const mustTransfer = input.paymentMethod === PaymentMethod.BANK_TRANSFER || depositVnd > 0;
+  const paymentDueAt = mustTransfer ? new Date(Date.now() + quote.payment.holdHours * 3600_000) : null;
+  if (mustTransfer) {
+    const open = await prisma.order.count({
+      where: { customerPhone: input.customer.phone, paymentDueAt: { not: null }, status: { in: [OrderStatus.PENDING, OrderStatus.PREORDER] } },
+    });
+    if (open >= OPEN_UNPAID_PER_PHONE) {
+      throw new HttpError(429, "Số điện thoại này đang có nhiều đơn chờ chuyển khoản. Bạn chuyển khoản hoặc huỷ bớt đơn cũ, hoặc chọn trả khi nhận hàng.", "TOO_MANY_UNPAID");
+    }
+  }
   const problems = quote.lines.filter((line) => line.problem !== null);
   if (problems.length > 0) {
     throw new HttpError(409, "Một số sản phẩm trong giỏ đã thay đổi. Vui lòng xem lại giỏ hàng.", "CART_CHANGED", problems);
@@ -250,6 +283,8 @@ export async function placeOrder(input: z.infer<typeof checkoutInput>, accountId
           subtotalVnd: quote.subtotalVnd,
           shippingVnd: quote.shippingVnd,
           totalVnd: quote.totalVnd,
+          depositVnd,
+          paymentDueAt,
           paymentMethod: input.paymentMethod,
           customerId: saved.id,
           items: {
@@ -261,7 +296,8 @@ export async function placeOrder(input: z.infer<typeof checkoutInput>, accountId
           },
         },
       });
-      // Đơn đặt chờ chưa trừ kho; shop chuyển sang "Chờ xác nhận" thì mới trừ (changeOrderStatus)
+      await logEvent(tx, created.id, { kind: "customer" }, { type: OrderEventType.CREATED, toStatus: created.status });
+      // Đơn đặt chờ chưa trừ kho; shop chuyển sang "Chờ xác nhận" thì mới trừ (order-flow.ts)
       if (quote.preorder) return created;
       try {
         await applyStock(tx, needs, -1, { orderId: created.id, note: `Đơn ${created.code}` });
@@ -280,47 +316,4 @@ export async function placeOrder(input: z.infer<typeof checkoutInput>, accountId
     }
     throw err;
   }
-}
-
-// Đơn giữ kho khi không phải Huỷ hay Đặt chờ. Ra khỏi trạng thái giữ kho: trả lại đúng số đã trừ theo sổ kho của đơn.
-// Vào trạng thái giữ kho (mở lại đơn huỷ, chốt đơn đặt chờ): trừ kho theo đơn, thiếu hàng thì báo lỗi
-const holdsStock = (status: OrderStatus) => status !== OrderStatus.CANCELLED && status !== OrderStatus.PREORDER;
-
-export async function changeOrderStatus(id: string, status: OrderStatus) {
-  return prisma.$transaction((tx) => changeOrderStatusTx(tx, id, status));
-}
-
-// Bản chạy trong transaction có sẵn, để chuyển đơn đặt chờ thành đơn chính cập nhật thông tin và trừ kho cùng lúc
-export async function changeOrderStatusTx(tx: Prisma.TransactionClient, id: string, status: OrderStatus) {
-  const order = await tx.order.findUniqueOrThrow({ where: { id }, include: { items: true } });
-  const held = holdsStock(order.status);
-  const willHold = holdsStock(status);
-
-  if (held && !willHold) await returnOrderStock(tx, order.id, `${status === OrderStatus.CANCELLED ? "Huỷ" : "Chuyển về đặt chờ"} đơn ${order.code}`);
-  if (!held && willHold) {
-    const items = order.items.map((item) => ({ productId: item.productId, beads: beadList(item.design), quantity: item.quantity, label: item.productName }));
-    const note = order.status === OrderStatus.PREORDER ? `Chốt đơn đặt chờ ${order.code}` : `Mở lại đơn ${order.code}`;
-    await applyStock(tx, await stockNeeds(tx, items), -1, { orderId: order.id, note });
-  }
-
-  return tx.order.update({ where: { id }, data: { status } });
-}
-
-// Đọc lại danh sách hạt từ bản lưu trong đơn vòng tự thiết kế
-export function beadList(design: Prisma.JsonValue | null) {
-  const list = (design as { beads?: unknown } | null)?.beads;
-  return Array.isArray(list) ? list.filter((slug): slug is string => typeof slug === "string") : null;
-}
-
-// Cộng lại kho theo các dòng sổ kho của đơn, để trả đúng thứ đã trừ kể cả khi công thức đã đổi
-export async function returnOrderStock(tx: Prisma.TransactionClient, orderId: string, note: string) {
-  const rows = await tx.stockMovement.groupBy({ by: ["materialId", "productId"], where: { orderId }, _sum: { quantity: true } });
-  const needs = { materials: new Map<string, number>(), products: new Map<string, number>() };
-  for (const r of rows) {
-    const out = -(r._sum.quantity ?? 0);
-    if (out <= 0) continue;
-    if (r.materialId) needs.materials.set(r.materialId, out);
-    else if (r.productId) needs.products.set(r.productId, out);
-  }
-  await applyStock(tx, needs, 1, { orderId, note });
 }

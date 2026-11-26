@@ -79,6 +79,8 @@ const productInput = z
     stock: z.number().int().min(0).max(100_000),
     origin: optionalText,
     featured: z.boolean().default(false),
+    // Đơn có sản phẩm này cần đặt cọc, khi shop bật cọc theo sản phẩm ở Thông tin cửa hàng
+    requiresDeposit: z.boolean().default(false),
     model3d: z.enum(Product3DModel).nullish().transform((value) => value ?? null),
     shopeeUrl: optionalUrl,
     tiktokUrl: optionalUrl,

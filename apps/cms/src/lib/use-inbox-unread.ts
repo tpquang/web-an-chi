@@ -8,7 +8,7 @@ export function useInboxUnread() {
   useEffect(() => {
     const refresh = () => api.get<{ unread: number }>("/inbox/unread").then((d) => setUnread(d.unread)).catch(() => {});
     refresh();
-    return subscribeInbox(refresh);
+    return subscribeInbox((event) => event.type !== "order" && refresh());
   }, []);
   useEffect(() => {
     document.title = unread > 0 ? `(${unread}) An Chi CMS` : "An Chi CMS";

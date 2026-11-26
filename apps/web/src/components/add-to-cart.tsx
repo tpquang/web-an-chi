@@ -2,35 +2,41 @@
 
 import { useState } from "react";
 import { cart, useCart } from "@/lib/cart";
-import { cartHref } from "@/lib/links";
+import { openCartDrawer } from "@/lib/cart-drawer";
 import { trackEvent } from "@/lib/track";
 import { Button } from "./ui/button";
 import { QuantityInput } from "./ui/quantity-input";
 import { showToast } from "./ui/toast";
 
-export function AddToCart({ slug, stock }: { slug: string; stock: number }) {
+// Đơn đặt chờ trước ngày mở bán không giới hạn theo tồn kho (shop nhập thêm trước ngày giao, API cũng cho qua),
+// chỉ chặn ở mức tối đa của một dòng trong giỏ
+const PREORDER_MAX = 99;
+
+export function AddToCart({ slug, stock, preorder }: { slug: string; stock: number; preorder?: boolean }) {
   const [quantity, setQuantity] = useState(1);
   const inCart = useCart().find((item) => item.slug === slug)?.quantity ?? 0;
-  const room = Math.max(0, stock - inCart);
+  const limit = preorder ? PREORDER_MAX : stock;
+  const room = Math.max(0, limit - inCart);
 
-  if (stock === 0) {
+  if (limit === 0) {
     return <p className="font-medium text-ink-2">Sản phẩm tạm hết hàng. Bạn có thể xem các sản phẩm khác cùng danh mục bên dưới.</p>;
   }
 
   function add() {
     if (room === 0) {
-      showToast({ type: "error", title: "Đã đủ số lượng còn lại", desc: `Giỏ của bạn đã có ${inCart} sản phẩm này, bằng số shop còn.` });
+      showToast({
+        type: "error",
+        title: preorder ? "Đã đủ số lượng tối đa" : "Đã đủ số lượng còn lại",
+        desc: preorder ? `Giỏ của bạn đã có ${inCart} sản phẩm này. Cần nhiều hơn, bạn nhắn shop nhé.` : `Giỏ của bạn đã có ${inCart} sản phẩm này, bằng số shop còn.`,
+      });
       return;
     }
     const added = Math.min(quantity, room);
-    const total = cart.add(slug, added, stock);
+    cart.add(slug, added, limit);
     trackEvent("add_to_cart", { items: [{ item_id: slug, quantity: added }] });
     setQuantity(1);
-    showToast({
-      title: "Đã thêm vào giỏ",
-      desc: `Giỏ đang có ${total} sản phẩm này. Bạn có thể đặt hàng khi đã chọn xong.`,
-      action: { href: cartHref, label: "Xem giỏ hàng" },
-    });
+    // Mở bảng giỏ bên phải để khách thấy ngay món vừa thêm và nút thanh toán
+    openCartDrawer();
   }
 
   return (

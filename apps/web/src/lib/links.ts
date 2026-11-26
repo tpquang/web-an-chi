@@ -13,7 +13,10 @@ export const braceletHref = "/thiet-ke-vong-tay";
 // Mở trang thiết kế để sửa một vòng đã lưu trong giỏ
 export const BRACELET_EDIT_PARAM = "sua";
 export const braceletEditHref = (cartSlug: string) => `${braceletHref}?${BRACELET_EDIT_PARAM}=${encodeURIComponent(cartSlug)}`;
-export const supplierHref = "/nha-cung-cap";
+// Chỉ nhận đường dẫn nội bộ để ?tiep= không dẫn khách sang trang khác. "/\\x" trình duyệt hiểu như "//x"
+export function safeNext(next: string | undefined, fallback: string) {
+  return next && /^\/(?![/\\])/.test(next) ? next : fallback;
+}
 
 export const productHref = (slug: string) => `/san-pham/${slug}`;
 export const categoryHref = (slug: string) => `/danh-muc/${slug}`;

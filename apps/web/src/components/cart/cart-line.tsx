@@ -17,8 +17,12 @@ function problemText(line: QuoteLine) {
   return null;
 }
 
-export function CartLine({ line, disabled }: { line: QuoteLine; disabled?: boolean }) {
+// Đơn đặt chờ không giới hạn theo tồn kho (API cho qua hết hàng, thiếu hàng), chỉ chặn ở 99 mỗi dòng
+const PREORDER_MAX = 99;
+
+export function CartLine({ line, disabled, preorder }: { line: QuoteLine; disabled?: boolean; preorder?: boolean }) {
   const { product } = line;
+  const max = product ? (preorder ? PREORDER_MAX : product.stock) : 0;
   const name = product?.name ?? "Sản phẩm không còn bán";
   const problem = problemText(line);
 
@@ -49,10 +53,10 @@ export function CartLine({ line, disabled }: { line: QuoteLine; disabled?: boole
           <p className="font-medium whitespace-nowrap tabular-nums">{formatVnd(line.lineTotalVnd)}</p>
         </div>
         <div className="flex flex-wrap items-start justify-between gap-3">
-          {product && product.stock > 0 ? (
+          {product && max > 0 ? (
             <QuantityInput
               value={line.quantity}
-              max={product.stock}
+              max={max}
               onChange={(value) => cart.set(line.slug, value)}
               label={`Số lượng ${name}`}
               disabled={disabled}

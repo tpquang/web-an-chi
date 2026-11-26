@@ -19,6 +19,12 @@ Các số dưới đây là bắt buộc. Form nào lệch thì sửa form, khô
 - Các ô và nút nằm trên cùng một hàng phải cao bằng nhau.
 - Kiểu mặc định của ô phải tự đủ khi đứng một mình, không phụ thuộc vào class của form bao ngoài.
 
+## Bắt buộc, gợi ý, lỗi (11/2026)
+
+- Ô bắt buộc có dấu `*` màu `--err` sau nhãn (`<Field required>`, tự thêm `aria-required`). Ô không bắt buộc để nhãn trơn, không ghi "(không bắt buộc)".
+- Form khách (thanh toán) không có dòng gợi ý dưới ô. Ví dụ cách điền đặt trong placeholder; dòng dưới ô chỉ hiện khi có lỗi, nói rõ sai gì và sửa thế nào.
+- Ô phụ thuộc ô khác (phường xã theo tỉnh) khoá lại và ghi điều kiện ở placeholder, như "Chọn tỉnh trước".
+
 ## Khoảng cách
 
 | Giữa | Giá trị |

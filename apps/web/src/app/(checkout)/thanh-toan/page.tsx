@@ -8,10 +8,7 @@ export const metadata: Metadata = { title: "Đặt hàng", ...privateMeta };
 export default function CheckoutPage() {
   return (
     <PageFrame>
-      <PageHeader
-        title="Đặt hàng"
-        desc="Bạn không cần tạo tài khoản. Shop gọi xác nhận trước khi giao."
-      />
+      <PageHeader title="Đặt hàng" />
       <CheckoutForm />
     </PageFrame>
   );

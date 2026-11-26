@@ -15,7 +15,7 @@
 - [ ] Chuỗi 108 hạt có bắt buộc hạt chủ và tua không (hiện mặc định có, khách bỏ tick được)
 - [ ] Vòng đơn có cần dài hơn 30 cm không (giới hạn 200 hạt chỉ chạm được với chuỗi)
 - [ ] Sản phẩm hộp tròn: nhãn in ghi 30 nụ, dữ liệu sản phẩm vẫn ghi 25 nụ
-- [ ] Trang sản phẩm thường: thêm vào giỏ có mở bảng giỏ hàng như vòng tự thiết kế không (hiện vẫn toast)
+- [x] Trang sản phẩm thường: thêm vào giỏ mở bảng giỏ hàng như vòng tự thiết kế (11/2026)
 
 ## P0
 
@@ -33,7 +33,7 @@
 
 - [ ] Ảnh OG mặc định và theo trang
 - [ ] Đo phễu theo `anchi-growth` mục 7
-- [ ] Gợi ý dùng kèm trong toast sau khi thêm vào giỏ (bậc 3 của `anchi-growth`)
+- [ ] Gợi ý dùng kèm trong bảng giỏ hàng sau khi thêm vào giỏ (bậc 3 của `anchi-growth`)
 - [ ] CI chạy typecheck, build, kiểm tra màu viết cứng; ESLint, test tự động; Dockerfile
 
 ## P2

@@ -17,8 +17,9 @@ Quy tắc ở skill `anchi-seo`. Trước khi ra mắt: đặt `NEXT_PUBLIC_SITE
 - [x] Header bảo mật trong `next.config.ts`, HSTS khi site chạy https, tắt `X-Powered-By`
 - [x] Google Tag Manager theo `NEXT_PUBLIC_GTM_ID` (hoặc GA4 trực tiếp theo `NEXT_PUBLIC_GA_ID`), chỉ nạp khi `SITE_INDEXING=on`; sự kiện `add_to_cart`, `purchase` đẩy vào dataLayer chuẩn GA4
 - [x] Đổi slug sản phẩm, danh mục, bài viết, chủ đề trên CMS: API tự ghi redirect (setting `redirects`), URL cũ trả 308 một bước sang URL mới
-- [x] `www` chuyển 301 về tên miền gốc (nginx trong `deploy.sh`), `/favicon.ico` chuyển 308 sang `/icon.svg`
-- [x] `llms.txt` liệt kê trang chính, danh mục, bài viết; chỉ có khi `SITE_INDEXING=on`
+- [x] `www` chuyển 301 về tên miền gốc (nginx trong `deploy.sh`); favicon là `app/favicon.ico` (bỏ chuyển 308 sang `/icon.svg` 11/2026 vì file đó không còn, favicon bị 404)
+- [x] `llms.txt` liệt kê trang chính, danh mục (bỏ danh mục chưa có hàng, khớp sitemap), bài viết; chỉ có khi `SITE_INDEXING=on`
+- [x] Trước ngày mở bán, chuyển trang sản phẩm về `/countdown` là cờ ở CMS, mặc định tắt. Không bật khi site đã index
 - [x] Article có `publisher.logo`, `image` (ảnh bìa hoặc ảnh OG mặc định), `inLanguage`; trang 404 có title riêng
 - [x] Phân trang `?trang=N` bằng link thật; `?trang=1` và trang vượt quá trả 404
 - [x] `next/image` cho ảnh sản phẩm, chỉ nhận tên miền trong `IMAGE_HOSTNAMES`

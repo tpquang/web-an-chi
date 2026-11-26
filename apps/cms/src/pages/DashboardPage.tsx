@@ -10,6 +10,7 @@ import { formatDateTime, formatVnd } from "../lib/format";
 import { options, orderStatus, salesChannel, type OrderStatus, type SalesChannel } from "../lib/labels";
 import { useLoad } from "../lib/use-load";
 import { useQueryState } from "../lib/use-query-state";
+import { useOrderCounts } from "../lib/order-counts";
 
 type Dashboard = {
   ordersByStatus: Partial<Record<OrderStatus, number>>;
@@ -234,18 +235,33 @@ function MoneyTable({ rows, empty }: { rows: { key: string; name: string; quanti
 
 // ---- Vận hành: đơn cần xử lý, hàng sắp hết
 
+// Việc cần làm lấy từ cùng số đếm với tab danh sách đơn
+const todo = [
+  { key: "todo", label: "Cần xử lý" },
+  { key: "payment", label: "Chờ chuyển khoản" },
+  { key: "preorder", label: "Đặt chờ" },
+  { key: "confirmed", label: "Đang chuẩn bị" },
+  { key: "shipping", label: "Đang giao" },
+  { key: "refund", label: "Cần hoàn tiền" },
+] as const;
+
 function OperationsSection() {
   const { state, slow, reload } = useLoad(() => api.get<Dashboard>("/dashboard"), []);
+  const counts = useOrderCounts();
   if (state.status === "error") return <ErrorState title="Chưa tải được số liệu" desc={state.error} onRetry={reload} />;
   if (state.status === "loading") return <Skeleton className={`h-48 ${slow ? "" : "invisible"}`} />;
   const d = state.data;
   return (
     <div className="grid gap-5 lg:grid-cols-3">
-      <Panel title="Đơn mới" className="lg:col-span-2">
+      <Panel title="Đơn hàng" className="lg:col-span-2">
         <div className="mb-3 flex flex-wrap gap-2">
-          {(["PREORDER", "PENDING", "CONFIRMED", "SHIPPING", "CANCELLED"] as const).map((s) => (
-            <Link key={s} to={`/orders?status=${s}`} className="rounded-sm border border-line px-3 py-1 text-xs hover:border-wood">
-              {orderStatus[s].label}: <span className="font-semibold">{d.ordersByStatus[s] ?? 0}</span>
+          {todo.map(({ key, label }) => (
+            <Link
+              key={key}
+              to={`/orders?view=${key}`}
+              className={`rounded-sm border px-3 py-1 text-xs hover:border-wood ${(key === "todo" || key === "refund") && (counts?.[key] ?? 0) > 0 ? "border-wood bg-wood-soft text-wood" : "border-line"}`}
+            >
+              {label}: <span className="font-semibold">{counts?.[key] ?? "–"}</span>
             </Link>
           ))}
         </div>

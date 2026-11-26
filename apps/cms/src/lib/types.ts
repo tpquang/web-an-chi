@@ -45,6 +45,8 @@ export type Product = {
   stock: number;
   origin: string | null;
   featured: boolean;
+  // Hàng đặt làm, giá trị cao: đơn có sản phẩm này cần đặt cọc (khi bật cọc theo sản phẩm)
+  requiresDeposit: boolean;
   model3d: import("./labels").Product3DModel | null;
   shopeeUrl: string | null;
   tiktokUrl: string | null;
@@ -116,14 +118,40 @@ export type OrderRow = {
   customerName: string;
   customerPhone: string;
   totalVnd: number;
+  // Tiền cọc khách chuyển khoản trước, 0 là không cọc
+  depositVnd: number;
   status: OrderStatus;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   channel: import("./labels").SalesChannel;
   externalCode: string | null;
   createdAt: string;
+  updatedAt: string;
+  paidVnd: number;
+  // Hạn chuyển khoản; quá hạn chưa nhận đủ thì hệ thống huỷ
+  paymentDueAt: string | null;
+  refundVnd: number;
+  refundedAt: string | null;
+  cancelReason: string | null;
+  cancelledBy: import("./labels").CancelActor | null;
+  carrier: string | null;
+  trackingCode: string | null;
   _count: { items: number };
 };
+
+export type OrderEvent = {
+  id: string;
+  type: import("./labels").OrderEventType;
+  fromStatus: OrderStatus | null;
+  toStatus: OrderStatus | null;
+  amountVnd: number | null;
+  note: string | null;
+  actor: string;
+  createdAt: string;
+};
+
+// Số đơn mỗi tab ở danh sách đơn
+export type OrderCounts = Record<"todo" | "payment" | "preorder" | "confirmed" | "shipping" | "refund", number>;
 
 export type Order = OrderRow & {
   customerEmail: string | null;
@@ -135,7 +163,14 @@ export type Order = OrderRow & {
   platformFeeVnd: number;
   paidAt: string | null;
   customerId: string | null;
-  items: { id: string; productName: string; unitPriceVnd: number; unitCostVnd: number; quantity: number; product: { slug: string } | null; design: BraceletDesignSnapshot | null }[];
+  items: { id: string; productName: string; unitPriceVnd: number; unitCostVnd: number; quantity: number; product: { slug: string; requiresDeposit: boolean } | null; design: BraceletDesignSnapshot | null }[];
+  events: OrderEvent[];
+  // Do API tính: còn phải chuyển, trạng thái được chuyển tới, được huỷ, tiền hoàn gợi ý, đơn khác của khách theo trạng thái
+  amountDue: number;
+  next: OrderStatus[];
+  canCancel: boolean;
+  suggestedRefund: number;
+  customerHistory: Partial<Record<OrderStatus, number>>;
 };
 
 export type Customer = Omit<CustomerRow, "spentVnd" | "lastOrderAt" | "_count"> & { orders: OrderRow[] };

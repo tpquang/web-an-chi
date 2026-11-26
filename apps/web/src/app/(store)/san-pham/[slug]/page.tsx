@@ -13,7 +13,7 @@ import { Tag } from "@/components/ui/tag";
 import { TrackViewItem } from "@/components/track-view-item";
 import { getProduct, getProducts, getStore } from "@/lib/api";
 import { paragraphs } from "@/lib/content";
-import { isPreLaunch, launchIso } from "@/lib/launch";
+import { isPreLaunch, launchAtOf, launchIso } from "@/lib/launch";
 import { categoryHref, policyHref, postHref, productHref } from "@/lib/links";
 import { notFoundOrRedirect } from "@/lib/redirect";
 import { absoluteImage, absoluteUrl, pageMeta, parseDayRange, safeJsonLd } from "@/lib/seo";
@@ -72,6 +72,8 @@ export default async function ProductPage({ params }: Props) {
   const shippingVnd = freeFromVnd !== null && product.priceVnd >= freeFromVnd ? 0 : flatFeeVnd;
   const transitDays = parseDayRange(eta);
   const returnDays = parseDayRange(store.returnPolicy)?.max;
+  const launchAt = launchAtOf(store);
+  const preLaunch = isPreLaunch(launchAt);
   // Google bắt buộc có ảnh cho Product. Trang mỏng (chưa ảnh hoặc mô tả) đang noindex nên không xuất schema
   const jsonLd = isNoindex(product)
     ? null
@@ -92,12 +94,12 @@ export default async function ProductPage({ params }: Props) {
           price: product.priceVnd,
           priceCurrency: "VND",
           // Trước ngày mở bán chưa nhận đơn nên không khai InStock
-          availability: isPreLaunch()
+          availability: preLaunch
             ? "https://schema.org/PreOrder"
             : product.stock > 0
               ? "https://schema.org/InStock"
               : "https://schema.org/OutOfStock",
-          ...(isPreLaunch() ? { availabilityStarts: launchIso } : {}),
+          ...(preLaunch ? { availabilityStarts: launchIso(launchAt) } : {}),
           seller: { "@type": "Organization", name: site.name },
           shippingDetails: {
             "@type": "OfferShippingDetails",
@@ -160,7 +162,7 @@ export default async function ProductPage({ params }: Props) {
               {product.stock > 0 ? <Tag tone="ok">Còn {product.stock} sản phẩm</Tag> : <Tag>Hết hàng</Tag>}
             </SalesGate>
           </div>
-          <SalesGate waiting={<ProductLaunchPanel>{store.preorderEnabled !== false && <AddToCart slug={product.slug} stock={product.stock} />}</ProductLaunchPanel>}>
+          <SalesGate waiting={<ProductLaunchPanel>{store.preorderEnabled !== false && <AddToCart slug={product.slug} stock={product.stock} preorder />}</ProductLaunchPanel>}>
             <AddToCart slug={product.slug} stock={product.stock} />
           </SalesGate>
           <p className="text-sm text-ink-2">

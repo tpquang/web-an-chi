@@ -7,6 +7,8 @@ const bus = new EventEmitter();
 bus.setMaxListeners(0);
 
 export type ChatEvent = { type: "message" | "conversation"; conversationId: string; data: unknown };
+// Đơn mới, khách tự huỷ, hệ thống huỷ vì quá hạn: CMS hiện thông báo và cập nhật số trên menu Đơn hàng
+export type OrderNotice = { type: "order"; data: { id: string; code: string; kind: "created" | "cancelled" | "expired"; customerName: string; totalVnd: number } };
 
 export const inboxChannel = "inbox";
 export const conversationChannel = (id: string) => `conversation:${id}`;
@@ -16,12 +18,16 @@ export function publish(event: ChatEvent) {
   bus.emit(conversationChannel(event.conversationId), event);
 }
 
+export function publishOrder(data: OrderNotice["data"]) {
+  bus.emit(inboxChannel, { type: "order", data } satisfies OrderNotice);
+}
+
 // Server-Sent Events: giữ kết nối, gửi nhịp 25 giây để proxy không cắt
 export function streamEvents(req: Request, res: Response, channel: string) {
   res.status(200).set({ "content-type": "text/event-stream", "cache-control": "no-cache, no-transform", connection: "keep-alive", "x-accel-buffering": "no" });
   res.flushHeaders();
   res.write(": connected\n\n");
-  const send = (event: ChatEvent) => res.write(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`);
+  const send = (event: ChatEvent | OrderNotice) => res.write(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`);
   const ping = setInterval(() => res.write(": ping\n\n"), 25_000);
   bus.on(channel, send);
   req.on("close", () => {

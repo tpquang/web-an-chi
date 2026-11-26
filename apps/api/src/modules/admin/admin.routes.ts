@@ -5,6 +5,7 @@ import { checkCredentials, issueToken, requireAdmin, type StaffContext } from ".
 import { PERMISSION_MODULES, requirePermission } from "../../lib/permissions.js";
 import { hashPassword, verifyPassword } from "../../lib/password.js";
 import { prisma } from "../../lib/prisma.js";
+import { clientIp } from "../../lib/client-ip.js";
 import { failureLimiter } from "../../lib/rate-limit.js";
 import { HttpError } from "../../middleware/errors.js";
 import { adminBlogRouter } from "./admin.blog.js";
@@ -19,6 +20,7 @@ import { adminMediaRouter } from "./admin.media.js";
 import { adminSalesRouter } from "./admin.sales.js";
 import { adminStaffRouter } from "./admin.staff.js";
 import { adminStoreRouter } from "./admin.store.js";
+import { adminOrdersRouter } from "./admin.orders.js";
 import { adminSuppliersRouter } from "./admin.suppliers.js";
 
 export const adminRouter = Router();
@@ -35,7 +37,7 @@ async function ensureOwner() {
 }
 
 adminRouter.post("/login", async (req, res) => {
-  const ip = req.ip ?? "unknown";
+  const ip = clientIp(req);
   limiter.check(ip);
   const { email, password } = z.object({ email: z.string(), password: z.string() }).parse(req.body);
   const staff = await prisma.staffUser.findUnique({ where: { email: email.trim().toLowerCase() }, omit: { passwordHash: false } });
@@ -71,6 +73,7 @@ adminRouter.use(adminHomeRouter);
 adminRouter.use(adminCatalogRouter);
 adminRouter.use(adminBraceletRouter);
 adminRouter.use(adminBlogRouter);
+adminRouter.use(adminOrdersRouter);
 adminRouter.use(adminSalesRouter);
 // Vốn, kho, nhân viên chỉ chủ shop xem
 adminRouter.use(adminMediaRouter);

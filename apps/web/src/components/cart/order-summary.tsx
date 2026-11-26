@@ -3,7 +3,8 @@ import type { Quote } from "@/lib/client-api";
 import { formatVnd } from "@/lib/site";
 
 // Tổng đặt trong aria-live để trình đọc màn hình báo khi số lượng đổi
-export function OrderSummary({ quote, children, busy }: { quote: Quote; children?: ReactNode; busy?: boolean }) {
+// depositVnd: trang thanh toán truyền khi khách chọn trả khi nhận hàng mà đơn phải cọc trước
+export function OrderSummary({ quote, children, busy, depositVnd }: { quote: Quote; children?: ReactNode; busy?: boolean; depositVnd?: number }) {
   const { subtotalVnd, shippingVnd, totalVnd, shipping } = quote;
   const missing = shipping.freeFromVnd !== null && shippingVnd > 0 ? shipping.freeFromVnd - subtotalVnd : 0;
 
@@ -25,6 +26,18 @@ export function OrderSummary({ quote, children, busy }: { quote: Quote; children
           <dt className="font-medium">Tổng cộng</dt>
           <dd className="font-serif text-[28px] leading-tight font-semibold whitespace-nowrap tabular-nums">{formatVnd(totalVnd)}</dd>
         </div>
+        {depositVnd ? (
+          <>
+            <div className="flex justify-between gap-4">
+              <dt className="text-ink-2">Chuyển khoản cọc trước</dt>
+              <dd className="font-medium tabular-nums">{formatVnd(depositVnd)}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-ink-2">Trả khi nhận hàng</dt>
+              <dd className="tabular-nums">{formatVnd(totalVnd - depositVnd)}</dd>
+            </div>
+          </>
+        ) : null}
       </dl>
       <p className="mt-3 text-sm text-ink-3">
         Giao trong {shipping.eta}.

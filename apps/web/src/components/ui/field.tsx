@@ -5,11 +5,13 @@ type FieldProps = {
   hint?: ReactNode;
   error?: string | null;
   optional?: boolean;
-  children: ReactElement<{ id?: string; "aria-describedby"?: string; "aria-invalid"?: boolean }>;
+  // Dấu sao đỏ sau nhãn. Form gọn chỉ đánh dấu ô bắt buộc, ô còn lại không ghi "(không bắt buộc)"
+  required?: boolean;
+  children: ReactElement<{ id?: string; "aria-describedby"?: string; "aria-invalid"?: boolean; "aria-required"?: boolean }>;
 };
 
-// Tự nối id, aria-describedby, aria-invalid cho ô bên trong
-export function Field({ label, hint, error, optional, children }: FieldProps) {
+// Tự nối id, aria-describedby, aria-invalid, aria-required cho ô bên trong
+export function Field({ label, hint, error, optional, required, children }: FieldProps) {
   const id = useId();
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
@@ -19,9 +21,14 @@ export function Field({ label, hint, error, optional, children }: FieldProps) {
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="text-sm font-medium">
         {label}
+        {required && (
+          <span aria-hidden className="ml-0.5 text-err">
+            *
+          </span>
+        )}
         {optional && <span className="font-normal text-ink-3"> (không bắt buộc)</span>}
       </label>
-      {cloneElement(children, { id, "aria-describedby": describedBy, "aria-invalid": error ? true : undefined })}
+      {cloneElement(children, { id, "aria-describedby": describedBy, "aria-invalid": error ? true : undefined, "aria-required": required || undefined })}
       {hint && !error && (
         <p id={hintId} className="text-sm text-ink-3">
           {hint}

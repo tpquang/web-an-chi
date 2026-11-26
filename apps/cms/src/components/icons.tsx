@@ -81,12 +81,6 @@ export const MoonIcon = (p: P) => (
     <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" />
   </Icon>
 );
-export const MonitorIcon = (p: P) => (
-  <Icon {...p}>
-    <rect x="3" y="4.5" width="18" height="12" rx="1.5" />
-    <path d="M9 20h6M12 16.5V20" />
-  </Icon>
-);
 
 // ---- Icon menu: nét mềm, góc bo tròn, cùng khung 24 nét 1.5
 export const HomeIcon = (p: P) => (
@@ -103,12 +97,6 @@ export const BagIcon = (p: P) => (
   <Icon {...p}>
     <path d="M5.5 8h13l-1 10.5a2 2 0 0 1-2 1.5h-7a2 2 0 0 1-2-1.5z" />
     <path d="M9 10V7a3 3 0 0 1 6 0v3" />
-  </Icon>
-);
-export const PlusCircleIcon = (p: P) => (
-  <Icon {...p}>
-    <circle cx="12" cy="12" r="8.5" />
-    <path d="M12 8.5v7M8.5 12h7" />
   </Icon>
 );
 export const UsersIcon = (p: P) => (

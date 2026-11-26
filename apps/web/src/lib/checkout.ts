@@ -4,18 +4,30 @@ export type CheckoutValues = {
   name: string;
   phone: string;
   email: string;
-  address: string;
+  // Địa chỉ chia ba ô: tỉnh, phường xã (theo địa giới từ 07/2025), số nhà tên đường. Ghép lại thành một chuỗi khi gửi
+  provinceCode: number | null;
+  wardCode: number | null;
+  street: string;
   note: string;
   paymentMethod: PaymentMethod;
 };
 
-export type CheckoutField = Exclude<keyof CheckoutValues, "paymentMethod">;
+export type CheckoutField = "name" | "phone" | "email" | "province" | "ward" | "street" | "note";
 export type CheckoutErrors = Partial<Record<CheckoutField, string>>;
 
-export const emptyCheckout: CheckoutValues = { name: "", phone: "", email: "", address: "", note: "", paymentMethod: "COD" };
+export const emptyCheckout: CheckoutValues = {
+  name: "",
+  phone: "",
+  email: "",
+  provinceCode: null,
+  wardCode: null,
+  street: "",
+  note: "",
+  paymentMethod: "COD",
+};
 
-// Thứ tự để focus ô sai đầu tiên
-export const fieldOrder: CheckoutField[] = ["name", "phone", "email", "address", "note"];
+// Thứ tự để focus ô sai đầu tiên, theo thứ tự hiện trên form
+export const fieldOrder: CheckoutField[] = ["name", "phone", "province", "ward", "street", "email", "note"];
 
 export function normalizePhone(value: string) {
   return value.replace(/[\s.-]/g, "").replace(/^\+84/, "0");
@@ -26,10 +38,12 @@ export function validateCheckout(values: CheckoutValues): CheckoutErrors {
   const errors: CheckoutErrors = {};
   if (values.name.trim().length < 2) errors.name = "Vui lòng nhập họ tên người nhận.";
   if (!/^0\d{9}$/.test(normalizePhone(values.phone))) errors.phone = "Số điện thoại cần đủ 10 chữ số, bắt đầu bằng 0.";
+  if (!values.provinceCode) errors.province = "Chọn tỉnh hoặc thành phố.";
+  if (!values.wardCode) errors.ward = "Chọn phường hoặc xã.";
+  if (values.street.trim().length < 3) errors.street = "Nhập số nhà, tên đường hoặc thôn, xóm.";
   if (values.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) {
     errors.email = "Email chưa đúng định dạng, ví dụ ten@gmail.com.";
   }
-  if (values.address.trim().length < 10) errors.address = "Vui lòng nhập địa chỉ đủ số nhà, đường, phường, tỉnh.";
   return errors;
 }
 
@@ -38,7 +52,10 @@ const DRAFT_KEY = "anchi-checkout-draft";
 
 export function loadDraft(): CheckoutValues {
   try {
-    return { ...emptyCheckout, ...JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? "{}") };
+    const saved = JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? "{}");
+    // Bản nháp cũ có một ô address: bỏ, khách chọn lại theo ba ô mới
+    const { address: _old, ...rest } = saved;
+    return { ...emptyCheckout, ...rest };
   } catch {
     return emptyCheckout;
   }

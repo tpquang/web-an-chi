@@ -134,8 +134,3 @@ export function fieldErrors(err: unknown): Record<string, string> {
   }
   return out;
 }
-
-export async function apiHealth() {
-  const res = await fetch(`${API_URL}/health`);
-  return res.ok;
-}

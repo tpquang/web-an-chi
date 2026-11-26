@@ -4,10 +4,9 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import type { Bead, BraceletRules } from "@/lib/api";
 import { cm } from "@/lib/bracelet";
-import { launchDateLabel } from "@/lib/launch";
 import { formatVnd } from "@/lib/site";
 import { CloseIcon, HandIcon, HelpIcon, ResetIcon, SpinIcon, UndoIcon } from "../icons";
-import { useLaunch } from "../launch/launch-clock";
+import { useLaunch, useLaunchLabel } from "../launch/launch-clock";
 import { Button, buttonClass } from "../ui/button";
 import { Tag } from "../ui/tag";
 import { BeadPicker } from "./bead-picker";
@@ -44,18 +43,16 @@ const action =
 export function BraceletDesigner({
   rules,
   beads,
-  salesOpen: initialOpen,
   preorder,
 }: {
   rules: BraceletRules;
   beads: Bead[];
-  // Server tính lúc dựng trang; trước ngày mở bán chỉ cho thử thiết kế, chưa thêm vào giỏ
-  salesOpen: boolean;
-  // Shop bật nhận đặt chờ ở CMS: trước ngày mở bán thì có nút "Đặt chờ" thay nút lưu vào giỏ
+  // Shop bật nhận đặt chờ ở CMS: trước ngày mở bán vẫn lưu vào giỏ, đơn là đơn đặt chờ. Tắt thì chỉ thử thiết kế
   preorder: boolean;
 }) {
   const state = useBracelet(rules, beads);
-  const { open: salesOpen } = useLaunch(initialOpen);
+  const { open: salesOpen } = useLaunch();
+  const launchDateLabel = useLaunchLabel();
   const {
     ring,
     sceneItems,

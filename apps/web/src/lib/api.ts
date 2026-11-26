@@ -108,6 +108,14 @@ export type Store = {
   returnPolicy: string;
   // Bật tắt ở CMS > Cài đặt cửa hàng. Chưa lưu lần nào thì coi như bật
   preorderEnabled?: boolean;
+  // Giờ mở bán (ISO). Trống là đã mở bán. Đọc qua lib/launch.ts
+  launchAt?: string | null;
+  // Trước giờ mở bán chuyển trang sản phẩm về /countdown (proxy.ts tự đọc)
+  countdownRedirect?: boolean;
+  bank?: { bankName: string; accountNumber: string; accountName: string };
+  // Đặt cọc theo điều kiện và hạn chuyển khoản, cho trang chính sách
+  deposit?: { enabled: boolean; percent: number; forCustom: boolean; forPreorder: boolean; forMarked: boolean; minOrderVnd: number | null };
+  paymentHoldHours?: number;
 };
 
 export type Paged<T> = { data: T[]; meta: { page: number; limit: number; total: number; totalPages: number } };
@@ -115,14 +123,31 @@ export type Paged<T> = { data: T[]; meta: { page: number; limit: number; total: 
 export type OrderSummary = {
   code: string;
   createdAt: string;
-  status: "PREORDER" | "PENDING" | "CONFIRMED" | "SHIPPING" | "COMPLETED" | "CANCELLED";
+  status: import("./order").OrderStatus;
   paymentMethod: "COD" | "BANK_TRANSFER";
-  paymentStatus: "UNPAID" | "PAID" | "REFUNDED";
+  paymentStatus: "UNPAID" | "DEPOSITED" | "PAID" | "REFUNDED";
   subtotalVnd: number;
   shippingVnd: number;
   totalVnd: number;
+  // Tiền cọc chuyển khoản trước của đơn trả khi nhận hàng, 0 là không cọc
+  depositVnd: number;
+  paidVnd: number;
+  // Còn phải chuyển trước khi shop làm tiếp, và hạn chuyển (quá hạn hệ thống huỷ đơn)
+  amountDue: number;
+  paymentDueAt: string | null;
+  refundVnd: number;
+  refundedAt: string | null;
+  cancelReason: string | null;
+  cancelledBy: "CUSTOMER" | "STAFF" | "SYSTEM" | null;
+  carrier: string | null;
+  trackingCode: string | null;
+  // Khách tự huỷ được (shop chưa xác nhận); đơn có hàng làm riêng (chính sách huỷ khác)
+  canCancel: boolean;
+  madeToOrder: boolean;
+  timeline: { status: import("./order").OrderStatus | null; at: string }[];
   items: { productName: string; unitPriceVnd: number; quantity: number }[];
-  payment: { bankName: string; accountNumber: string; accountName: string; transferNote: string } | null;
+  // Còn phải chuyển khoản: amountVnd là phần còn lại của cả đơn hoặc tiền cọc (deposit)
+  payment: { bankName: string; accountNumber: string; accountName: string; transferNote: string; amountVnd: number; deposit: boolean } | null;
 };
 
 type Options = { fresh?: boolean };
@@ -252,10 +277,15 @@ export async function getAccount(token: string | null) {
 }
 
 // Route handler của web chuyển tiếp request của trình duyệt tới API, kèm token khách nếu có
-export async function forward(path: string, { method = "POST", body, token }: { method?: string; body?: unknown; token?: string | null } = {}) {
+// clientIp: IP thật của khách (nginx đặt X-Real-IP), để API giới hạn số lần thử theo từng người chứ không theo máy chủ web
+export async function forward(path: string, { method = "POST", body, token, clientIp }: { method?: string; body?: unknown; token?: string | null; clientIp?: string | null } = {}) {
   const res = await fetch(`${API_URL}/api/v1${path}`, {
     method,
-    headers: { "content-type": "application/json", ...(token ? { authorization: `Bearer ${token}` } : {}) },
+    headers: {
+      "content-type": "application/json",
+      ...(token ? { authorization: `Bearer ${token}` } : {}),
+      ...(clientIp ? { "x-real-ip": clientIp } : {}),
+    },
     body: body === undefined ? undefined : JSON.stringify(body),
     cache: "no-store",
     signal: AbortSignal.timeout(TIMEOUT_MS),

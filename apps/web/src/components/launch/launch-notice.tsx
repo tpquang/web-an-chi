@@ -1,29 +1,28 @@
+"use client";
+
 import type { ReactNode } from "react";
-import { isPreLaunch, launchDateLabel } from "@/lib/launch";
 import { braceletHref, postsHref } from "@/lib/links";
 import { Button } from "../ui/button";
 import { Eyebrow } from "../ui/layout";
 import { Tag } from "../ui/tag";
-import { LaunchCountdown, LaunchGate } from "./launch-clock";
+import { LaunchCountdown, LaunchGate, useLaunchLabel } from "./launch-clock";
 
-// Các khối "chờ ngày mở bán". Server tính trạng thái lúc dựng trang, LaunchGate tự chuyển đúng giờ ở trình duyệt.
-// Sau ngày mở bán các khối này không render gì, gỡ hẳn khi không còn cần
+// Các khối "chờ ngày mở bán". Ngày mở bán sửa ở CMS > Thông tin cửa hàng, LaunchGate tự chuyển đúng giờ ở trình duyệt.
+// Sau ngày mở bán các khối này không render gì
 
 // Bọc nút mua: trước giờ mở bán hiện `waiting`
 export function SalesGate({ waiting, children }: { waiting: ReactNode; children: ReactNode }) {
-  return (
-    <LaunchGate initialOpen={!isPreLaunch()} waiting={waiting}>
-      {children}
-    </LaunchGate>
-  );
+  return <LaunchGate waiting={waiting}>{children}</LaunchGate>;
 }
 
 export function LaunchTag() {
+  const launchDateLabel = useLaunchLabel();
   return <Tag tone="wood">Mở bán {launchDateLabel}</Tag>;
 }
 
 // Trang chủ, ngay dưới banner
 export function HomeLaunch() {
+  const launchDateLabel = useLaunchLabel();
   return (
     <SalesGate
       waiting={
@@ -58,6 +57,7 @@ export function HomeLaunch() {
 
 // Dải báo ở đầu trang danh sách sản phẩm, danh mục, thiết kế vòng
 export function LaunchStrip({ children }: { children: ReactNode }) {
+  const launchDateLabel = useLaunchLabel();
   return (
     <SalesGate
       waiting={
@@ -81,6 +81,7 @@ export function LaunchStrip({ children }: { children: ReactNode }) {
 // không có children (shop tắt đặt chờ ở CMS) thì chỉ hiện đếm ngược
 export function ProductLaunchPanel({ children }: { children?: ReactNode }) {
   const item = Boolean(children);
+  const launchDateLabel = useLaunchLabel();
   return (
     <section aria-labelledby="mo-ban" className="flex flex-col gap-4 rounded-3xl border border-edge bg-surface p-5">
       <div>

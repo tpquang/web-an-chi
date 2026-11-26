@@ -6,8 +6,8 @@ Mẫu App trong `anchi-ui-ux`, không có giới hạn 1180px. Dùng chung token
 |---|---|
 | `/inbox`, `/inbox/:id` | Hộp thư: danh sách hội thoại (đang mở, của tôi, chưa ai nhận, đã xong), khung trả lời có câu mẫu gõ "/", phân công, thẻ, ghi chú nội bộ, thông tin và đơn của khách. Huy hiệu số tin chưa đọc ở menu và tiêu đề tab |
 | `/staff` | Nhân viên (chỉ chủ shop): thêm, đổi quyền, khoá tài khoản |
-| `/` | Tổng quan: đơn chờ xác nhận, đang giao, doanh thu 30 ngày, khách hàng, đơn mới, sắp hết hàng |
-| `/orders`, `/orders/:id` | Đơn hàng: tìm, lọc trạng thái, xem chi tiết, đổi trạng thái đơn và thanh toán |
+| `/` | Tổng quan: việc cần làm với đơn (cùng số với tab danh sách đơn), doanh thu, đơn mới, sắp hết hàng |
+| `/orders`, `/orders/:id` | Đơn hàng. Danh sách: tab Cần xử lý, Chờ chuyển khoản, Đặt chờ, Đang chuẩn bị, Đang giao, Cần hoàn tiền, Tất cả (có số đếm); tag cảnh báo quá 24 giờ chưa xác nhận, hạn chuyển khoản, cần hoàn tiền, giao quá 7 ngày. Chi tiết: nút hành động theo trạng thái (một nút chính), modal giao vận chuyển, huỷ (lý do, tiền hoàn gợi ý theo chính sách), hoàn hàng; khối Thanh toán (phải thu, đã nhận, cọc, hạn, ghi nhận tiền, đã hoàn tiền); Đối soát; Lịch sử đơn có ghi chú nội bộ; cảnh báo khách từng huỷ hoặc không nhận hàng. Không có ô chọn trạng thái tự do. Menu Đơn hàng có số đơn cần xử lý; đơn mới, khách huỷ hiện toast ở mọi trang |
 | `/customers`, `/customers/:id` | Khách hàng: tìm theo tên hoặc số điện thoại, lịch sử đơn, đồng ý nhận tin |
 | `/products`, `/products/new`, `/products/:id` | Sản phẩm: lọc, nút gạt nổi bật trang chủ ngay trên danh sách (tối đa 4, API chặn khi đủ), form đầy đủ gồm thông số, ảnh, link Shopee và TikTok, cấu thành từ nguyên liệu thô, SEO |
 | `/business`, `/business/new`, `/business/:id` | Đợt nhập: nguyên liệu nhập (theo kg hoặc theo đơn vị), chi phí phát sinh, hao hụt khi nhận, quy đổi ra thành phẩm, vốn và lợi nhuận, nút nhập kho |

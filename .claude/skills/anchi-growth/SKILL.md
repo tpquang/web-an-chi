@@ -23,7 +23,7 @@ Khách mua trầm hương sợ nhất là mua phải hàng giả. Lời mời n�
 |---|---|---|
 | 1 | Đang xem danh mục | Thẻ sản phẩm, không nút mua trên thẻ |
 | 2 | Đang xem sản phẩm | "Thêm vào giỏ" là nút primary, gần giá |
-| 3 | Vừa thêm vào giỏ | Toast có lối vào giỏ, tối đa 3 sản phẩm hợp dùng kèm. Vòng tự thiết kế mở bảng giỏ hàng bên phải thay toast |
+| 3 | Vừa thêm vào giỏ | Mở bảng giỏ hàng bên phải (cả sản phẩm thường và vòng tự thiết kế, 11/2026), nút "Thanh toán" ở đáy bảng. Gợi ý dùng kèm tối đa 3 món, nếu có, đặt trong bảng dưới dòng hàng. |
 | 4 | Đã mua | Hướng dẫn dùng và bảo quản, không mời mua ngay |
 
 - Luôn ghi giá thật bằng VND. Phí giao hàng hiện trước bước cuối.
@@ -78,17 +78,38 @@ An Chi là site bán hàng, nên **không đặt quảng cáo bên thứ ba** nh
 - Có trang chính sách bảo mật; làm đúng quy định bảo vệ dữ liệu cá nhân hiện hành.
 - Không truyền tên, điện thoại, địa chỉ qua URL hay vào công cụ phân tích.
 - Nhắc qua email, Zalo chỉ gửi người đã đồng ý riêng, tối đa 2 tin mỗi tháng, theo dịp có thật, có cách huỷ.
-- Không chọn sẵn ô đồng ý nhận tiếp thị.
+- Không chọn sẵn ô đồng ý nhận tiếp thị. Từ 11/2026 trang thanh toán không có ô này (cho gọn); muốn nhắc theo dịp thì xin đồng ý ở chỗ khác, như trang đơn hàng sau khi đặt hoặc tài khoản, không đặt lại vào form thanh toán.
 
-## 6a. Đặt chờ (11/2026)
+## 6a. Mở bán và đặt chờ (11/2026)
 
-Trước ngày mở bán, khách đặt trước bằng nút "Đặt chờ" ở trang sản phẩm và trang thiết kế vòng.
+Giờ mở bán, nhận đặt chờ, chuyển trang sản phẩm về đếm ngược đều sửa ở CMS > Thông tin cửa hàng, web đổi sau khoảng một phút, không cần deploy.
 
-- Chỉ hỏi họ tên và số điện thoại (bắt buộc), ghi chú tuỳ chọn. Không hỏi địa chỉ, không có ô đồng ý tiếp thị. Ghi rõ số điện thoại chỉ dùng để gọi lại về đơn đặt chờ.
-- Nói rõ chưa phải thanh toán và shop sẽ gọi lại chốt địa chỉ, phí giao. Không hứa giữ hàng hay ưu đãi khi chưa có thật.
-- Đơn vào CMS với trạng thái "Đặt chờ", chưa trừ kho, không tính vào báo cáo lợi nhuận. Shop chuyển thành đơn chính ở chi tiết đơn thì mới trừ kho.
-- Chủ shop bật tắt ở CMS > Cài đặt cửa hàng. Tắt thì web chỉ còn đồng hồ đếm ngược.
-- Đo bằng sự kiện `begin_preorder` (mở form) và `preorder` (gửi xong, chỉ mã đơn và giá trị, không gửi tên hay số điện thoại).
+- Đồng hồ đếm ngược chỉ chạy tới ngày mở bán thật. Không đặt lại ngày để tạo cảm giác gấp, theo mục 4.
+- Đặt chờ đi qua giỏ hàng và trang thanh toán như đơn thường, không có nút hay form riêng. Ghi chú "Đơn đặt chờ" nói rõ ngày giao và việc shop gọi xác nhận. Không hứa giữ hàng hay ưu đãi khi chưa có thật.
+- Đơn vào CMS với trạng thái "Chờ chuẩn bị", chưa trừ kho, không tính vào báo cáo lợi nhuận. Chuyển sang trạng thái khác thì mới trừ kho.
+- Tắt đặt chờ thì trước ngày mở bán không thêm vào giỏ được, web chỉ còn đồng hồ đếm ngược.
+- "Chuyển trang sản phẩm về đếm ngược" chỉ bật khi site chưa có trên Google, theo `anchi-seo`.
+- Đo bằng phễu thường (`add_to_cart`, `begin_checkout`, `purchase`), không có sự kiện riêng.
+
+## 6b. Đặt cọc (11/2026)
+
+Bật tắt ở CMS > Thông tin cửa hàng, mục Đặt cọc và hạn chuyển khoản: phần trăm 30–50% tiền hàng (không tính phí giao, làm tròn lên nghìn đồng). Đơn cần cọc khi có một điều kiện đang bật: vòng tự thiết kế, đặt chờ, sản phẩm bật "Cần đặt cọc" (hàng đặt làm, giá trị cao), tạm tính từ một mức.
+
+- Chỉ đơn trả khi nhận hàng mới cọc. Khách chuyển khoản cả đơn thì không cọc.
+- Lựa chọn thanh toán ghi rõ số tiền cọc và số còn lại trả khi nhận, trước khi bấm đặt hàng. Tóm tắt đơn có hai dòng cọc trước, trả khi nhận.
+- Cần có tài khoản nhận chuyển khoản; chưa có thì web không yêu cầu cọc và không hiện lựa chọn chuyển khoản.
+- Không gọi tiền cọc là phí. Không dùng cọc để giữ chỗ cho ưu đãi không có thật.
+- Lựa chọn thanh toán nói rõ vì sao đơn cần cọc và hạn chuyển.
+- Shop ghi nhận tiền ở chi tiết đơn, sửa được số tiền cọc khi thoả thuận lại với khách.
+
+## 6c. Hạn chuyển khoản và huỷ đơn (11/2026)
+
+Chính sách đầy đủ ở `docs/web/plans/order-flow-2026-11.md` mục 2, hiện cho khách ở `/chinh-sach#huy-don`.
+
+- Đơn chuyển khoản hoặc cần cọc có hạn (mặc định 24 giờ). Quá hạn chưa nhận đủ thì hệ thống huỷ, trả kho. Trang đơn nói rõ giờ hết hạn, không dùng đồng hồ đếm ngược gây áp lực.
+- Khách tự huỷ được tới khi shop xác nhận, không cần gọi. Không hỏi giữ chân, không bắt điền lý do dài: chọn một lý do có sẵn.
+- Sau khi shop xác nhận: hàng có sẵn hoàn đủ; hàng làm riêng giữ tiền cọc. Đang giao không huỷ, từ chối nhận thì hoàn tiền trừ phí giao.
+- Câu chính sách trên trang đơn phải đúng với trạng thái hiện tại, không hiện điều khoản không áp dụng.
 
 ## 7. Giữ chân
 

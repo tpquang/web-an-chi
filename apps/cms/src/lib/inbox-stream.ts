@@ -2,7 +2,10 @@ import { getToken } from "./api";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 
-export type InboxEvent = { type: "message" | "conversation"; conversationId: string; data: { message?: unknown; conversation: unknown } };
+export type InboxEvent =
+  | { type: "message" | "conversation"; conversationId: string; data: { message?: unknown; conversation: unknown } }
+  // Đơn mới, khách huỷ, hệ thống huỷ vì quá hạn thanh toán (API publishOrder)
+  | { type: "order"; data: { id: string; code: string; kind: "created" | "cancelled" | "expired"; customerName: string; totalVnd: number } };
 type Listener = (event: InboxEvent) => void;
 
 // Một kết nối Server-Sent Events dùng chung cho cả CMS. EventSource không gửi được header Authorization,

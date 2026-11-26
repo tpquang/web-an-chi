@@ -2,9 +2,12 @@ import type { Metadata, Viewport } from "next";
 import { Be_Vietnam_Pro, Cormorant_SC } from "next/font/google";
 import type { ReactNode } from "react";
 import { Analytics } from "@/components/analytics";
+import { CartLayer } from "@/components/cart/cart-drawer";
 import { ChatLauncher } from "@/components/chat/chat-launcher";
+import { LaunchProvider } from "@/components/launch/launch-clock";
 import { SiteHeader } from "@/components/site-header";
-import { getCategories } from "@/lib/api";
+import { getCategories, getStore } from "@/lib/api";
+import { isPreLaunch, launchAtOf } from "@/lib/launch";
 import { Toaster } from "@/components/ui/toast";
 import { site } from "@/lib/site";
 import "./globals.css";
@@ -45,16 +48,24 @@ const themeScript = `try{var t=localStorage.getItem("anchi-theme");document.docu
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   // Menu sổ xuống không được làm hỏng cả trang khi API lỗi, lỗi thì chỉ còn link "Tất cả sản phẩm"
-  const categories = await getCategories().then((list) => list.map(({ name, slug }) => ({ name, slug })), () => []);
+  const [categories, store] = await Promise.all([
+    getCategories().then((list) => list.map(({ name, slug }) => ({ name, slug })), () => []),
+    // API lỗi thì coi như đã mở bán, không khoá nút mua vì lỗi cấu hình
+    getStore().catch(() => null),
+  ]);
+  const launchAt = launchAtOf(store);
   return (
     <html lang="vi" className={`${serif.variable} ${sans.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="flex min-h-dvh flex-col">
-        <SiteHeader categories={categories} />
-        {children}
-        <ChatLauncher />
+        <LaunchProvider at={launchAt} initialOpen={!isPreLaunch(launchAt)}>
+          <SiteHeader categories={categories} />
+          {children}
+          <CartLayer />
+          <ChatLauncher />
+        </LaunchProvider>
         <Toaster />
         <Analytics />
       </body>

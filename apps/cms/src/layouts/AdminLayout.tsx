@@ -26,6 +26,8 @@ import {
 import { ThemeToggle } from "../components/ThemeToggle";
 import { useAuth, type PermissionKey } from "../lib/auth";
 import { useInboxUnread } from "../lib/use-inbox-unread";
+import { useOrderCounts } from "../lib/order-counts";
+import { useOrderNotices } from "../lib/use-order-notices";
 
 type NavItem = { to: string; label: string; Icon: ComponentType<{ size?: number }>; perm: PermissionKey | "owner" };
 type NavGroup = { label: string; links: NavItem[] };
@@ -93,6 +95,8 @@ const groups: NavGroup[] = [
 export function AdminLayout() {
   const { logout, staff, isOwner, can } = useAuth();
   const unread = useInboxUnread();
+  const orderCounts = useOrderCounts();
+  useOrderNotices();
   const visible = groups
     .map((g) => ({ ...g, links: g.links.filter((l) => (l.perm === "owner" ? isOwner : can(l.perm))) }))
     .filter((g) => g.links.length > 0);
@@ -122,6 +126,9 @@ export function AdminLayout() {
                 >
                   <Icon size={18} />
                   {label}
+                  {to === "/orders" && (orderCounts?.todo ?? 0) > 0 && (
+                    <span aria-label={`${orderCounts!.todo} đơn cần xử lý`} className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-wood px-1.5 text-[11px] leading-5 font-semibold text-on-wood">{orderCounts!.todo}</span>
+                  )}
                   {to === "/inbox" && unread > 0 && (
                     <span aria-label={`${unread} tin chưa đọc`} className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-err px-1.5 text-[11px] leading-5 font-semibold text-surface">{unread}</span>
                   )}

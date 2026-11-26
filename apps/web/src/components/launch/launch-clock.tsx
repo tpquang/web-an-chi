@@ -1,32 +1,45 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
-import { msToLaunch } from "@/lib/launch";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { launchLabel, msToLaunch } from "@/lib/launch";
 
-// initialOpen do server tính lúc dựng trang nên HTML và lần render đầu ở trình duyệt luôn khớp.
+// Giờ mở bán lấy từ cài đặt cửa hàng ở root layout, mọi component client đọc qua đây.
+// initialOpen do server tính lúc dựng trang nên HTML và lần render đầu ở trình duyệt luôn khớp
+const LaunchContext = createContext<{ at: number | null; initialOpen: boolean }>({ at: null, initialOpen: true });
+
+export function LaunchProvider({ at, initialOpen, children }: { at: number | null; initialOpen: boolean; children: ReactNode }) {
+  return <LaunchContext value={{ at, initialOpen }}>{children}</LaunchContext>;
+}
+
+// Ngày mở bán dạng chữ, ví dụ 12/12/2026
+export function useLaunchLabel() {
+  return launchLabel(useContext(LaunchContext).at);
+}
+
 // Sau khi mount, đồng hồ của trình duyệt quyết định: trang cache cũ vẫn tự mở đúng giờ.
 // left là null trước khi mount, vì giờ trên server (trang cache 60 giây) không khớp giờ của khách
-export function useLaunch(initialOpen: boolean) {
+export function useLaunch() {
+  const { at, initialOpen } = useContext(LaunchContext);
   const [left, setLeft] = useState<number | null>(null);
 
   useEffect(() => {
     // Không dùng setTimeout tới giờ mở bán: quá 24,8 ngày thì trình duyệt cho chạy ngay
     const tick = () => {
-      const ms = msToLaunch();
+      const ms = msToLaunch(at);
       setLeft(ms);
       if (ms === 0) clearInterval(id);
     };
     const id = setInterval(tick, 1000);
     tick();
     return () => clearInterval(id);
-  }, []);
+  }, [at]);
 
   return { open: left === null ? initialOpen : left === 0, left };
 }
 
 // Trước giờ mở bán hiện `waiting`, sau đó hiện `children` (nút mua)
-export function LaunchGate({ initialOpen, waiting, children }: { initialOpen: boolean; waiting: ReactNode; children?: ReactNode }) {
-  const { open } = useLaunch(initialOpen);
+export function LaunchGate({ waiting, children }: { waiting: ReactNode; children?: ReactNode }) {
+  const { open } = useLaunch();
   return <>{open ? children : waiting}</>;
 }
 
@@ -46,7 +59,7 @@ const tones = {
 
 // Bốn ô ngày, giờ, phút, giây. Trước khi mount hiện gạch giữ chỗ, ô rộng cố định nên không giật
 export function LaunchCountdown({ size = "md", tone = "surface" }: { size?: "md" | "lg"; tone?: keyof typeof tones }) {
-  const { left } = useLaunch(false);
+  const { left } = useLaunch();
   const values = units.map((unit) => (left === null ? null : Math.floor(left / unit.ms) % unit.wrap));
   // Máy đọc màn hình nghe một câu gọn, không đọc lại mỗi giây
   const spoken = values[0] === null ? "Đang tính thời gian" : `Còn ${values[0]} ngày ${values[1]} giờ ${values[2]} phút`;

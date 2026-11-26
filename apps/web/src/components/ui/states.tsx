@@ -27,8 +27,3 @@ export function ErrorState({ title, desc, onRetry }: { title: string; desc?: str
 export function Skeleton({ className = "" }: { className?: string }) {
   return <span aria-hidden className={`block animate-pulse rounded-xl bg-paper-2 motion-reduce:animate-none ${className}`} />;
 }
-
-export function Alert({ tone = "info", children }: { tone?: "info" | "warn" | "ok"; children: ReactNode }) {
-  const cls = { info: "bg-info-soft", warn: "bg-warn-soft", ok: "bg-ok-soft" }[tone];
-  return <div className={`rounded-2xl p-4 text-sm ${cls}`}>{children}</div>;
-}

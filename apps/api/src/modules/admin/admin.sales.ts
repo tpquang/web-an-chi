@@ -1,14 +1,14 @@
 import { Router } from "express";
 import { z } from "zod";
-import { OrderStatus, PaymentMethod, PaymentStatus, ProductType, SalesChannel, type Prisma } from "../../generated/prisma/client.js";
+import { OrderEventType, OrderStatus, PaymentMethod, PaymentStatus, ProductType, SalesChannel, type Prisma } from "../../generated/prisma/client.js";
 import type { StaffContext } from "../../lib/auth.js";
 import { applyStock, stockNeeds, unitCosts, withLiveStock } from "../../lib/stock.js";
 import { optionalText } from "../../lib/text.js";
 import { HttpError } from "../../middleware/errors.js";
 import { prisma } from "../../lib/prisma.js";
 import { pageQuery } from "../../lib/text.js";
-import { changeOrderStatus, orderCode, phoneField } from "../orders/orders.service.js";
-import { convertPreorder, convertPreorderInput } from "../orders/orders.preorder.js";
+import { logEvent } from "../orders/order-flow.js";
+import { orderCode, phoneField } from "../orders/orders.service.js";
 
 export const adminSalesRouter = Router();
 
@@ -76,87 +76,10 @@ adminSalesRouter.delete("/customers/:id", async (req, res) => {
   res.status(204).end();
 });
 
-// ---- Đơn hàng
-
-const orderQuery = z.object({
-  ...pageQuery,
-  q: z.string().trim().optional(),
-  status: z.enum(OrderStatus).optional(),
-  channel: z.enum(SalesChannel).optional(),
-});
-
-adminSalesRouter.get("/orders", async (req, res) => {
-  const { page, limit, q, status, channel } = orderQuery.parse(req.query);
-  const where: Prisma.OrderWhereInput = {
-    ...(status ? { status } : {}),
-    ...(channel ? { channel } : {}),
-    ...(q
-      ? {
-          OR: [
-            { code: { contains: q.toUpperCase() } },
-            { customerPhone: { contains: q.replace(/\s/g, "") } },
-            { customerName: { contains: q, mode: "insensitive" } },
-            { externalCode: { contains: q, mode: "insensitive" } },
-          ],
-        }
-      : {}),
-  };
-  const [data, total] = await prisma.$transaction([
-    prisma.order.findMany({
-      where,
-      include: { _count: { select: { items: true } } },
-      orderBy: [{ createdAt: "desc" }, { id: "asc" }],
-      skip: (page - 1) * limit,
-      take: limit,
-    }),
-    prisma.order.count({ where }),
-  ]);
-  res.json({ data, meta: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) } });
-});
-
-adminSalesRouter.get("/orders/:id", async (req, res) => {
-  const data = await prisma.order.findUniqueOrThrow({
-    where: { id: req.params.id },
-    include: { items: { include: { product: { select: { slug: true } } } } },
-  });
-  res.json({ data });
-});
+// ---- Đơn hàng: danh sách, chi tiết, trạng thái ở admin.orders.ts
 
 const vnd = z.number().int().min(0).max(2_000_000_000);
 const day = z.iso.date().transform((value) => new Date(`${value}T12:00:00+07:00`));
-
-// Đối soát nhập tay: phí sàn, tiền ship thực trả, ngày nhận tiền
-const orderPatch = z.object({
-  status: z.enum(OrderStatus).optional(),
-  paymentStatus: z.enum(PaymentStatus).optional(),
-  paidAt: day.nullish(),
-  platformFeeVnd: vnd.optional(),
-  shippingCostVnd: vnd.optional(),
-  externalCode: optionalText,
-  note: optionalText,
-});
-
-// Đơn đặt chờ thành đơn chính: ghi địa chỉ, phí giao, thanh toán, chuyển "Chờ xác nhận" và trừ kho
-adminSalesRouter.post("/orders/:id/convert", async (req, res) => {
-  await convertPreorder(req.params.id, convertPreorderInput.parse(req.body));
-  res.json({ data: await prisma.order.findUniqueOrThrow({ where: { id: req.params.id } }) });
-});
-
-adminSalesRouter.patch("/orders/:id", async (req, res) => {
-  const { status, paymentStatus, paidAt, ...rest } = orderPatch.parse(req.body);
-  if (status) await changeOrderStatus(req.params.id, status);
-  const fields = Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== undefined));
-  await prisma.order.update({
-    where: { id: req.params.id },
-    data: {
-      ...fields,
-      ...(paymentStatus ? { paymentStatus } : {}),
-      // Đánh dấu đã thu mà chưa ghi ngày thì lấy hôm nay
-      ...(paidAt !== undefined ? { paidAt } : paymentStatus === PaymentStatus.PAID ? { paidAt: new Date() } : {}),
-    },
-  });
-  res.json({ data: await prisma.order.findUniqueOrThrow({ where: { id: req.params.id } }) });
-});
 
 // ---- Nhập đơn tay: đơn Shopee, TikTok, khách giới thiệu. Trừ kho như đơn web
 
@@ -239,6 +162,7 @@ adminSalesRouter.post("/orders", async (req, res) => {
       },
     });
     await applyStock(tx, needs, -1, { orderId: created.id, note: `Đơn ${created.code}` });
+    await logEvent(tx, created.id, { kind: "staff", id: staff.id, name: staff.name || staff.email }, { type: OrderEventType.CREATED, toStatus: created.status, note: "Nhập đơn tay" });
     return created;
   });
   res.status(201).json({ data: order });

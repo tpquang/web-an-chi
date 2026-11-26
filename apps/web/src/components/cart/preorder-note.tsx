@@ -1,8 +1,11 @@
-import { launchDateLabel } from "@/lib/launch";
+"use client";
+
 import type { Quote } from "@/lib/client-api";
+import { useLaunchLabel } from "../launch/launch-clock";
 
 // Ghi chú dưới giỏ hàng trước ngày mở bán: đặt hàng như thường, đơn là đơn đặt chờ
 export function PreorderNote({ quote, className = "" }: { quote: Quote; className?: string }) {
+  const launchDateLabel = useLaunchLabel();
   if (quote.preorderClosed) {
     return (
       <p className={`rounded-xl bg-warn-soft px-4 py-3 text-sm ${className}`}>

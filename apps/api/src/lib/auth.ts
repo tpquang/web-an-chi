@@ -57,11 +57,6 @@ export const requireAdmin: RequestHandler = async (req, res, next) => {
   next();
 };
 
-export const requireOwner: RequestHandler = (_req, res, next) => {
-  if ((res.locals.staff as StaffContext | undefined)?.role !== "OWNER") throw new HttpError(403, "Chỉ chủ shop xem được mục này.", "FORBIDDEN");
-  next();
-};
-
 // Khách đăng nhập là tuỳ chọn: không có token hoặc token sai thì coi như khách vãng lai
 export function customerIdFrom(req: Request): string | null {
   const header = req.get("authorization") ?? "";
