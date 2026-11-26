@@ -20,7 +20,7 @@
 ## P0
 
 - [ ] Thông báo đơn mới cho shop (Zalo, email hoặc Telegram)
-- [ ] Rate limit cho `POST /orders`, `POST /preorders` và `orders/lookup`
+- [ ] Rate limit cho `POST /orders` và `orders/lookup`
 - [ ] Trang chính sách và giới thiệu, link ở footer
 
 ## P1

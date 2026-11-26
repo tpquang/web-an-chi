@@ -33,7 +33,8 @@ const fitIds = braceletRules.fits.map((f) => f.id) as [FitId, ...FitId[]];
 
 export const braceletDesign = z
   .object({
-    beads: z.array(z.string().min(1).max(80)).min(braceletRules.minBeads).max(braceletRules.maxBeads),
+    // Không ép độ dài theo cổ tay: khách xâu dư vòng cũng được, chỉ giữ trần số hạt để chặn dữ liệu rác
+    beads: z.array(z.string().min(1).max(80)).min(1).max(braceletRules.maxBeads),
     cord: z.enum(cordIds),
     fit: z.enum(fitIds),
     wristCm: z.number().min(braceletRules.wristCm.min).max(braceletRules.wristCm.max),
@@ -49,10 +50,6 @@ export const braceletDesign = z
       })
       .optional(),
     note: z.string().trim().max(300).optional(),
-  })
-  .refine((d) => (d.wraps ? d.beads.length >= braceletRules.mala.beads : d.beads.length <= braceletRules.maxBeads), {
-    message: "Số hạt không hợp với kiểu vòng",
-    path: ["beads"],
   });
 
 export type BraceletDesign = z.infer<typeof braceletDesign>;

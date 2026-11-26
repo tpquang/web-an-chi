@@ -5,7 +5,7 @@ type TrackWindow = Window & { gtag?: (...args: unknown[]) => void; dataLayer?: u
 // - Có dataLayer (GTM): đẩy { event, ecommerce }, trong GTM tạo trigger Custom Event cùng tên.
 // - Chưa nạp gì (bản test): bỏ qua.
 // Chỉ gửi mã sản phẩm, số lượng, giá: không gửi tên, số điện thoại, địa chỉ khách
-export function trackEvent(name: "view_item" | "add_to_cart" | "begin_checkout" | "purchase" | "begin_preorder" | "preorder", params: Record<string, unknown>) {
+export function trackEvent(name: "view_item" | "add_to_cart" | "begin_checkout" | "purchase", params: Record<string, unknown>) {
   if (typeof window === "undefined") return;
   const w = window as TrackWindow;
   const ecommerce = { currency: "VND", ...params };

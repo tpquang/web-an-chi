@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cart } from "@/lib/cart";
 import type { QuoteLine } from "@/lib/client-api";
-import { productHref } from "@/lib/links";
+import { braceletEditHref, productHref } from "@/lib/links";
 import { formatVnd } from "@/lib/site";
 import { TrashIcon } from "../icons";
 import { IconButton } from "../ui/button";
@@ -14,8 +14,6 @@ function problemText(line: QuoteLine) {
   if (line.problem === "UNAVAILABLE") return "Sản phẩm này không còn bán. Bạn xoá khỏi giỏ để đặt hàng.";
   if (line.problem === "OUT_OF_STOCK") return "Sản phẩm đã hết hàng. Bạn xoá khỏi giỏ để đặt hàng.";
   if (line.problem === "NOT_ENOUGH") return `Shop chỉ còn ${line.product?.stock} sản phẩm. Bạn giảm số lượng để đặt hàng.`;
-  if (line.problem === "TOO_LONG") return "Vòng dài quá giới hạn shop làm được. Bạn xoá vòng này và thiết kế lại.";
-  if (line.problem === "TOO_SHORT") return "Vòng ngắn hơn cỡ cổ tay. Bạn xoá vòng này và thiết kế lại.";
   return null;
 }
 
@@ -62,9 +60,16 @@ export function CartLine({ line, disabled }: { line: QuoteLine; disabled?: boole
           ) : (
             <span />
           )}
+          <span className="ml-auto flex items-center gap-1">
+          {line.design && (
+            <Link href={braceletEditHref(line.slug)} className="inline-flex min-h-11 items-center px-2 text-sm font-medium text-wood underline-offset-4 hover:underline">
+              Sửa vòng
+            </Link>
+          )}
           <IconButton label={`Xoá ${name} khỏi giỏ`} onClick={() => cart.remove(line.slug)} disabled={disabled}>
             <TrashIcon />
           </IconButton>
+          </span>
         </div>
         {problem && (
           <div role="alert" className="flex flex-wrap items-center gap-x-3 text-sm">

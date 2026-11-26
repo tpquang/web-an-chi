@@ -5,7 +5,7 @@ import type { CartItem } from "./cart";
 export type QuoteLine = {
   slug: string;
   quantity: number;
-  problem: "UNAVAILABLE" | "OUT_OF_STOCK" | "NOT_ENOUGH" | "TOO_LONG" | "TOO_SHORT" | null;
+  problem: "UNAVAILABLE" | "OUT_OF_STOCK" | "NOT_ENOUGH" | null;
   lineTotalVnd: number;
   product: {
     id: string;
@@ -37,6 +37,10 @@ export type Quote = {
   totalVnd: number;
   shipping: { flatFeeVnd: number; freeFromVnd: number | null; eta: string };
   canCheckout: boolean;
+  // Trước ngày mở bán: đơn là đơn đặt chờ, chưa trừ kho
+  preorder?: boolean;
+  // Trước ngày mở bán mà shop tắt đặt chờ
+  preorderClosed?: boolean;
 };
 
 export type ApiFailure = {

@@ -6,7 +6,6 @@ import { formatVnd } from "@/lib/site";
 import { useState } from "react";
 import { MinusIcon, PlusIcon, SlidersIcon } from "../icons";
 import { Button } from "../ui/button";
-import { PreorderButton } from "../preorder/preorder-button";
 import { BraceletAccent, BraceletNotes, FitChoice } from "./bracelet-options";
 import type { BraceletState } from "./use-bracelet";
 
@@ -104,7 +103,7 @@ export function WristSize({ state, compact }: { state: BraceletState; compact?: 
 
 // Cột trái máy tính, dưới kho hạt: hạt chủ, cổ tay, rồi chốt vòng (tạm tính, nút lưu vào giỏ), ghi chú, chi tiết hạt
 export function BraceletSummary({ state, salesOpen, preorder }: { state: BraceletState; salesOpen: boolean; preorder: boolean }) {
-  const { lines, rules, totalVnd, problem, addToCart, gift, note } = state;
+  const { lines, rules, totalVnd, addToCart, gift, note } = state;
   // Dòng tóm tắt dưới tiêu đề Ghi chú để khách thấy đã chọn gì mà không cần mở
   const noteSummary = [
     rules.cords.find((c) => c.id === state.cord)?.name,
@@ -130,27 +129,19 @@ export function BraceletSummary({ state, salesOpen, preorder }: { state: Bracele
           <span className="font-medium">Tạm tính</span>
           <span className="font-serif text-[28px] leading-tight font-semibold text-wood tabular-nums">{formatVnd(totalVnd)}</span>
         </p>
-        <p role="status" className={`text-sm ${problem ? "text-err" : "text-ok"}`}>
-          {problem ?? "Vòng đã vừa cỡ tay."}
-        </p>
-        {salesOpen ? (
-          <Button size="lg" block onClick={addToCart}>
-            Lưu vòng vào giỏ hàng
-          </Button>
+        <FitStatus state={state} className="text-sm" />
+        {salesOpen || preorder ? (
+          <>
+            <Button size="lg" block onClick={addToCart}>
+              {state.editing ? "Cập nhật vòng trong giỏ" : "Lưu vòng vào giỏ hàng"}
+            </Button>
+            {!salesOpen && <p className="text-sm text-ink-2">Shop giao từ ngày {launchDateLabel}. Vòng đặt trước ngày này là đơn đặt chờ.</p>}
+          </>
         ) : (
-          preorder ? (
-            <>
-              <p className="text-sm text-ink-2">
-                Shop giao hàng từ ngày {launchDateLabel}. Bạn đặt chờ vòng này ngay: để lại tên và số điện thoại, shop gọi lại chốt đơn, chưa cần thanh toán.
-              </p>
-              <PreorderButton item={state.preorderItem} label="Đặt chờ vòng này" block />
-            </>
-          ) : (
             <p className="rounded-2xl bg-wood-soft p-4 text-sm">
               <span className="block font-medium text-wood">Chờ ngày mở bán {launchDateLabel}</span>
-              Vòng thiết kế đặt được từ ngày này. Thiết kế chưa được lưu lại, bạn ghi nhớ mẫu ưng ý để đặt khi shop mở bán.
+              Vòng thiết kế đặt được từ ngày này. Thiết kế của bạn được lưu trên trình duyệt này để đặt khi shop mở bán.
             </p>
-          )
         )}
       </section>
 
@@ -195,6 +186,29 @@ export function BraceletSummary({ state, salesOpen, preorder }: { state: Bracele
           )}
         </dl>
       </section>
+    </div>
+  );
+}
+
+// Lỗi chặn lưu tô đỏ; lệch cỡ tay chỉ là gợi ý, vòng vẫn lưu được
+export function FitStatus({ state, className }: { state: BraceletState; className: string }) {
+  const { problem, hint } = state;
+  return (
+    <p role="status" className={`${className} ${problem ? "text-err" : hint ? "text-warn" : "text-ok"}`}>
+      {problem ?? hint ?? "Vòng đã vừa cỡ tay."}
+    </p>
+  );
+}
+
+// Đang sửa một vòng trong giỏ: báo cho khách và cho thôi sửa
+export function EditingNotice({ state }: { state: BraceletState }) {
+  if (!state.editing) return null;
+  return (
+    <div role="status" className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-xl border border-wood/40 bg-wood-soft px-4 py-2 text-sm">
+      <p>Bạn đang sửa một vòng trong giỏ. Bấm cập nhật để lưu thay đổi.</p>
+      <button type="button" onClick={state.stopEditing} className="min-h-11 font-medium text-wood underline-offset-4 hover:underline">
+        Thôi sửa, lưu thành vòng mới
+      </button>
     </div>
   );
 }

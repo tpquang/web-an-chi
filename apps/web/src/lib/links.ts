@@ -10,6 +10,9 @@ export const loginHref = "/dang-nhap";
 export const registerHref = "/dang-ky";
 export const accountHref = "/tai-khoan";
 export const braceletHref = "/thiet-ke-vong-tay";
+// Mở trang thiết kế để sửa một vòng đã lưu trong giỏ
+export const BRACELET_EDIT_PARAM = "sua";
+export const braceletEditHref = (cartSlug: string) => `${braceletHref}?${BRACELET_EDIT_PARAM}=${encodeURIComponent(cartSlug)}`;
 export const supplierHref = "/nha-cung-cap";
 
 export const productHref = (slug: string) => `/san-pham/${slug}`;

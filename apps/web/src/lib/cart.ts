@@ -74,6 +74,8 @@ function subscribe(listener: () => void) {
 }
 
 // Server và lần render đầu luôn thấy giỏ rỗng để HTML khớp nhau
+export const readCart = () => read();
+
 export function useCart() {
   return useSyncExternalStore(subscribe, read, () => EMPTY);
 }
@@ -109,6 +111,20 @@ export const cart = {
       current
         ? items.map((item) => (item.slug === slug ? { ...item, quantity: Math.min(item.quantity + 1, MAX_QUANTITY) } : item))
         : [...items, { slug, quantity: 1, design }],
+    );
+    return slug;
+  },
+  // Sửa vòng trong giỏ: giữ số lượng và chỗ trong giỏ. Trùng vòng khác đã có thì gộp lại
+  replaceBracelet(oldSlug: string, design: BraceletDesign) {
+    const slug = designKey(design);
+    const items = read();
+    const old = items.find((item) => item.slug === oldSlug);
+    if (!old) return cart.addBracelet(design);
+    const twin = slug !== oldSlug && items.find((item) => item.slug === slug);
+    write(
+      twin
+        ? items.filter((item) => item.slug !== oldSlug).map((item) => (item.slug === slug ? { ...item, quantity: Math.min(item.quantity + old.quantity, MAX_QUANTITY) } : item))
+        : items.map((item) => (item.slug === oldSlug ? { slug, quantity: old.quantity, design } : item)),
     );
     return slug;
   },

@@ -160,7 +160,7 @@ export function StorePage() {
 
         <Panel title="Đặt chờ">
           <p className="-mt-2 mb-3 text-sm text-ink-2">
-            Trước ngày mở bán, trang sản phẩm và trang thiết kế vòng có nút “Đặt chờ”: khách để lại tên và số điện thoại, đơn vào danh sách với trạng thái “Đặt chờ”, chưa trừ kho. Tắt thì nút ẩn đi và không nhận đơn đặt chờ mới; đơn đã có vẫn giữ nguyên. Web cập nhật sau khoảng một phút.
+            Trước ngày mở bán, khách vẫn thêm vào giỏ và đặt hàng như thường, giỏ hàng ghi chú là đơn đặt chờ. Đơn vào danh sách với trạng thái “Chờ chuẩn bị”, chưa trừ kho; chuyển sang “Chờ xác nhận” thì kho mới bị trừ. Tắt thì trước ngày mở bán không thêm vào giỏ được; đơn đã có vẫn giữ nguyên. Web cập nhật sau khoảng một phút.
           </p>
           <Switch checked={values.preorderEnabled} onChange={(v) => set("preorderEnabled", v)} label={values.preorderEnabled ? "Đang nhận đặt chờ" : "Đang tắt đặt chờ"} disabled={submitting} />
         </Panel>

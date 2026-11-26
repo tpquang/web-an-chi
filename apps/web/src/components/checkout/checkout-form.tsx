@@ -21,6 +21,7 @@ import { cartHref, checkoutHref, loginHref, orderHref, productsHref } from "@/li
 import { paymentOptions } from "@/lib/order";
 import { trackEvent } from "@/lib/track";
 import { useQuote } from "@/lib/use-quote";
+import { PreorderNote } from "../cart/preorder-note";
 import { useSignedIn } from "@/lib/use-signed-in";
 import { OrderSummary } from "../cart/order-summary";
 import { CartSkeleton } from "../cart/cart-view";
@@ -245,8 +246,9 @@ export function CheckoutForm() {
             <Button type="submit" size="lg" loading={submitting} disabled={!quote.canCheckout} className="sm:min-w-56">
               Đặt hàng
             </Button>
-            {!quote.canCheckout && <p className="text-sm text-err">Giỏ có sản phẩm cần sửa. Bạn quay lại giỏ hàng để xem.</p>}
+            {!quote.canCheckout && !quote.preorderClosed && <p className="text-sm text-err">Giỏ có sản phẩm cần sửa. Bạn quay lại giỏ hàng để xem.</p>}
           </div>
+          <PreorderNote quote={quote} />
           <p className="text-sm text-ink-3">Shop chỉ dùng tên, số điện thoại và địa chỉ để giao đơn này.</p>
         </div>
       </div>

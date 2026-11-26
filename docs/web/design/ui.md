@@ -31,7 +31,7 @@
 
 **Thiết kế vòng `/thiet-ke-vong-tay`:** điện thoại vào bằng form khởi tạo theo bước (`BraceletSetup`), máy tính có hàng cài đặt gọn `SetupBar` trên khu thiết kế. Bố cục chi tiết ở skill `anchi-ui-ux` `layout.md` mục Thiết kế vòng tay.
 
-**Đặt chờ:** `PreorderButton`, `PreorderDialog` (`components/preorder`), route handler `/api/preorders`. Hiện trước ngày mở bán khi CMS bật đặt chờ.
+**Đặt chờ:** không có nút hay form riêng. Trước ngày mở bán (CMS bật đặt chờ) trang sản phẩm và thiết kế vòng vẫn có nút thêm vào giỏ; `PreorderNote` (`components/cart/preorder-note.tsx`) hiện dưới giỏ hàng, bảng giỏ và trang thanh toán.
 
 **Chat với shop:** nút "Nhắn shop" góc phải dưới (`ChatLauncher`), khung chat chỉ tải khi mở. Ẩn ở giỏ và đặt hàng nếu khách chưa từng chat, để khu đặt hàng gọn. Khách điền tên, số điện thoại (không bắt buộc) và câu hỏi; đã đăng nhập thì điền sẵn.
 
@@ -43,4 +43,6 @@
 
 - Xoá một món khỏi giỏ không hỏi xác nhận: thao tác nhỏ, thêm lại được ngay. `confirmDialog` dành cho xoá dữ liệu.
 
-**Thiết kế vòng, chuỗi 108 hạt và đeo thử:** "Loại vòng" (đầu cột phải) có Vòng đơn hoặc Chuỗi 108 hạt quấn 4 vòng, tuỳ chọn tick "Hạt chủ và tua" (`accent`): hạt chủ đặt giữa vòng dưới, xa đoạn vắt chéo, nút chặn và hai dây tua 3 hạt (`tassel.ts`), tính thêm 7 hạt trầm chính vào giá và tồn kho (`rules.mala` ở `apps/api/src/modules/bracelet/bracelet.service.ts`, thiết kế gửi thêm `wraps`). Chuỗi giữ đúng 108 hạt trầm (thêm tối đa 12 charm), tự chọn cỡ hạt cùng loại trầm để quấn gần đúng số vòng; lệch quá 0,4 vòng thì báo lỗi. Nút "Đeo thử" nạp bàn tay scan ở `public/models/ban-tay/` (`hand-model.ts`): đo bề mặt da theo lát cắt, phóng theo cỡ cổ tay khách, chuỗi trượt xuống cẳng tay theo trọng lực tới chỗ các vòng ôm vừa (dư thì chùng, thiếu thì dây thun giãn), đoạn cuối vắt chéo ra ngoài để khép vòng (`coil.ts`), bóng đổ lên da. Khi đeo thử chỉ xoay xem, không sửa hạt.
+**Thiết kế vòng, chuỗi 108 hạt và đeo thử:** "Loại vòng" (đầu cột phải) có Vòng đơn hoặc Chuỗi 108 hạt quấn 4 vòng, tuỳ chọn tick "Hạt chủ và tua" (`accent`): hạt chủ đặt giữa vòng dưới, xa đoạn vắt chéo, nút chặn và hai dây tua 3 hạt (`tassel.ts`), tính thêm 7 hạt trầm chính vào giá và tồn kho (`rules.mala` ở `apps/api/src/modules/bracelet/bracelet.service.ts`, thiết kế gửi thêm `wraps`). Chuỗi dựng sẵn 108 hạt trầm, tự chọn cỡ hạt cùng loại trầm để quấn gần đúng số vòng. Nút "Đeo thử" nạp bàn tay scan ở `public/models/ban-tay/` (`hand-model.ts`): đo bề mặt da theo lát cắt, phóng theo cỡ cổ tay khách, chuỗi trượt xuống cẳng tay theo trọng lực tới chỗ các vòng ôm vừa (dư thì chùng, thiếu thì dây thun giãn), đoạn cuối vắt chéo ra ngoài để khép vòng (`coil.ts`), bóng đổ lên da. Khi đeo thử chỉ xoay xem, không sửa hạt.
+
+**Không chặn độ dài, lưu nháp và sửa vòng:** khách xâu dài ngắn tuỳ ý (dư vòng, thiếu hạt, khác 108 hạt đều lưu được), lệch cỡ tay chỉ hiện gợi ý màu `warn` (`hint` ở `use-bracelet.ts`); chỉ chặn khi vòng trống hoặc shop thiếu hạt, trần chung 200 hạt và charm. API cũng bỏ lỗi `TOO_LONG`, `TOO_SHORT`. Thiết kế đang làm tự lưu vào `localStorage` (`anchi-bracelet-draft`), vào lại trang thì mở thẳng thiết kế cũ. Dòng vòng trong giỏ có nút "Sửa vòng" mở `/thiet-ke-vong-tay?sua=<mã vòng>`: nút lưu đổi thành "Cập nhật vòng trong giỏ", thay đúng dòng đó và giữ số lượng (`cart.replaceBracelet`); "Thôi sửa" biến thiết kế thành vòng mới.

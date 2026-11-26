@@ -103,7 +103,7 @@ export function OrderDetailPage() {
           </Panel>
         </div>
         <div className="flex flex-col gap-6 xl:col-span-4">
-          {order.status === "PREORDER" && <PreorderConvert order={order} onDone={reload} disabled={!editable} />}
+          {order.status === "PREORDER" && !order.address && <PreorderConvert order={order} onDone={reload} disabled={!editable} />}
           <Panel title="Xử lý đơn">
             <div className="flex flex-col gap-4">
               <Field label="Trạng thái đơn"><Select value={status} onChange={(v) => setStatus(v as OrderStatus)} options={options(orderStatus)} disabled={submitting || !editable} /></Field>
@@ -117,7 +117,7 @@ export function OrderDetailPage() {
                 <dt className="text-ink-2">Lãi của đơn</dt><dd className={`text-right font-semibold tabular-nums ${profitVnd < 0 ? "text-err" : ""}`}>{formatVnd(profitVnd)}</dd>
               </dl>
               {/* Đơn đặt chờ: nút chính là "Chuyển thành đơn chính", nút cập nhật lùi xuống nút viền */}
-              {editable && <Button onClick={save} loading={submitting} disabled={!changed} variant={order.status === "PREORDER" ? "outline" : "primary"} className="mt-2">Cập nhật đơn</Button>}
+              {editable && <Button onClick={save} loading={submitting} disabled={!changed} variant={order.status === "PREORDER" && !order.address ? "outline" : "primary"} className="mt-2">Cập nhật đơn</Button>}
             </div>
           </Panel>
         </div>

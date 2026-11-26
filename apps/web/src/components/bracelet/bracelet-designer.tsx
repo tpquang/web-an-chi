@@ -12,9 +12,8 @@ import { Button, buttonClass } from "../ui/button";
 import { Tag } from "../ui/tag";
 import { BeadPicker } from "./bead-picker";
 import { BraceletOptions } from "./bracelet-options";
-import { PreorderButton } from "../preorder/preorder-button";
 import { BraceletSetup, SetupBar } from "./bracelet-setup";
-import { BraceletSummary, WristSize } from "./bracelet-summary";
+import { BraceletSummary, EditingNotice, FitStatus, WristSize } from "./bracelet-summary";
 import type { SceneHandle } from "./bracelet-scene";
 import { type BraceletSetupValues, useBracelet } from "./use-bracelet";
 
@@ -66,7 +65,6 @@ export function BraceletDesigner({
     lengthMm,
     mainBead,
     totalVnd,
-    problem,
   } = state;
 
   // Điện thoại: thiết kế trong sheet toàn màn hình trượt từ đáy lên. Máy tính: ba cột ngay trong trang
@@ -86,6 +84,10 @@ export function BraceletDesigner({
   const [configured, setConfigured] = useState(false);
   const configuredRef = useRef(false);
   configuredRef.current = configured;
+  // Có bản nháp hoặc đang sửa vòng trong giỏ thì vào thẳng thiết kế
+  useEffect(() => {
+    if (state.restored) setConfigured(true);
+  }, [state.restored]);
   const wristLabel = `${state.wristCm.toLocaleString("vi-VN")} cm`;
   // Chip đi theo con trỏ khi kéo hạt từ kho; vào khung 3D thì chip mờ đi, nhường cho hạt 3D
   const [dragging, setDragging] = useState<{
@@ -247,6 +249,7 @@ export function BraceletDesigner({
           <BraceletSetup state={state} onDone={startDesign} />
         </div>
       )}
+      <EditingNotice state={state} />
       <div className="hidden lg:block">
         <SetupBar state={state} />
       </div>
@@ -295,22 +298,17 @@ export function BraceletDesigner({
               {formatVnd(totalVnd)}
             </span>
           </p>
-          {salesOpen ? (
+          {salesOpen || preorder ? (
             <Button onClick={state.addToCart} className="rounded-full">
-              Lưu vào giỏ
+              {state.editing ? "Cập nhật" : "Lưu vào giỏ"}
             </Button>
           ) : (
-            preorder ? <PreorderButton item={state.preorderItem} size="md" className="rounded-full" /> : <Tag tone="wood">Mở bán {launchDateLabel}</Tag>
+            <Tag tone="wood">Mở bán {launchDateLabel}</Tag>
           )}
         </div>
         <div className="flex flex-col gap-2 px-(--page-gutter) pt-3 lg:hidden">
           <WristSize state={state} compact />
-          <p
-            role="status"
-            className={`text-xs ${problem ? "text-err" : "text-ok"}`}
-          >
-            {problem ?? "Vòng đã vừa cỡ tay."}
-          </p>
+          <FitStatus state={state} className="text-xs" />
         </div>
 
         {/* Kho hạt: đáy sheet trên điện thoại, cột trái trên máy tính */}

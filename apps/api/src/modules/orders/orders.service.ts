@@ -9,7 +9,7 @@ import {
 import { prisma } from "../../lib/prisma.js";
 import { sellableProduct } from "../../lib/pricing.js";
 import { applyStock, stockNeeds, unitCosts, withLiveStock, type StockItem } from "../../lib/stock.js";
-import { getStore, shippingFee } from "../../lib/store.js";
+import { getStore, preorderOn, shippingFee } from "../../lib/store.js";
 import { HttpError } from "../../middleware/errors.js";
 import {
   activeBeads,
@@ -61,7 +61,12 @@ export const checkoutInput = z.object({
   marketingConsent: z.boolean().default(false),
   paymentMethod: z.enum(PaymentMethod),
   items: cartItems,
+  // Đặt chờ trước ngày mở bán (web tự gắn theo ngày mở bán): đơn vào trạng thái "Chờ chuẩn bị", chưa trừ kho
+  preorder: z.boolean().optional(),
 });
+
+// Hết hàng, thiếu hàng không chặn đơn đặt chờ: đơn chưa trừ kho, shop nhập thêm trước ngày giao
+const STOCK_PROBLEMS = new Set<string>(["OUT_OF_STOCK", "NOT_ENOUGH"]);
 
 type CartItems = z.infer<typeof cartItems>;
 
@@ -75,9 +80,9 @@ function mergeItems(items: CartItems) {
   return [...merged.values()];
 }
 
-type LineProblem = "UNAVAILABLE" | "OUT_OF_STOCK" | "NOT_ENOUGH" | "TOO_LONG" | "TOO_SHORT";
+type LineProblem = "UNAVAILABLE" | "OUT_OF_STOCK" | "NOT_ENOUGH";
 
-export async function quoteCart(items: CartItems) {
+export async function quoteCart(items: CartItems, options: { preorder?: boolean } = {}) {
   const wanted = mergeItems(items);
   const beadSlugs = [...new Set(wanted.flatMap((item) => item.design?.beads ?? []))];
   const [products, beads, store] = await Promise.all([
@@ -102,9 +107,8 @@ export async function quoteCart(items: CartItems) {
       const stock = maxBuildable(design, beadBySlug, reserved);
       for (const [bead, count] of countBeads(design)) reserved.set(bead, (reserved.get(bead) ?? 0) + count * Math.min(quantity, stock));
       const problem: LineProblem | null =
-        priced.lengthMm > (design.wraps ? braceletRules.mala.maxLengthMm : braceletRules.maxLengthMm) ? "TOO_LONG"
-        : priced.lengthMm < design.wristCm * 10 * (design.wraps ?? 1) ? "TOO_SHORT"
-        : stock === 0 ? "OUT_OF_STOCK"
+        // Khách xâu dài ngắn tuỳ ý (quấn dư vòng cũng được), chỉ chặn khi thiếu hàng
+        stock === 0 ? "OUT_OF_STOCK"
         : quantity > stock ? "NOT_ENOUGH"
         : null;
       return {
@@ -144,15 +148,27 @@ export async function quoteCart(items: CartItems) {
     };
   });
 
-  const subtotalVnd = lines.reduce((sum, line) => sum + line.lineTotalVnd, 0);
+  // Đặt chờ chỉ có hiệu lực khi shop bật nhận đặt chờ ở CMS
+  const preorder = Boolean(options.preorder) && preorderOn(store);
+  const priced = preorder
+    ? lines.map((line) =>
+        line.problem && STOCK_PROBLEMS.has(line.problem) && line.product
+          ? { ...line, problem: null, lineTotalVnd: line.product.unitPriceVnd * line.quantity }
+          : line,
+      )
+    : lines;
+  const subtotalVnd = priced.reduce((sum, line) => sum + line.lineTotalVnd, 0);
   const shippingVnd = shippingFee(store, subtotalVnd);
   return {
-    lines,
+    lines: priced,
+    preorder,
+    // Trước ngày mở bán mà shop tắt đặt chờ thì không nhận đơn
+    preorderClosed: Boolean(options.preorder) && !preorder,
     subtotalVnd,
     shippingVnd,
     totalVnd: subtotalVnd + shippingVnd,
     shipping: store.shipping,
-    canCheckout: lines.every((line) => line.problem === null),
+    canCheckout: priced.every((line) => line.problem === null) && !(options.preorder && !preorder),
   };
 }
 
@@ -178,7 +194,8 @@ export async function placeOrder(input: z.infer<typeof checkoutInput>, accountId
   const existing = await prisma.order.findUnique({ where: { idempotencyKey: input.idempotencyKey } });
   if (existing) return { order: existing, created: false };
 
-  const quote = await quoteCart(input.items);
+  const quote = await quoteCart(input.items, { preorder: input.preorder });
+  if (quote.preorderClosed) throw new HttpError(403, "Shop đang tạm ngừng nhận đặt chờ. Bạn nhắn shop để được tư vấn.", "PREORDER_OFF");
   const problems = quote.lines.filter((line) => line.problem !== null);
   if (problems.length > 0) {
     throw new HttpError(409, "Một số sản phẩm trong giỏ đã thay đổi. Vui lòng xem lại giỏ hàng.", "CART_CHANGED", problems);
@@ -224,6 +241,7 @@ export async function placeOrder(input: z.infer<typeof checkoutInput>, accountId
         data: {
           code: orderCode(),
           idempotencyKey: input.idempotencyKey,
+          ...(quote.preorder ? { status: OrderStatus.PREORDER } : {}),
           customerName: customer.name,
           customerPhone: customer.phone,
           customerEmail: customer.email,
@@ -243,6 +261,8 @@ export async function placeOrder(input: z.infer<typeof checkoutInput>, accountId
           },
         },
       });
+      // Đơn đặt chờ chưa trừ kho; shop chuyển sang "Chờ xác nhận" thì mới trừ (changeOrderStatus)
+      if (quote.preorder) return created;
       try {
         await applyStock(tx, needs, -1, { orderId: created.id, note: `Đơn ${created.code}` });
       } catch (err) {

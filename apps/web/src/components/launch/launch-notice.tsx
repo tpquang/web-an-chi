@@ -4,8 +4,6 @@ import { braceletHref, postsHref } from "@/lib/links";
 import { Button } from "../ui/button";
 import { Eyebrow } from "../ui/layout";
 import { Tag } from "../ui/tag";
-import { PreorderButton } from "../preorder/preorder-button";
-import type { PreorderItem } from "../preorder/preorder-dialog";
 import { LaunchCountdown, LaunchGate } from "./launch-clock";
 
 // Các khối "chờ ngày mở bán". Server tính trạng thái lúc dựng trang, LaunchGate tự chuyển đúng giờ ở trình duyệt.
@@ -79,9 +77,10 @@ export function LaunchStrip({ children }: { children: ReactNode }) {
   );
 }
 
-// Trang sản phẩm: thay chỗ nút "Thêm vào giỏ"
-// item null: shop đang tắt đặt chờ ở CMS, chỉ hiện đếm ngược
-export function ProductLaunchPanel({ item }: { item: PreorderItem | null }) {
+// Trang sản phẩm trước ngày mở bán. children là nút thêm vào giỏ khi shop bật đặt chờ;
+// không có children (shop tắt đặt chờ ở CMS) thì chỉ hiện đếm ngược
+export function ProductLaunchPanel({ children }: { children?: ReactNode }) {
+  const item = Boolean(children);
   return (
     <section aria-labelledby="mo-ban" className="flex flex-col gap-4 rounded-3xl border border-edge bg-surface p-5">
       <div>
@@ -90,12 +89,12 @@ export function ProductLaunchPanel({ item }: { item: PreorderItem | null }) {
         </h2>
         <p className="mt-1 text-sm text-ink-2">
           {item
-            ? `Shop giao hàng từ ngày ${launchDateLabel}. Bạn có thể đặt chờ ngay: để lại tên và số điện thoại, shop gọi lại chốt đơn, chưa cần thanh toán.`
+            ? `Shop giao hàng từ ngày ${launchDateLabel}. Bạn thêm vào giỏ và đặt hàng như thường, đơn là đơn đặt chờ: shop chuẩn bị hàng và gọi xác nhận trước khi giao.`
             : `Sản phẩm này nhận đơn từ ngày ${launchDateLabel}. Bạn có thể xem trước giá, thông số và cách dùng ở bên dưới.`}
         </p>
       </div>
       <LaunchCountdown />
-      {item && <PreorderButton item={item} block />}
+      {children}
     </section>
   );
 }

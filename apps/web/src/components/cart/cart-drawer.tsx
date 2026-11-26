@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { PreorderNote } from "./preorder-note";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { closeCartDrawer, openChatFromCart, useCartDrawerOpen } from "@/lib/cart-drawer";
@@ -116,11 +117,12 @@ function Panel() {
               <span className="font-serif text-[28px] leading-tight font-semibold tabular-nums">{formatVnd(state.quote.subtotalVnd)}</span>
             </p>
             <p className="text-sm text-ink-3">Phí giao hàng tính ở bước đặt hàng. Shop gọi xác nhận trước khi giao.</p>
+            <PreorderNote quote={state.quote} />
             {state.quote.canCheckout ? (
               <Button href={checkoutHref} size="lg" block>
                 Đặt hàng
               </Button>
-            ) : (
+            ) : state.quote.preorderClosed ? null : (
               <p className="text-sm text-err">Bạn sửa các sản phẩm được đánh dấu trong giỏ trước khi đặt hàng.</p>
             )}
             <Button href={cartHref} variant="outline" block>

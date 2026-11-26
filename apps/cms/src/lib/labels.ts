@@ -45,7 +45,7 @@ export const salesChannel: Record<SalesChannel, { label: string; tone: Tone }> =
 
 export const orderStatus: Record<OrderStatus, { label: string; tone: Tone }> = {
   // Khách đặt trước ngày mở bán: gọi lại chốt địa chỉ, phí giao. Chuyển sang trạng thái khác thì kho mới bị trừ
-  PREORDER: { label: "Đặt chờ", tone: "wood" },
+  PREORDER: { label: "Chờ chuẩn bị", tone: "wood" },
   PENDING: { label: "Chờ xác nhận", tone: "warn" },
   CONFIRMED: { label: "Đã xác nhận", tone: "info" },
   SHIPPING: { label: "Đang giao", tone: "info" },

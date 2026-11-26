@@ -1,6 +1,7 @@
 "use client";
 
 import { checkoutHref, productsHref } from "@/lib/links";
+import { PreorderNote } from "./preorder-note";
 import { useQuote } from "@/lib/use-quote";
 import { Button } from "../ui/button";
 import { EmptyState, ErrorState, Skeleton } from "../ui/states";
@@ -64,10 +65,11 @@ export function CartView() {
                 <Button size="lg" block disabled>
                   Đặt hàng
                 </Button>
-                <p className="mt-2 text-sm text-err">Bạn sửa các sản phẩm được đánh dấu trong giỏ trước khi đặt hàng.</p>
+                {!quote.preorderClosed && <p className="mt-2 text-sm text-err">Bạn sửa các sản phẩm được đánh dấu trong giỏ trước khi đặt hàng.</p>}
               </>
             )}
             <p className="mt-3 text-sm text-ink-3">Không cần tạo tài khoản. Shop gọi xác nhận trước khi giao.</p>
+            <PreorderNote quote={quote} className="mt-3" />
           </OrderSummary>
         </div>
       </div>
