@@ -1,6 +1,7 @@
 "use client";
 
-import { checkoutHref, productsHref } from "@/lib/links";
+import { openCheckout } from "@/lib/cart-drawer";
+import { productsHref } from "@/lib/links";
 import { PreorderNote } from "./preorder-note";
 import { useQuote } from "@/lib/use-quote";
 import { Button } from "../ui/button";
@@ -58,7 +59,8 @@ export function CartView() {
           <OrderSummary quote={quote} busy={refreshing}>
             <PreorderNote quote={quote} className="mb-3" />
             {quote.canCheckout ? (
-              <Button href={checkoutHref} size="lg" block>
+              // Form đặt hàng nằm trong bảng giỏ trượt, không có trang riêng
+              <Button type="button" size="lg" block onClick={openCheckout}>
                 Thanh toán
               </Button>
             ) : quote.preorderClosed ? null : (

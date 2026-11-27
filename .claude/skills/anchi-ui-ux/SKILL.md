@@ -76,7 +76,7 @@ Modal chờ API mở ở kích thước ổn định. Nội dung không được
 
 - Trạng thái nên chia sẻ hoặc quay lại được (bộ lọc, trang, bước đặt hàng) phải nằm trên URL.
 - Đa số khách đến từ điện thoại: thiết kế luồng mua cho mobile trước.
-- Đặt hàng được khi chưa đăng ký tài khoản. Ít ô bắt buộc, có câu trấn an về giao hàng và đổi trả. Tài khoản khách là tuỳ chọn, chỉ để xem lại đơn và điền sẵn thông tin.
+- Phải đăng nhập mới đặt hàng (yêu cầu chủ shop 11/2026, xem `anchi-auth` mục 1). Đăng nhập, tạo tài khoản, Google làm ngay trong bảng giỏ, không đẩy khách sang trang khác (trừ bước sang Google), giỏ và form đã điền giữ nguyên. Ít ô bắt buộc, có câu trấn an về giao hàng và đổi trả.
 - Trạng thái đăng nhập đọc ở client từ cookie cờ, không đọc cookie ở layout, để trang công khai vẫn tĩnh.
 - Thanh dính và nút nổi không che nút hành động chính.
 - Người vận hành CMS cần tốc độ: giữ dữ liệu form, Enter để gửi, thao tác lặp không bắt mở nhiều lớp, không giả lập thời gian chờ.

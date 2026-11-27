@@ -6,14 +6,15 @@ import { useRef, useState, type FormEvent } from "react";
 import { announceSession } from "@/lib/account-client";
 import { normalizePhone } from "@/lib/checkout";
 import { postJson } from "@/lib/client-api";
-import { accountHref, loginHref } from "@/lib/links";
+import { loginHref } from "@/lib/links";
 import { Button } from "../ui/button";
 import { Field, Input } from "../ui/field";
 
 type Values = { name: string; phone: string; password: string; orderCode: string };
 type Errors = Partial<Record<keyof Values | "form", string>>;
 
-export function RegisterForm() {
+// next: trang quay về sau khi tạo xong. onDone, onLogin: dùng trong bảng giỏ, ở lại bảng thay vì chuyển trang
+export function RegisterForm({ next, onDone, onLogin }: { next: string; onDone?: () => void; onLogin?: () => void }) {
   const router = useRouter();
   const [values, setValues] = useState<Values>({ name: "", phone: "", password: "", orderCode: "" });
   const [errors, setErrors] = useState<Errors>({});
@@ -50,7 +51,8 @@ export function RegisterForm() {
       const result = await postJson("/api/account/register", { ...values, orderCode: values.orderCode || undefined });
       if (result.ok) {
         announceSession();
-        router.replace(accountHref);
+        if (onDone) return onDone();
+        router.replace(next);
         router.refresh();
         return;
       }
@@ -96,9 +98,15 @@ export function RegisterForm() {
         </Button>
         <p className="text-sm text-ink-2">
           Đã có tài khoản?{" "}
-          <Link href={loginHref} className="font-medium text-wood underline-offset-4 hover:underline">
-            Đăng nhập
-          </Link>
+          {onLogin ? (
+            <button type="button" onClick={onLogin} className="min-h-11 font-medium text-wood underline-offset-4 hover:underline">
+              Đăng nhập
+            </button>
+          ) : (
+            <Link href={`${loginHref}?tiep=${encodeURIComponent(next)}`} className="font-medium text-wood underline-offset-4 hover:underline">
+              Đăng nhập
+            </Link>
+          )}
         </p>
       </div>
     </form>

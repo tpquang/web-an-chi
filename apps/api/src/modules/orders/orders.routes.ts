@@ -23,11 +23,14 @@ const orderLimit = failureLimiter({ max: 5, windowMs: 10 * 60 * 1000, message: "
 // Huỷ đơn: sai số điện thoại nhiều lần thì chặn, để không dò được đơn của người khác
 const cancelLimit = failureLimiter({ max: 8, windowMs: 15 * 60 * 1000, message: "Bạn nhập sai nhiều lần. Đợi 15 phút hoặc nhắn shop để huỷ đơn." });
 
+// Khách phải đăng nhập mới đặt được hàng (yêu cầu chủ shop 11/2026). Đơn nhập tay ở CMS không đi qua đây
 ordersRouter.post("/orders", async (req, res) => {
+  const customerId = await customerIdFrom(req);
+  if (!customerId) throw new HttpError(401, "Bạn đăng nhập để đặt hàng.", "LOGIN_REQUIRED");
   const input = checkoutInput.parse(req.body);
   const ip = clientIp(req);
   orderLimit.check(ip);
-  const { order, created } = await placeOrder(input, await customerIdFrom(req));
+  const { order, created } = await placeOrder(input, customerId);
   if (created) {
     orderLimit.fail(ip);
     publishOrder({ id: order.id, code: order.code, kind: "created", customerName: order.customerName, totalVnd: order.totalVnd });

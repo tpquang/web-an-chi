@@ -35,7 +35,8 @@ export function AddressFields({ values, provinces, failed, onRetry, errors, disa
           </button>
         </p>
       )}
-      <div className="grid gap-4 md:grid-cols-2">
+      {/* Một cột: form nằm trong bảng giỏ trượt hẹp */}
+      <div className="flex flex-col gap-4">
         <Field label="Tỉnh, thành phố" required error={errors.province}>
           <Select
             ref={refs.province}

@@ -2,7 +2,8 @@
 export const productsHref = "/san-pham";
 export const postsHref = "/bai-viet";
 export const cartHref = "/gio-hang";
-export const checkoutHref = "/thanh-toan";
+// Đặt hàng nằm trong bảng giỏ trượt: link này mở trang giỏ kèm bảng ở bước đặt hàng (xem CHECKOUT_PARAM)
+export const checkoutHref = "/gio-hang?dat-hang=1";
 export const orderLookupHref = "/tra-cuu-don-hang";
 export const aboutHref = "/gioi-thieu";
 export const policyHref = "/chinh-sach";

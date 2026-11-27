@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { CHAT_OPEN_EVENT, openChatFromCart, useCartDrawerOpen } from "@/lib/cart-drawer";
 import { hasConversation, loadChat, subscribeChat } from "@/lib/chat-client";
-import { cartHref, checkoutHref } from "@/lib/links";
+import { cartHref } from "@/lib/links";
 import { ChatIcon } from "../icons";
 import { Badge } from "../ui/button";
 
@@ -42,7 +42,7 @@ export function ChatLauncher() {
   }, []);
 
   // Khu đặt hàng giữ gọn: chỉ hiện nút chat khi khách đã đang trò chuyện
-  if ((pathname === checkoutHref || pathname === cartHref) && !active && !open) return null;
+  if (pathname === cartHref && !active && !open) return null;
 
   return (
     <>

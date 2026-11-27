@@ -20,15 +20,15 @@ export default async function LoginPage({ searchParams }: Props) {
 
   return (
     <PageFrame>
-      <PageHeader title="Đăng nhập" desc="Đăng nhập để xem lại đơn đã đặt và điền sẵn địa chỉ khi đặt hàng." />
+      <PageHeader title="Đăng nhập" desc="Đăng nhập để đặt hàng, xem lại đơn đã đặt và điền sẵn địa chỉ." />
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-6">
         <div className="lg:col-span-6">
           <LoginForm next={next} />
           <GoogleSection clientId={googleClientId} next={next} error={loi} />
         </div>
         <aside className="text-ink-2 lg:col-span-5 lg:col-start-8">
-          <p className="font-medium text-ink">Không bắt buộc có tài khoản</p>
-          <p className="mt-2">Bạn vẫn đặt hàng được khi chưa đăng nhập. Đơn đã đặt tra cứu được bằng mã đơn và số điện thoại.</p>
+          <p className="font-medium text-ink">Cần tài khoản để đặt hàng</p>
+          <p className="mt-2">Tạo tài khoản chỉ cần họ tên, số điện thoại và mật khẩu, hoặc bấm Tiếp tục với Google. Đơn đặt trước đây vẫn tra cứu được bằng mã đơn và số điện thoại.</p>
         </aside>
       </div>
     </PageFrame>

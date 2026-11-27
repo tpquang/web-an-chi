@@ -7,7 +7,7 @@ description: Quy tắc tài khoản và đăng nhập An Chi gồm tài khoản 
 
 ## 1. Nguyên tắc
 
-- **Tài khoản khách là tuỳ chọn.** Đặt hàng, tra cứu đơn không cần đăng nhập. Tài khoản chỉ để xem lại đơn, điền sẵn thông tin.
+- **Phải đăng nhập mới đặt hàng** (yêu cầu chủ shop 11/2026). API `POST /orders` trả 401 `LOGIN_REQUIRED` khi không có phiên khách hợp lệ. Bước đặt hàng trong bảng giỏ cho đăng nhập, tạo tài khoản, Google ngay trong bảng (`components/checkout/checkout-sign-in.tsx`), giỏ giữ nguyên. Tra cứu đơn cũ bằng mã đơn và số điện thoại vẫn không cần đăng nhập. Đơn nhập tay ở CMS không cần tài khoản khách.
 - **Số điện thoại là định danh chính** của khách (đơn hàng, giao hàng, gộp hội thoại). Không bắt khách dùng email. Đăng nhập Google là cách đăng nhập thêm, không thay số điện thoại.
 - Không lộ một số điện thoại hay email đã có tài khoản hay chưa ở form đăng nhập: báo chung "chưa đúng". Riêng form đăng ký được báo trùng vì khách cần biết để chuyển sang đăng nhập.
 

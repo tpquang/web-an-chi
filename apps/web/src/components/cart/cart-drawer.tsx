@@ -3,12 +3,13 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { createPortal } from "react-dom";
-import { closeCartDrawer, finishCartDrawer, openChatFromCart, useCartDrawerPhase } from "@/lib/cart-drawer";
+import { CHECKOUT_PARAM, closeCartDrawer, finishCartDrawer, openChatFromCart, openCheckout, showDrawerView, useCartDrawerPhase, useCartDrawerView } from "@/lib/cart-drawer";
 import { useCartCount } from "@/lib/cart";
-import { cartHref, checkoutHref, productsHref } from "@/lib/links";
+import { cartHref, productsHref } from "@/lib/links";
 import { formatVnd } from "@/lib/site";
 import { useQuote } from "@/lib/use-quote";
-import { ArrowRightIcon, ChatIcon, CloseIcon } from "../icons";
+import { ArrowLeftIcon, ArrowRightIcon, ChatIcon, CloseIcon } from "../icons";
+import { CheckoutStep } from "../checkout/checkout-step";
 import { Button } from "../ui/button";
 import { EmptyState, ErrorState, Skeleton } from "../ui/states";
 import { CartEdgeTab } from "./cart-edge-tab";
@@ -17,21 +18,31 @@ import { PreorderNote } from "./preorder-note";
 
 // Lớp giỏ hàng gắn một lần ở root layout: bảng trượt từ phải và tab cạnh phải màn máy tính.
 // Portal vào body vì header có backdrop-filter làm position: fixed bám sai chỗ
-export function CartLayer() {
+// googleClientId: root layout hỏi API (cache 60 giây); null thì bước đặt hàng không hiện nút Google
+export function CartLayer({ googleClientId }: { googleClientId: string | null }) {
   const phase = useCartDrawerPhase();
   const pathname = usePathname();
   const firstPath = useRef(pathname);
 
-  // Chuyển trang (bấm Thanh toán, Xem giỏ hàng) thì đóng
+  // Chuyển trang (Xem giỏ hàng, đặt xong sang trang đơn) thì đóng
   useEffect(() => {
     if (pathname !== firstPath.current) closeCartDrawer();
     firstPath.current = pathname;
   }, [pathname]);
 
+  // ?dat-hang=1 (checkoutHref, quay lại sau đăng nhập): mở bảng ở bước đặt hàng rồi bỏ tham số khỏi URL
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has(CHECKOUT_PARAM)) return;
+    url.searchParams.delete(CHECKOUT_PARAM);
+    window.history.replaceState(window.history.state, "", url);
+    openCheckout();
+  }, [pathname]);
+
   return (
     <>
       <CartEdgeTab hidden={phase !== "closed"} />
-      {phase !== "closed" && createPortal(<Panel closing={phase === "closing"} />, document.body)}
+      {phase !== "closed" && createPortal(<Panel closing={phase === "closing"} googleClientId={googleClientId} />, document.body)}
     </>
   );
 }
@@ -76,10 +87,12 @@ function useSwipeToClose() {
   };
 }
 
-function Panel({ closing }: { closing: boolean }) {
+function Panel({ closing, googleClientId }: { closing: boolean; googleClientId: string | null }) {
   const count = useCartCount();
-  const { state, reload } = useQuote();
+  const { items, state, reload } = useQuote();
+  const view = useCartDrawerView();
   const closeRef = useRef<HTMLButtonElement>(null);
+  const backRef = useRef<HTMLButtonElement>(null);
   const swipe = useSwipeToClose();
 
   useEffect(() => {
@@ -87,7 +100,8 @@ function Panel({ closing }: { closing: boolean }) {
     const overflow = document.documentElement.style.overflow;
     document.documentElement.style.overflow = "hidden";
     closeRef.current?.focus();
-    const onKey = (event: KeyboardEvent) => event.key === "Escape" && closeCartDrawer();
+    // Esc trong ô chọn tỉnh, phường chỉ đóng danh sách (Select đã preventDefault), không đóng bảng
+    const onKey = (event: KeyboardEvent) => event.key === "Escape" && !event.defaultPrevented && closeCartDrawer();
     window.addEventListener("keydown", onKey);
     return () => {
       document.documentElement.style.overflow = overflow;
@@ -95,6 +109,14 @@ function Panel({ closing }: { closing: boolean }) {
       opener?.focus();
     };
   }, []);
+
+  // Đổi bước thì đưa focus lên đầu bảng: nút quay lại ở bước đặt hàng, nút đóng ở bước giỏ
+  const firstView = useRef(view);
+  useEffect(() => {
+    if (view === firstView.current) return;
+    firstView.current = view;
+    (view === "checkout" ? backRef : closeRef).current?.focus();
+  }, [view]);
 
   // Trượt ra xong thì gỡ. Giảm chuyển động hoặc transitionend không tới thì gỡ theo giờ
   useEffect(() => {
@@ -120,6 +142,8 @@ function Panel({ closing }: { closing: boolean }) {
   }
 
   const ready = state.status === "ready" ? state.quote : null;
+  // Bước đặt hàng chỉ khi giỏ đã có giá; giỏ trống hoặc lỗi thì hiện như bước giỏ
+  const checkout = view === "checkout" && state.status === "ready";
 
   return (
     // Cùng lớp với sheet thiết kế vòng nhưng gắn sau trong body nên nằm trên. Đang trượt ra thì inert, không bắt bấm
@@ -146,8 +170,20 @@ function Panel({ closing }: { closing: boolean }) {
         }`}
       >
         <div className="flex h-(--header-h) flex-none items-center gap-2 border-b border-line pr-3 pl-5">
+          {checkout && (
+            <button
+              ref={backRef}
+              type="button"
+              onClick={() => showDrawerView("cart")}
+              aria-label="Quay lại giỏ hàng"
+              className="-ml-3 inline-flex size-11 flex-none items-center justify-center rounded-full text-ink-2 hover:bg-paper-2"
+            >
+              <ArrowLeftIcon />
+            </button>
+          )}
           <h2 id="gio-hang-bang" className="mr-auto font-serif text-2xl">
-            Giỏ hàng{count > 0 && <span className="text-ink-3 tabular-nums"> ({count})</span>}
+            {checkout ? "Đặt hàng" : "Giỏ hàng"}
+            {!checkout && count > 0 && <span className="text-ink-3 tabular-nums"> ({count})</span>}
           </h2>
           {/* Màn hẹp bảng kín màn hình nên nút chat nổi bị ẩn; lối nhắn shop đặt trên đầu bảng, không chen dưới nút thanh toán */}
           <button
@@ -169,6 +205,10 @@ function Panel({ closing }: { closing: boolean }) {
           </button>
         </div>
 
+        {checkout ? (
+          <CheckoutStep items={items} quote={state.quote} refreshing={state.refreshing} reload={reload} googleClientId={googleClientId} />
+        ) : (
+          <>
         <div className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-5">
           {state.status === "loading" && (
             <div className="flex flex-col gap-5 py-5">
@@ -221,7 +261,7 @@ function Panel({ closing }: { closing: boolean }) {
               <p className="mt-1 text-sm text-ink-3">Phí giao hàng tính ở bước thanh toán. Shop gọi xác nhận trước khi giao.</p>
             </div>
             {ready.canCheckout ? (
-              <Button href={checkoutHref} size="lg" block>
+              <Button type="button" size="lg" block onClick={() => showDrawerView("checkout")}>
                 Thanh toán
                 <ArrowRightIcon size={20} />
               </Button>
@@ -231,6 +271,8 @@ function Panel({ closing }: { closing: boolean }) {
               </p>
             )}
           </div>
+        )}
+          </>
         )}
       </div>
     </div>

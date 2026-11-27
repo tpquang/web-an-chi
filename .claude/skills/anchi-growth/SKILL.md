@@ -116,7 +116,7 @@ Chính sách đầy đủ ở `docs/web/plans/order-flow-2026-11.md` mục 2, hi
 | Chỗ rơi | Cách giữ |
 |---|---|
 | Xem rồi thoát vì chưa tin | Ảnh thật, xuất xứ, chính sách đổi trả, cách phân biệt hàng thật |
-| Bỏ giỏ | Giữ giỏ trong trình duyệt, không bắt đăng ký tài khoản |
+| Bỏ giỏ | Giữ giỏ trong trình duyệt. Đặt hàng cần tài khoản (11/2026) nên đăng nhập, tạo tài khoản, Google ngay trong bảng giỏ, không mất giỏ |
 | Bỏ form đặt hàng | Ít ô, giữ dữ liệu đã nhập, nói rõ phí giao và thời gian giao |
 | Mua xong không quay lại | Hướng dẫn dùng và bảo quản, nhắc theo dịp với người đã đồng ý |
 

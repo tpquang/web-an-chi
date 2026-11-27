@@ -3,17 +3,17 @@
 import { usePathname } from "next/navigation";
 import { useCartCount } from "@/lib/cart";
 import { openCartDrawer } from "@/lib/cart-drawer";
-import { cartHref, checkoutHref } from "@/lib/links";
+import { cartHref } from "@/lib/links";
 import { BagIcon } from "../icons";
 
 // Tab giỏ hàng dính cạnh phải, chỉ màn máy tính (từ 960px). Mờ 50% để không giành chú ý với nội dung, rê chuột hoặc focus thì rõ hẳn.
 // CartLayer nằm ngoài header (header có backdrop-filter) nên position: fixed bám đúng cạnh màn hình.
-// Ẩn ở giỏ hàng và thanh toán (khu đặt hàng giữ sạch) và khi bảng giỏ đang mở
+// Ẩn ở trang giỏ hàng (khu đặt hàng giữ sạch) và khi bảng giỏ đang mở
 export function CartEdgeTab({ hidden }: { hidden: boolean }) {
   const count = useCartCount();
   const pathname = usePathname();
 
-  if (hidden || pathname === cartHref || pathname === checkoutHref) return null;
+  if (hidden || pathname === cartHref) return null;
 
   return (
     <button

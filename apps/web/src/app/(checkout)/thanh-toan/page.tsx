@@ -1,15 +1,7 @@
-import type { Metadata } from "next";
-import { CheckoutForm } from "@/components/checkout/checkout-form";
-import { PageFrame, PageHeader } from "@/components/ui/layout";
-import { privateMeta } from "@/lib/seo";
+import { redirect } from "next/navigation";
+import { checkoutHref } from "@/lib/links";
 
-export const metadata: Metadata = { title: "Đặt hàng", ...privateMeta };
-
+// Đặt hàng đã chuyển vào bảng giỏ trượt. Giữ đường dẫn cũ (link đã lưu, tab đang mở) và đưa về giỏ hàng mở sẵn bước đặt hàng
 export default function CheckoutPage() {
-  return (
-    <PageFrame>
-      <PageHeader title="Đặt hàng" />
-      <CheckoutForm />
-    </PageFrame>
-  );
+  redirect(checkoutHref);
 }

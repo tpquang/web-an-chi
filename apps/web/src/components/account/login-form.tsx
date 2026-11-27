@@ -12,7 +12,9 @@ import { Button } from "../ui/button";
 import { Field, Input } from "../ui/field";
 import { DevAccountLogin } from "./dev-account-login";
 
-export function LoginForm({ next }: { next: string }) {
+// onDone: dùng trong bảng giỏ (bước đặt hàng), đăng nhập xong ở lại bảng thay vì chuyển trang.
+// onRegister: bảng giỏ đổi sang form tạo tài khoản ngay trong bảng thay vì mở trang /dang-ky
+export function LoginForm({ next, onDone, onRegister }: { next: string; onDone?: () => void; onRegister?: () => void }) {
   const router = useRouter();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -28,6 +30,7 @@ export function LoginForm({ next }: { next: string }) {
       return;
     }
     announceSession();
+    if (onDone) return onDone();
     router.replace(next);
     router.refresh();
   }
@@ -73,9 +76,15 @@ export function LoginForm({ next }: { next: string }) {
           </Button>
           <p className="text-sm text-ink-2">
             Chưa có tài khoản?{" "}
-            <Link href={registerHref} className="font-medium text-wood underline-offset-4 hover:underline">
-              Tạo tài khoản
-            </Link>
+            {onRegister ? (
+              <button type="button" onClick={onRegister} className="min-h-11 font-medium text-wood underline-offset-4 hover:underline">
+                Tạo tài khoản
+              </button>
+            ) : (
+              <Link href={`${registerHref}?tiep=${encodeURIComponent(next)}`} className="font-medium text-wood underline-offset-4 hover:underline">
+                Tạo tài khoản
+              </Link>
+            )}
           </p>
         </div>
         <p className="text-sm text-ink-3">

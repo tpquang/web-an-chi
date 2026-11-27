@@ -6,7 +6,7 @@ import { CartLayer } from "@/components/cart/cart-drawer";
 import { ChatLauncher } from "@/components/chat/chat-launcher";
 import { LaunchProvider } from "@/components/launch/launch-clock";
 import { SiteHeader } from "@/components/site-header";
-import { getCategories, getStore } from "@/lib/api";
+import { getCategories, getGoogleClientId, getStore } from "@/lib/api";
 import { isPreLaunch, launchAtOf } from "@/lib/launch";
 import { Toaster } from "@/components/ui/toast";
 import { site } from "@/lib/site";
@@ -48,10 +48,12 @@ const themeScript = `try{var t=localStorage.getItem("anchi-theme");document.docu
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   // Menu sổ xuống không được làm hỏng cả trang khi API lỗi, lỗi thì chỉ còn link "Tất cả sản phẩm"
-  const [categories, store] = await Promise.all([
+  const [categories, store, googleClientId] = await Promise.all([
     getCategories().then((list) => list.map(({ name, slug }) => ({ name, slug })), () => []),
     // API lỗi thì coi như đã mở bán, không khoá nút mua vì lỗi cấu hình
     getStore().catch(() => null),
+    // Nút Google ở bước đặt hàng trong bảng giỏ; shop chưa cấu hình hoặc API lỗi thì null, chỉ ẩn nút
+    getGoogleClientId(),
   ]);
   const launchAt = launchAtOf(store);
   return (
@@ -63,7 +65,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <LaunchProvider at={launchAt} initialOpen={!isPreLaunch(launchAt)}>
           <SiteHeader categories={categories} />
           {children}
-          <CartLayer />
+          <CartLayer googleClientId={googleClientId} />
           <ChatLauncher />
         </LaunchProvider>
         <Toaster />

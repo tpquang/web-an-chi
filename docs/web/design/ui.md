@@ -10,7 +10,7 @@
 | `/chu-de/[slug]` | Chủ đề bài viết | List | |
 | `/bai-viet/[slug]` | Bài viết | Read | Mục lục khi bài trên 1.200 chữ, sản phẩm trong bài, bài cùng chủ đề |
 | `/gio-hang` | Giỏ hàng | App | noindex, footer không có link ra sàn |
-| `/thanh-toan` | Đặt hàng | App | noindex. Trái: người nhận, địa chỉ ba ô, email và ghi chú, cách thanh toán; ô bắt buộc có sao đỏ, không có dòng gợi ý dưới ô, lỗi chỉ hiện khi bấm Đặt hàng. Phải: tóm tắt đơn có nút Đặt hàng (dính khi cuộn; điện thoại nằm cuối form). Không có ô nhận tin tiếp thị |
+| `/thanh-toan` | Đặt hàng | App | Không còn trang riêng (11/2026): chuyển 307 về `/gio-hang?dat-hang=1`, mở bảng giỏ ở bước đặt hàng |
 | `/don-hang/[code]` | Đơn đã đặt | App | noindex. Khối trạng thái (`components/order/order-status.tsx`): tiến trình 4 bước, hạn chuyển khoản, mã vận đơn, câu chính sách huỷ theo trạng thái, nút Huỷ đơn mở form tại chỗ (lý do chọn sẵn, số điện thoại). Thông tin chuyển khoản có hạn; việc tiếp theo chỉ khi đơn còn chờ |
 | `/tra-cuu-don-hang` | Tra cứu đơn | App | noindex, cần mã đơn và số điện thoại. Cùng khối trạng thái, huỷ không hỏi lại số điện thoại |
 | `/gioi-thieu` | Giới thiệu | Read | Nguyên tắc bán hàng, giao hàng, liên hệ. Chỉ nêu điều kiểm tra được |
@@ -27,11 +27,11 @@
 
 **Chờ ngày mở bán:** giờ mở bán sửa ở CMS > Thông tin cửa hàng, mục Mở bán và đặt chờ (`launchAt` trong setting `store`, trống là đã mở bán). Root layout đọc qua `getStore` (cache 60 giây) rồi đưa xuống `LaunchProvider`; component client dùng `useLaunch`, `useLaunchLabel`, server dùng `launchAtOf`, `isPreLaunch` ở `lib/launch.ts`. Trước giờ này: trang chủ ẩn khối sản phẩm nổi bật và có khối đếm ngược dưới banner (`HomeLaunch`); `/san-pham`, `/danh-muc/*`, `/thiet-ke-vong-tay` có dải đếm ngược (`LaunchStrip`); trang sản phẩm có khối `ProductLaunchPanel` thay khối mua, Product schema ghi `PreOrder`. Cờ "Chuyển trang sản phẩm về đếm ngược" (`countdownRedirect`) bật thì `src/proxy.ts` chuyển tạm (307) `/san-pham`, `/san-pham/*`, `/danh-muc/*` về `/countdown` (noindex); proxy tự đọc cài đặt, nhớ 60 giây. API tự quyết đơn là đơn đặt chờ theo cùng giờ này. `LaunchGate` ở trình duyệt tự mở đúng giờ nên không cần deploy vào ngày mở bán; sau giờ mở bán `/countdown` chuyển 308 về trang chủ. Các trang nội dung, tài khoản, tra cứu đơn, chat không đổi.
 
-**Giỏ hàng dạng bảng (11/2026):** `CartLayer` ở root layout. Mọi nút giỏ (header, tab mờ cạnh phải màn máy tính, menu điện thoại) và mọi lần thêm vào giỏ đều mở bảng trượt từ phải; đóng thì trượt ra, điện thoại vuốt sang phải để đóng. Nút "Thanh toán" ở đáy bảng. Trước ngày mở bán, khi nhận đặt chờ, trang sản phẩm và giỏ không giới hạn số lượng theo tồn kho (tối đa 99 mỗi dòng). Quy cách ở skill `anchi-ui-ux` `components.md` mục Drawer. Trang `/gio-hang` giữ nguyên cho xem đầy đủ.
+**Giỏ hàng dạng bảng (11/2026):** `CartLayer` ở root layout. Mọi nút giỏ (header, tab mờ cạnh phải màn máy tính, menu điện thoại) và mọi lần thêm vào giỏ đều mở bảng trượt từ phải; đóng thì trượt ra, điện thoại vuốt sang phải để đóng. Nút "Thanh toán" ở đáy bảng chuyển bảng sang bước "Đặt hàng" ngay trong bảng (theo yêu cầu 11/2026, không tách trang). Chưa đăng nhập thì bước này là đăng nhập (số điện thoại, mật khẩu), đổi được sang tạo tài khoản, và nút Google; xong thì hiện form ngay, không rời bảng. Đã đăng nhập: một cột người nhận, địa chỉ ba ô, email và ghi chú, cách thanh toán, xem lại hàng và tiền; ô bắt buộc có sao đỏ, lỗi chỉ hiện khi bấm Đặt hàng; đáy dính tổng cộng và nút "Đặt hàng". Không có ô nhận tin tiếp thị. Link `checkoutHref` (`/gio-hang?dat-hang=1`) và quay về sau đăng nhập Google mở thẳng bước này. Trước ngày mở bán, khi nhận đặt chờ, trang sản phẩm và giỏ không giới hạn số lượng theo tồn kho (tối đa 99 mỗi dòng). Quy cách ở skill `anchi-ui-ux` `components.md` mục Drawer. Trang `/gio-hang` giữ nguyên cho xem đầy đủ.
 
 **Thiết kế vòng `/thiet-ke-vong-tay`:** điện thoại vào bằng form khởi tạo theo bước (`BraceletSetup`), máy tính có hàng cài đặt gọn `SetupBar` trên khu thiết kế. Bố cục chi tiết ở skill `anchi-ui-ux` `layout.md` mục Thiết kế vòng tay.
 
-**Đặt chờ:** không có nút hay form riêng. Trước ngày mở bán (CMS bật đặt chờ) trang sản phẩm và thiết kế vòng vẫn có nút thêm vào giỏ; `PreorderNote` (`components/cart/preorder-note.tsx`) hiện dưới giỏ hàng, bảng giỏ và trang thanh toán.
+**Đặt chờ:** không có nút hay form riêng. Trước ngày mở bán (CMS bật đặt chờ) trang sản phẩm và thiết kế vòng vẫn có nút thêm vào giỏ; `PreorderNote` (`components/cart/preorder-note.tsx`) hiện dưới giỏ hàng, bảng giỏ và bước đặt hàng.
 
 **Đặt cọc:** cách thanh toán ở trang thanh toán lấy từ báo giá (`quote.payment`, `paymentOptions` ở `lib/order.ts`): chưa có tài khoản ngân hàng thì chỉ có trả khi nhận hàng; đơn phải cọc thì lựa chọn trả khi nhận hàng đổi thành "Đặt cọc N%, còn lại trả khi nhận hàng", ghi rõ hai số tiền. Trang đơn và tra cứu đơn hiện khối "Chuyển khoản tiền cọc" với đúng số tiền cọc. Quy tắc ở `anchi-growth` mục 6b.
 
@@ -41,7 +41,7 @@
 
 **Giỏ hàng:** chỉ lưu slug và số lượng trong `localStorage` (`lib/cart.ts`); giá và tồn kho luôn hỏi lại API. Dữ liệu form đặt hàng giữ trong `sessionStorage` của tab, đóng tab thì mất.
 
-**Chỉ có khi dev:** nút đăng nhập nhanh bằng khách mẫu ở `/dang-nhap` và khối điền nhanh ở `/thanh-toan`, đọc 3 khách đầu trong `sample-data.json` qua `/api/dev/sample-customers` (trả 404 ngoài `next dev`, không trả mật khẩu mẫu).
+**Chỉ có khi dev:** nút đăng nhập nhanh bằng khách mẫu ở `/dang-nhap` và khối điền nhanh ở bước đặt hàng của bảng giỏ, đọc 3 khách đầu trong `sample-data.json` qua `/api/dev/sample-customers` (trả 404 ngoài `next dev`, không trả mật khẩu mẫu).
 
 **Ngoại lệ:**
 
