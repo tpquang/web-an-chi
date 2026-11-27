@@ -3,6 +3,15 @@ import type { SalesChannel } from "./labels";
 
 // Cùng dạng với GET /reports/profit ở apps/api/src/modules/admin/admin.finance.ts
 type Money = { revenueVnd: number; costVnd: number; grossProfitVnd: number };
+// Cùng dạng với apps/api/src/lib/break-even.ts. null khi báo cáo đang lọc theo dòng sản phẩm hoặc kênh
+export type BreakEven = {
+  fixedCostVnd: number;
+  contributionVnd: number;
+  contributionPct: number | null;
+  breakEvenRevenueVnd: number | null;
+  revenueGapVnd: number | null;
+  progressPct: number | null;
+};
 export type MonthRow = Money & {
   month: string;
   orders: number;
@@ -14,6 +23,7 @@ export type MonthRow = Money & {
   collectedVnd: number;
   netProfitVnd: number;
   batchOtherPct: number | null;
+  breakEven: BreakEven | null;
 };
 export type ProfitReport = {
   from: string;

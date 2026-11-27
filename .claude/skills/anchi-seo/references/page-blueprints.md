@@ -67,6 +67,16 @@ Giới thiệu: chúng tôi là ai · nguồn hàng · nguyên tắc · số li�
 
 Chính sách: giao hàng, đổi trả, thanh toán, bảo mật. Câu chữ rõ, có ngày cập nhật, link ở footer.
 
+## Trang nội dung tự soạn
+
+Bảo hành, chính sách đại lý, cộng tác viên và các trang tĩnh khác soạn ở CMS (model `Page`), hiện tại đường dẫn gốc `/<slug>`.
+
+- Khung chung: H1 · một đoạn tóm tắt ai được áp dụng · các mục H2 · ngày cập nhật · liên hệ hoặc nút đăng ký (đại lý, CTV).
+- Bảo hành: phạm vi, thời hạn, trường hợp không bảo hành, cách gửi yêu cầu. Không hứa điều shop không làm được.
+- Đại lý, CTV: điều kiện, mức chiết khấu hoặc hoa hồng (nếu công khai), cách đặt hàng, thanh toán, đối soát, nút liên hệ. Có số liệu thì ghi số, không viết chung chung.
+- Mặc định index, có trong sitemap khi đã đăng. Trang chỉ dành cho người đã ký hợp đồng thì bật `noindex`.
+- Slug không được trùng route tĩnh của web: API giữ danh sách slug cấm (`RESERVED_PAGE_SLUGS` trong `apps/api/src/modules/admin/admin.pages.ts`). Thêm thư mục route mới dưới `apps/web/src/app` hoặc thư mục mới trong `apps/web/public` thì thêm tên đó vào danh sách.
+
 ## Bản đồ liên quan
 
 Mỗi trang tối đa 4 khối liên quan theo thứ tự: sản phẩm cùng danh mục, sản phẩm dùng kèm, bài cùng chủ đề, danh mục liên quan. Dùng `<a href>` render server. Nên gắn bằng tag trên CMS để biên tập tự cập nhật.

@@ -27,4 +27,5 @@ export const CONTENT_SEO = [
   { label: "Danh mục sản phẩm", pattern: "/danh-muc/<slug>", to: "/categories" },
   { label: "Bài viết", pattern: "/bai-viet/<slug>", to: "/posts" },
   { label: "Chủ đề bài viết", pattern: "/chu-de/<slug>", to: "/post-categories" },
+  { label: "Trang nội dung", pattern: "/<slug>", to: "/pages" },
 ] as const;

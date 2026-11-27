@@ -6,13 +6,14 @@ import { Field, Input, Textarea } from "../ui/Field";
 import { Panel } from "../ui/Page";
 
 type Values = SeoInput & { ogTitle: string; ogDescription: string; ogImageUrl: string };
-type Props = { values: Values; set: <K extends keyof Values>(key: K, value: Values[K]) => void; noindex: boolean; onNoindex(noindex: boolean): void; disabled?: boolean; siteUrl: string };
+type Props = { values: Values; set: <K extends keyof Values>(key: K, value: Values[K]) => void; noindex: boolean; onNoindex(noindex: boolean): void; disabled?: boolean; siteUrl: string; pathPrefix?: string };
 
 const tone = { good: "text-ok", warn: "text-warn", bad: "text-err" } as const;
 const Icon = { good: CheckIcon, warn: AlertIcon, bad: CloseIcon } as const;
 const word = { good: "Tốt", warn: "Nên sửa", bad: "Cần sửa" } as const;
 
-export function SeoTab({ values, set, noindex, onNoindex, disabled, siteUrl }: Props) {
+// pathPrefix: đoạn đầu đường dẫn trên web, bài viết "/bai-viet/", trang tự soạn "/"
+export function SeoTab({ values, set, noindex, onNoindex, disabled, siteUrl, pathPrefix = "/bai-viet/" }: Props) {
   const { checks, score } = analyzeSeo(values);
   const title = values.metaTitle || values.title;
   const desc = values.metaDescription || values.excerpt;
@@ -35,7 +36,7 @@ export function SeoTab({ values, set, noindex, onNoindex, disabled, siteUrl }: P
             </Field>
             <div className="rounded-lg border border-line bg-paper p-3" aria-label="Xem trước kết quả trên Google">
               <p className="text-xs text-ink-3">Xem trước trên Google</p>
-              <p className="mt-1 truncate text-xs text-ink-2">{siteUrl}/bai-viet/{values.slug || "..."}</p>
+              <p className="mt-1 truncate text-xs text-ink-2">{siteUrl}{pathPrefix}{values.slug || "..."}</p>
               <p className="truncate text-base font-medium text-info">{title || "Tiêu đề bài"} | An Chi Trầm Hương</p>
               <p className="line-clamp-2 text-sm text-ink-2">{desc ? desc.slice(0, LIMITS.descMax) : "Mô tả sẽ hiện ở đây."}</p>
             </div>

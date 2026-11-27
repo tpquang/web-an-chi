@@ -162,3 +162,33 @@ export function fillMax(batch: BatchInput, materials: Material[], recipes: Recip
   }
   return plans;
 }
+
+// Hoà vốn của đợt nhập: phải bán bao nhiêu thành phẩm để tiền thu về (đã trừ phí bán) bằng toàn bộ vốn bỏ ra cho đợt
+// (tiền hàng + mọi chi phí, kể cả khấu hao không chia vào giá vốn). Giữ cơ cấu bán theo kế hoạch đang nhập.
+// Chỉ CMS dùng để xem trước, API không có bản sao
+export type BatchBreakEven = {
+  // false: bán hết số dự kiến vẫn chưa thu đủ vốn
+  reachable: boolean;
+  // % số dự kiến cần bán, có thể vượt 100 khi chưa thu đủ
+  planPct: number;
+  units: { productId: string; name: string; quantity: number; of: number }[];
+  totalUnits: number;
+  // Còn thiếu bao nhiêu tiền khi bán hết số dự kiến
+  shortfallVnd: number;
+};
+
+export function batchBreakEven(result: BatchResult): BatchBreakEven | null {
+  const sold = result.plans.filter((p) => p.quantity > 0);
+  const netRevenue = result.revenueVnd - result.feeVnd;
+  if (result.capitalNeededVnd <= 0 || sold.length === 0 || netRevenue <= 0) return null;
+  const ratio = result.capitalNeededVnd / netRevenue;
+  const reachable = ratio <= 1;
+  const units = sold.map((p) => ({ productId: p.productId, name: p.name, of: p.quantity, quantity: reachable ? Math.ceil(p.quantity * ratio) : p.quantity }));
+  return {
+    reachable,
+    planPct: ratio * 100,
+    units,
+    totalUnits: units.reduce((s, u) => s + u.quantity, 0),
+    shortfallVnd: Math.max(0, result.capitalNeededVnd - netRevenue),
+  };
+}

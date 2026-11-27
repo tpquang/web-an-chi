@@ -27,7 +27,7 @@ ordersRouter.post("/orders", async (req, res) => {
   const input = checkoutInput.parse(req.body);
   const ip = clientIp(req);
   orderLimit.check(ip);
-  const { order, created } = await placeOrder(input, customerIdFrom(req));
+  const { order, created } = await placeOrder(input, await customerIdFrom(req));
   if (created) {
     orderLimit.fail(ip);
     publishOrder({ id: order.id, code: order.code, kind: "created", customerName: order.customerName, totalVnd: order.totalVnd });

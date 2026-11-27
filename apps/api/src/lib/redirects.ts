@@ -9,6 +9,8 @@ export const PATH_PREFIX = {
   category: "/danh-muc/",
   post: "/bai-viet/",
   postCategory: "/chu-de/",
+  // Trang tự soạn nằm ngay dưới gốc
+  page: "/",
 } as const;
 
 const KEY = "redirects";

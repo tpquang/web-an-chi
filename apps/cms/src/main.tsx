@@ -24,6 +24,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { OrderDetailPage } from "./pages/OrderDetailPage";
 import { OrdersPage } from "./pages/OrdersPage";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
+import { ContentPageFormPage, ContentPagesPage } from "./pages/ContentPagesPage";
 import { PostFormPage } from "./pages/PostFormPage";
 import { HomeConfigPage } from "./pages/HomeConfigPage";
 import { PostsPage } from "./pages/PostsPage";
@@ -55,6 +56,9 @@ function App() {
         <Route path="posts/new" element={<PostFormPage />} />
         <Route path="posts/:id" element={<PostFormPage />} />
         <Route path="post-categories" element={<TaxonomyPage kind="post-categories" />} />
+        <Route path="pages" element={<ContentPagesPage />} />
+        <Route path="pages/new" element={<ContentPageFormPage />} />
+        <Route path="pages/:id" element={<ContentPageFormPage />} />
         <Route path="seo" element={<SeoPagesPage />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route path="orders/new" element={<OrderCreatePage />} />

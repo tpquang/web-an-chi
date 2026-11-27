@@ -243,9 +243,12 @@ export async function placeOrder(input: z.infer<typeof checkoutInput>, accountId
       // Đã đăng nhập: gắn đơn vào tài khoản, người nhận có thể là người khác nên không dò theo số điện thoại
       const account = accountId ? await tx.customer.findUnique({ where: { id: accountId } }) : null;
       if (account) {
+        // Tài khoản Google chưa có số: lấy số của đơn đầu tiên, nếu số đó chưa thuộc hồ sơ khác
+        const takePhone = !account.phone && !(await tx.customer.findUnique({ where: { phone: customer.phone }, select: { id: true } }));
         await tx.customer.update({
           where: { id: account.id },
           data: {
+            ...(takePhone ? { phone: customer.phone } : {}),
             ...(account.address ? {} : { address: customer.address }),
             ...(account.email || !customer.email ? {} : { email: customer.email }),
             ...(input.marketingConsent ? { marketingConsent: true } : {}),

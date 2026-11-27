@@ -18,8 +18,9 @@ import { options, product3dModels, productType, publishStatus, type ProductType,
 import type { Category, Product } from "../lib/types";
 import { useLoad } from "../lib/use-load";
 import { useSubmit } from "../lib/use-submit";
+import { ModelUploadModal } from "../components/ModelUploadModal";
 
-type Values = Omit<Product, "id" | "specs" | "images" | "priceVnd"> & {
+type Values = Omit<Product, "id" | "specs" | "images" | "priceVnd" | "modelFile"> & {
   priceVnd: number | null;
   specs: { label: string; value: string }[];
   images: { url: string; alt: string }[];
@@ -31,7 +32,7 @@ const empty: Values = {
   categoryId: "", images: [],
 };
 
-function toValues(product: Product): Values {
+function toValues({ modelFile: _file, ...product }: Product): Values {
   return { ...empty, ...product, specs: product.specs ?? [], images: product.images.map((i) => ({ url: i.url, alt: i.alt ?? "" })) };
 }
 
@@ -43,11 +44,15 @@ export function ProductFormPage() {
   const product = useLoad(() => (id ? api.get<Product>(`/products/${id}`) : Promise.resolve(null)), [id]);
   const [values, setValues] = useState<Values>(empty);
   const [slugTouched, setSlugTouched] = useState(false);
+  const [modeling, setModeling] = useState(false);
+  // Thông tin file 3D giữ riêng: lưu file không tải lại cả form nên không mất phần đang sửa
+  const [modelFile, setModelFile] = useState<Product["modelFile"]>(null);
   const { submitting, errors, run } = useSubmit();
 
   useEffect(() => {
     if (product.state.status === "ready") {
       setValues(product.state.data ? toValues(product.state.data) : empty);
+      setModelFile(product.state.data?.modelFile ?? null);
       setSlugTouched(Boolean(product.state.data));
     }
   }, [product.state]);
@@ -127,7 +132,7 @@ export function ProductFormPage() {
             <ImageList images={values.images} onChange={(images) => set("images", images)} disabled={submitting} />
             {errors.images && <p role="alert" className="mt-2 text-sm text-err">{errors.images}</p>}
             <div className="mt-4">
-              <Field label="Xem 3D" optional hint="Trang sản phẩm có thêm nút 3D để khách xoay xem hộp, cạnh nút Ảnh.">
+              <Field label="Mẫu 3D dựng sẵn" optional hint="Hộp in ảnh dựng bằng code. Trang sản phẩm có thêm nút 3D cạnh nút Ảnh.">
                 <Select
                   value={values.model3d ?? ""}
                   onChange={(v) => set("model3d", (v || null) as Values["model3d"])}
@@ -137,6 +142,32 @@ export function ProductFormPage() {
               </Field>
             </div>
           </Panel>
+          {!isNew && id && (
+            <Panel title="File 3D tải lên">
+              <div className="flex flex-col gap-3 text-sm">
+                <p className="text-ink-2">Cho vật có hình phức tạp làm bằng Blender (lư hương, tượng, trầm cảnh). Khách bấm “Xem 3D” trên trang sản phẩm để xoay.</p>
+                {modelFile ? (
+                  <p className="truncate">Đang dùng: {modelFile.fileName} · {(modelFile.size / 1_000_000).toFixed(1)} MB</p>
+                ) : (
+                  <p className="text-ink-3">Chưa có file.</p>
+                )}
+                <div><Button variant="outline" onClick={() => setModeling(true)} disabled={submitting}>{modelFile ? "Đổi hoặc xoá file 3D" : "Tải file .glb"}</Button></div>
+              </div>
+            </Panel>
+          )}
+          {modeling && id && (
+            <ModelUploadModal
+              name={values.name || "sản phẩm"}
+              path={`/products/${id}/model`}
+              file={modelFile ?? null}
+              requirements={["Nên dưới 5 MB, dưới 100.000 tam giác để trang sản phẩm tải nhanh.", "Trục Y hướng lên, gốc toạ độ ở giữa đáy vật.", "Vật liệu PBR, ảnh vân nhúng trong file. Không dùng nén Draco."]}
+              onClose={() => setModeling(false)}
+              onSaved={() => {
+                setModeling(false);
+                api.get<Product>(`/products/${id}`).then((p) => setModelFile(p.modelFile ?? null), () => undefined);
+              }}
+            />
+          )}
           {!isNew && id && <RecipePanel productId={id} priceVnd={values.priceVnd ?? 0} />}
           <Panel title="SEO">
             <div className="flex flex-col gap-4">

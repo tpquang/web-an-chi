@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { AdjustModal } from "../components/business/AdjustModal";
-import { ModelModal } from "../components/business/ModelModal";
+import { ModelUploadModal } from "../components/ModelUploadModal";
 import { PlusIcon } from "../components/icons";
 import { RowActions } from "../components/RowActions";
 import { Button } from "../components/ui/Button";
@@ -219,7 +219,16 @@ export function MaterialsPage() {
           </form>
         )}
       </Modal>
-      {modeling && <ModelModal row={modeling} onClose={() => setModeling(null)} onSaved={() => (setModeling(null), reload())} />}
+      {modeling && (
+        <ModelUploadModal
+          name={`charm ${modeling.name}`}
+          path={`/materials/${modeling.id}/model`}
+          file={modeling.model}
+          requirements={["Tâm charm ở gốc toạ độ, lỗ xâu dây nằm ngang.", "Đơn vị mét, đúng kích thước thật. Charm 10 mm thì dài 0,01.", "Ảnh vân, màu kim loại đóng gói sẵn trong file."]}
+          onClose={() => setModeling(null)}
+          onSaved={() => (setModeling(null), reload())}
+        />
+      )}
       {texturing && <UploadModal row={texturing} onClose={() => setTexturing(null)} onSaved={() => (setTexturing(null), reload(), textures.reload())} />}
       <AdjustModal
         target={adjusting && { kind: "materials", id: adjusting.id, name: adjusting.name, unit: adjusting.unit, stock: adjusting.stock }}

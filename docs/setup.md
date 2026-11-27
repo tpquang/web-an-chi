@@ -445,6 +445,23 @@ sudo INDEXING=on bash scripts/deploy.sh
 
 Sau đó vào Google Search Console gửi `https://<ten-mien>/sitemap.xml`.
 
+## Đăng nhập Google cho khách
+
+Chưa cấu hình thì web ẩn nút Google, khách vẫn đăng nhập bằng số điện thoại.
+
+1. Vào Google Cloud Console, tạo project (hoặc dùng project có sẵn). Mở **APIs & Services > OAuth consent screen**: loại **External**, điền tên shop, email hỗ trợ, logo; phạm vi chỉ cần `openid`, `email`, `profile`. Bấm **Publish app** để khách ngoài dùng được.
+2. **APIs & Services > Credentials > Create credentials > OAuth client ID**, loại **Web application**. Ở **Authorized redirect URIs** thêm `https://<ten-mien>/api/account/google/callback` (máy dev thêm `http://localhost:3000/api/account/google/callback`).
+3. Trên VPS, thêm vào `apps/api/.env` (deploy không ghi đè file này):
+
+   ```bash
+   GOOGLE_CLIENT_ID=<client id>.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=<client secret>
+   ```
+
+4. Chạy lại API: `pm2 restart anchi-api` (hoặc `bash scripts/update.sh`). Nút Google hiện ở trang đăng nhập sau khoảng một phút.
+
+Khách đăng nhập Google lần đầu được tạo tài khoản chưa có số điện thoại; số được bổ sung ở trang tài khoản hoặc lấy từ đơn đầu tiên. Tài khoản không tự gộp theo email.
+
 ## Chuyển sang VPS khác
 
 1. Trên VPS cũ, sao lưu database:

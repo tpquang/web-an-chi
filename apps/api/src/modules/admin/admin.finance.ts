@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { OrderStatus, SalesChannel, type Prisma } from "../../generated/prisma/client.js";
+import { breakEven } from "../../lib/break-even.js";
 import { prisma } from "../../lib/prisma.js";
 import { optionalText } from "../../lib/text.js";
 
@@ -176,7 +177,14 @@ adminFinanceRouter.get("/reports/profit", async (req, res) => {
   for (const o of paid) months.get(monthKey(o.paidAt!))!.collectedVnd += o.totalVnd;
 
   const withProfit = <T extends { revenueVnd: number; costVnd: number }>(row: T) => ({ ...row, grossProfitVnd: row.revenueVnd - row.costVnd });
-  const monthRows = [...months].map(([key, b]) => ({ month: key, ...withProfit(b), netProfitVnd: net(b), batchOtherPct: pct(b.batchOtherVnd, b.revenueVnd) }));
+  // Hoà vốn chỉ có nghĩa khi đã trừ chi phí chung (không lọc theo dòng sản phẩm, kênh)
+  const monthRows = [...months].map(([key, b]) => ({
+    month: key,
+    ...withProfit(b),
+    netProfitVnd: net(b),
+    batchOtherPct: pct(b.batchOtherVnd, b.revenueVnd),
+    breakEven: whole ? breakEven(b) : null,
+  }));
   const total = monthRows.reduce((sum, m) => {
     for (const k of Object.keys(sum) as (keyof Bucket)[]) sum[k] += m[k];
     return sum;
@@ -189,7 +197,13 @@ adminFinanceRouter.get("/reports/profit", async (req, res) => {
       categoryId: categoryId ?? null,
       channel: channel ?? null,
       includesSharedCosts: whole,
-      total: { ...withProfit(total), netProfitVnd: net(total), batchOtherPct: pct(total.batchOtherVnd, total.revenueVnd), grossMarginPct: pct(total.revenueVnd - total.costVnd, total.revenueVnd) },
+      total: {
+        ...withProfit(total),
+        netProfitVnd: net(total),
+        batchOtherPct: pct(total.batchOtherVnd, total.revenueVnd),
+        grossMarginPct: pct(total.revenueVnd - total.costVnd, total.revenueVnd),
+        breakEven: whole ? breakEven(total) : null,
+      },
       channels: byChannel.map((c) => ({ channel: c.channel, orders: c._count._all, revenueVnd: c._sum.subtotalVnd ?? 0, platformFeeVnd: c._sum.platformFeeVnd ?? 0 })),
       months: monthRows,
       categories: [...categories.values()].map(withProfit).sort((a, b) => b.revenueVnd - a.revenueVnd),

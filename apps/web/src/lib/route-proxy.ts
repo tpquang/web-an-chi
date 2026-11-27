@@ -2,15 +2,16 @@ import "server-only";
 import { forward } from "./api";
 import { endSession, sessionToken, startSession } from "./session";
 
-type Options = { method?: string; session?: "start" | "use" | "none" };
+type Options = { method?: string; session?: "start" | "use" | "renew" | "none" };
 
 const UNREACHABLE = "Không kết nối được hệ thống của shop. Bạn thử lại sau ít phút, giỏ hàng vẫn được giữ.";
 
 // Trình duyệt không gọi thẳng API: route handler của web nhận rồi chuyển tiếp.
 // session "use": gửi kèm token khách từ cookie. "start": API trả token thì cất vào cookie, không đưa token cho JS.
+// "renew": gửi kèm token rồi cất token mới API trả về, ví dụ đổi mật khẩu.
 // "none": không đụng tới phiên khách, ví dụ trang nhà cung cấp
 // IP của khách do nginx đặt; chạy dev không qua nginx thì không có, API dùng IP kết nối
-const clientIpOf = (request: Request) => request.headers.get("x-real-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+export const clientIpOf = (request: Request) => request.headers.get("x-real-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
 
 // path là hàm khi đường dẫn có tham số, ví dụ (p) => `/orders/${p.code}/cancel`
 type Path = string | ((params: Record<string, string>) => string);
@@ -28,13 +29,13 @@ export function routeProxy(pathOf: Path, { method = "POST", session = "use" }: O
     }
     let res: Response;
     try {
-      res = await forward(path, { method, body, token: session === "use" ? await sessionToken() : null, clientIp: clientIpOf(request) });
+      res = await forward(path, { method, body, token: session === "use" || session === "renew" ? await sessionToken() : null, clientIp: clientIpOf(request) });
     } catch (error) {
       console.error(error);
       return Response.json({ error: UNREACHABLE }, { status: 503 });
     }
-    if (session === "use" && res.status === 401) await endSession();
-    if (session !== "start" || !res.ok) return res;
+    if ((session === "use" || session === "renew") && res.status === 401) await endSession();
+    if ((session !== "start" && session !== "renew") || !res.ok) return res;
     const { data } = await res.json();
     await startSession(data.token, data.expiresAt);
     return Response.json({ data: { ok: true } });

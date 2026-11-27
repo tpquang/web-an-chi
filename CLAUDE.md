@@ -16,6 +16,11 @@ Rule của dự án nằm trong `.claude/skills/` và tự nạp theo việc đa
 | `anchi-seo` | Metadata, URL, redirect, breadcrumb, sitemap, nội dung |
 | `anchi-brand` | Viết chữ, mô tả sản phẩm, logo, ảnh chia sẻ, quyết định chưa có quy tắc |
 | `anchi-growth` | CTA, khuyến mãi, quảng cáo, bán kèm, dữ liệu cá nhân, đo phễu |
+| `anchi-backend` | Route API, model Prisma, migration, tiền, kho, đơn hàng, phân quyền |
+| `anchi-media` | Tải ảnh, nén ảnh, file và trình xem 3D, nơi lưu file |
+| `anchi-auth` | Đăng ký, đăng nhập, mật khẩu, Google, phiên, tài khoản nhân viên |
+
+Agent không đọc file này (Antigravity...) vào qua `AGENTS.md` và `.agents/skills.json`.
 
 Token màu chỉ sửa ở `design/tokens.css`. Thứ tự ưu tiên khi mâu thuẫn: yêu cầu trực tiếp, `CLAUDE.md`, skill. Quyết định mới dùng lâu dài thì ghi vào skill tương ứng trong cùng commit.
 
@@ -28,11 +33,12 @@ Next.js 16 có thay đổi phá vỡ so với kiến thức cũ: trước khi vi
 | `npm start` | `scripts/dev.sh` (Windows: `start.cmd` → `scripts/dev.ps1`): cài thư viện, tạo `.env`, bật Docker + PostgreSQL (cổng 5433), áp migration, chạy cả 3 app |
 | `npm run dev` | Chạy cả 3 app khi database đã bật. Một app: `npm run dev -w @an-chi/web` |
 | `npm run db:migrate` | `prisma migrate dev`, mọi thay đổi `schema.prisma` đi qua đây |
-| `npm run db:seed` | Nạp `apps/api/prisma/sample-data.json`, chạy lại nhiều lần được. `-w @an-chi/api db:seed:reset` xoá sạch rồi nạp lại |
+| `npm run db:up` / `db:down` | Bật / tắt PostgreSQL trong Docker |
+| `npm run db:seed` | Nạp `apps/api/prisma/sample-data.json`, chạy lại nhiều lần được. `-w @an-chi/api db:seed:reset` xoá sạch sản phẩm, đơn, kho rồi nạp lại; `db:seed:initial` (deploy lần đầu) chỉ nạp khi database chưa có nguyên liệu, sản phẩm |
 
 Không có test tự động và lint. Kiểm tra trước khi commit: `npm run typecheck`, `npm run build`, và `node .claude/skills/anchi-ui-ux/scripts/find-hardcoded-colors.mjs`.
 
-Đăng nhập CMS dev bằng `ADMIN_EMAIL` / `ADMIN_PASSWORD` trong `apps/api/.env`. `DEV_LOGIN=on` bật nút đăng nhập nhanh ở CMS và web; API bỏ qua khi `NODE_ENV=production`.
+Đăng nhập CMS dev bằng `ADMIN_EMAIL` / `ADMIN_PASSWORD` trong `apps/api/.env`. `DEV_LOGIN=on` bật nút đăng nhập nhanh ở CMS và web; API bỏ qua khi `NODE_ENV=production`. Khách mẫu đăng nhập web: `0900000101` hoặc `0900000102`, mật khẩu `khachmau123`.
 
 ## Kiến trúc
 
@@ -41,7 +47,7 @@ Không có test tự động và lint. Kiểm tra trước khi commit: `npm run 
 - **Web:** trình duyệt không bao giờ gọi thẳng API. Server component lấy dữ liệu qua `src/lib/api.ts` (`server-only`, cache 60 giây, timeout thì trả 500). Thao tác của khách đi qua route handler `src/app/api/*`, dùng `routeProxy` trong `src/lib/route-proxy.ts` để chuyển tiếp và giữ token khách trong cookie httpOnly. Không có `SITE_INDEXING=on` thì toàn site noindex.
 - **CMS:** SPA gọi API trực tiếp qua `VITE_API_URL`, token admin lưu trong `localStorage` (`src/lib/api.ts`).
 - **Giao diện:** cả web và CMS import `design/tailwind-theme.css` (nối biến CSS thành class Tailwind như `bg-paper`, `text-ink`) và `design/tokens.css` (giá trị màu sáng, tối).
-- **Code nhân đôi, sửa thì sửa cả hai:** công thức chia chi phí đợt nhập `apps/api/src/lib/inventory.ts` ↔ `apps/cms/src/lib/batch.ts`; SEO mặc định của trang không có slug `apps/api/src/lib/seo-pages.ts` ↔ `apps/web/src/lib/page-seo.ts`. Kiểu dữ liệu ở web và CMS khai báo tay, không dùng chung với API.
+- **Code nhân đôi, sửa thì sửa cả hai:** công thức chia chi phí đợt nhập `apps/api/src/lib/inventory.ts` ↔ `apps/cms/src/lib/batch.ts`; SEO mặc định của trang không có slug `apps/api/src/lib/seo-pages.ts` ↔ `apps/web/src/lib/page-seo.ts`; cách bọc ảnh vân lên hạt 3D (three.js) `apps/cms/src/components/BeadPreview.tsx` ↔ `apps/web/src/components/bracelet/bracelet-scene.tsx`; slug cấm của trang tự soạn `RESERVED_PAGE_SLUGS` (`apps/api/src/modules/admin/admin.pages.ts`) ↔ thư mục route trong `apps/web/src/app` và `apps/web/public`. Kiểu dữ liệu ở web và CMS khai báo tay, không dùng chung với API.
 - **Triển khai:** `scripts/deploy.sh` cài lần đầu lên VPS Ubuntu (nginx, HTTPS, web ở tên miền chính, CMS và `/api/` ở `mun.<domain>`); cập nhật về sau bằng `scripts/update.sh`.
 
 ## Tài liệu

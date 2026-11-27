@@ -24,7 +24,7 @@ const MODULES: { key: PermissionKey; label: string }[] = [
   { key: "inventory", label: "Kho, đóng gói, kiểm kho" },
   { key: "batches", label: "Đợt nhập hàng" },
   { key: "finance", label: "Chi phí, lợi nhuận" },
-  { key: "posts", label: "Bài viết" },
+  { key: "posts", label: "Bài viết, trang nội dung" },
   { key: "home", label: "Trang chủ" },
   { key: "inbox", label: "Hộp thư" },
 ];

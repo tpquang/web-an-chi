@@ -27,19 +27,20 @@ export function checkCredentials(email: string, password: string) {
 // kind tách token quản trị và token khách: token khách không mở được API quản trị
 type TokenKind = "admin" | "customer";
 
-export function issueToken(sub: string, kind: TokenKind = "admin", ttlSeconds = TOKEN_TTL_SECONDS) {
+// ver: Customer.sessionVersion lúc cấp, chỉ có ở token khách
+export function issueToken(sub: string, kind: TokenKind = "admin", ttlSeconds = TOKEN_TTL_SECONDS, ver?: number) {
   const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
-  const payload = Buffer.from(JSON.stringify({ sub, kind, exp })).toString("base64url");
+  const payload = Buffer.from(JSON.stringify({ sub, kind, exp, ...(ver === undefined ? {} : { ver }) })).toString("base64url");
   return { token: `${payload}.${sign(payload)}`, expiresAt: new Date(exp * 1000).toISOString() };
 }
 
-function verifyToken(token: string, kind: TokenKind): { sub: string } | null {
+function verifyToken(token: string, kind: TokenKind): { sub: string; ver: number } | null {
   const [payload, signature] = token.split(".");
   if (!payload || !signature || !safeEqual(signature, sign(payload))) return null;
   try {
     const data = JSON.parse(Buffer.from(payload, "base64url").toString());
     if (typeof data.exp !== "number" || data.exp * 1000 < Date.now() || data.kind !== kind) return null;
-    return { sub: String(data.sub) };
+    return { sub: String(data.sub), ver: typeof data.ver === "number" ? data.ver : 0 };
   } catch {
     return null;
   }
@@ -57,14 +58,17 @@ export const requireAdmin: RequestHandler = async (req, res, next) => {
   next();
 };
 
-// Khách đăng nhập là tuỳ chọn: không có token hoặc token sai thì coi như khách vãng lai
-export function customerIdFrom(req: Request): string | null {
+// Khách đăng nhập là tuỳ chọn: không có token, token sai hoặc đã bị thu hồi (đổi mật khẩu) thì coi như khách vãng lai
+export async function customerIdFrom(req: Request): Promise<string | null> {
   const header = req.get("authorization") ?? "";
-  return header.startsWith("Bearer ") ? (verifyToken(header.slice(7), "customer")?.sub ?? null) : null;
+  const token = header.startsWith("Bearer ") ? verifyToken(header.slice(7), "customer") : null;
+  if (!token) return null;
+  const customer = await prisma.customer.findUnique({ where: { id: token.sub }, select: { sessionVersion: true } });
+  return customer?.sessionVersion === token.ver ? token.sub : null;
 }
 
-export const requireCustomer: RequestHandler = (req, res, next) => {
-  const id = customerIdFrom(req);
+export const requireCustomer: RequestHandler = async (req, res, next) => {
+  const id = await customerIdFrom(req);
   if (!id) throw new HttpError(401, "Bạn cần đăng nhập lại.", "UNAUTHORIZED");
   res.locals.customerId = id;
   next();

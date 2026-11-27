@@ -113,9 +113,11 @@ model Product {
   featured          Boolean            @default(false)
   // Hàng đặt làm hoặc giá trị cao: đơn có sản phẩm này phải đặt cọc (khi shop bật cọc theo sản phẩm)
   requiresDeposit   Boolean            @default(false)
-  // Link gian hàng của chính sản phẩm này trên sàn, để trống nếu không bán ở đó
   // Mô hình 3D xem cạnh ảnh ở trang sản phẩm. Để trống thì chỉ có ảnh
   model3d           Product3DModel?
+  // File .glb tải lên từ CMS (hình phức tạp làm bằng Blender). Có cả hai thì web hiện cả hai nút xem
+  modelFile         ProductModel?
+  // Link gian hàng của chính sản phẩm này trên sàn, để trống nếu không bán ở đó
   shopeeUrl         String?
   tiktokUrl         String?
   status            PublishStatus      @default(DRAFT)
@@ -214,15 +216,19 @@ model Post {
 model Customer {
   id               String         @id @default(cuid())
   name             String
-  // Khoá nhận diện khách đặt hàng không cần tài khoản
-  phone            String         @unique
+  // Khoá nhận diện khách đặt hàng không cần tài khoản. null: tài khoản tạo qua Google, chưa bổ sung số
+  phone            String?        @unique
   email            String?
+  // Mã tài khoản Google ("sub" trong id_token), khoá liên kết đăng nhập Google. Không liên kết bằng email
+  googleSub        String?        @unique
   address          String?
   // Chỉ true khi khách tự đánh dấu đồng ý nhận tin
   marketingConsent Boolean        @default(false)
   conversations    Conversation[]
   // null: khách chỉ đặt hàng, chưa tạo tài khoản. Dạng "scrypt$<salt>$<hash>"
   passwordHash     String?
+  // Tăng mỗi lần đổi hoặc đặt lại mật khẩu. Token khách mang số này, lệch thì phiên cũ hết hiệu lực
+  sessionVersion   Int            @default(0)
   orders           Order[]
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
@@ -669,8 +675,7 @@ model BeadTexture {
   updatedAt  DateTime @updatedAt
 }
 
-// Ảnh banner và slide trang chủ, tải lên từ CMS. Đã nén ở CMS, lưu thẳng trong database như ảnh vân hạt.
-// Setting "home" giữ id ảnh; ảnh không còn được dùng thì xoá khi lưu cấu hình trang chủ.
+// Kênh bán của đơn
 enum SalesChannel {
   WEB
   SHOPEE
@@ -692,6 +697,8 @@ model MediaImage {
   createdAt DateTime @default(now())
 }
 
+// Ảnh banner và slide trang chủ, tải lên từ CMS. Đã nén ở CMS, lưu thẳng trong database như ảnh vân hạt.
+// Setting "home" giữ id ảnh; ảnh không còn được dùng thì xoá khi lưu cấu hình trang chủ.
 model SiteImage {
   id        String   @id @default(cuid())
   image     Bytes
@@ -711,6 +718,20 @@ model MaterialModel {
   size       Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+// File 3D .glb của sản phẩm tải lên từ CMS. Bảng riêng để danh sách sản phẩm không phải đọc cả file.
+// Tải file mới thì ghi đè, updatedAt làm số phiên bản trong link để cache lâu dài
+model ProductModel {
+  id        String   @id @default(cuid())
+  productId String   @unique
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  data      Bytes
+  fileName  String
+  // Byte
+  size      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // ---- Chi phí phát sinh: mặt bằng, lương, quảng cáo, khấu hao... trừ vào lợi nhuận theo tháng
@@ -740,4 +761,33 @@ model Supplier {
   batches   PurchaseBatch[]
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
+}
+
+// Trang nội dung tự soạn ở CMS (bảo hành, chính sách đại lý, cộng tác viên...), hiện ở /<slug> trên web.
+// Nội dung cùng định dạng văn bản thuần với Post.content
+model Page {
+  id              String        @id @default(cuid())
+  title           String
+  // Không được trùng route tĩnh của web, xem RESERVED_PAGE_SLUGS ở modules/admin/admin.pages.ts
+  slug            String        @unique
+  // Một đoạn tóm tắt ai được áp dụng, hiện dưới tiêu đề
+  summary         String?
+  content         String
+  status          PublishStatus @default(DRAFT)
+  // Hiện link trong cột liên kết cuối trang, theo thứ tự position tăng dần
+  showInFooter    Boolean       @default(false)
+  position        Int           @default(0)
+  // Nút cuối trang, ví dụ "Đăng ký làm cộng tác viên". Để trống thì không có nút
+  ctaLabel        String?
+  ctaHref         String?
+  focusKeyword    String?
+  metaTitle       String?
+  metaDescription String?
+  // Ẩn khỏi Google: thẻ noindex và bỏ khỏi sitemap, ví dụ trang chỉ dành cho đại lý đã ký
+  noindex         Boolean       @default(false)
+  ogTitle         String?
+  ogDescription   String?
+  ogImageUrl      String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }

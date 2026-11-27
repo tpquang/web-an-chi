@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 import type { Account } from "@/lib/api";
 import { postJson } from "@/lib/client-api";
@@ -10,16 +11,21 @@ import { showToast } from "../ui/toast";
 async function patchProfile(body: unknown) {
   const res = await fetch("/api/account/me", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).catch(() => null);
   const json = res ? await res.json().catch(() => ({})) : {};
-  return res?.ok ? { ok: true as const } : { ok: false as const, error: json.error ?? "Không gửi được. Bạn thử lại.", issues: json.issues as { path: string[]; message: string }[] | undefined };
+  return res?.ok
+    ? { ok: true as const }
+    : { ok: false as const, error: json.error ?? "Không gửi được. Bạn thử lại.", code: json.code as string | undefined, issues: json.issues as { path: string[]; message: string }[] | undefined };
 }
 
 // Địa chỉ lưu ở đây được điền sẵn khi đặt hàng
 export function ProfileForm({ account }: { account: Account }) {
+  const router = useRouter();
   const [values, setValues] = useState({
     name: account.name,
     email: account.email ?? "",
     address: account.address ?? "",
     marketingConsent: account.marketingConsent,
+    // Chỉ gửi khi tài khoản chưa có số (tạo qua Google); số đã có là tên đăng nhập, không sửa ở đây
+    phone: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -31,10 +37,16 @@ export function ProfileForm({ account }: { account: Account }) {
     inFlight.current = true;
     setSubmitting(true);
     try {
-      const result = await patchProfile(values);
+      const result = await patchProfile(account.phone ? { ...values, phone: undefined } : values);
       if (result.ok) {
         setErrors({});
         showToast({ title: "Đã lưu thông tin", desc: "Lần đặt hàng sau shop điền sẵn địa chỉ này." });
+        // Vừa bổ sung số: tải lại để tiêu đề và mục mật khẩu dùng số mới
+        if (!account.phone && values.phone) router.refresh();
+        return;
+      }
+      if (result.code === "PHONE_TAKEN") {
+        setErrors({ phone: result.error });
         return;
       }
       const found: Record<string, string> = {};
@@ -53,6 +65,11 @@ export function ProfileForm({ account }: { account: Account }) {
       <Field label="Họ tên" error={errors.name}>
         <Input value={values.name} onChange={(e) => setValues({ ...values, name: e.target.value })} disabled={submitting} autoComplete="name" />
       </Field>
+      {!account.phone && (
+        <Field label="Số điện thoại" optional hint="Để shop gọi xác nhận đơn và để bạn đăng nhập bằng số điện thoại." error={errors.phone}>
+          <Input value={values.phone} onChange={(e) => setValues({ ...values, phone: e.target.value })} disabled={submitting} inputMode="tel" autoComplete="tel" />
+        </Field>
+      )}
       <Field label="Email" optional error={errors.email}>
         <Input type="email" value={values.email} onChange={(e) => setValues({ ...values, email: e.target.value })} disabled={submitting} autoComplete="email" />
       </Field>

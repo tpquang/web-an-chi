@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { MovementType, Product3DModel, ProductType, PublishStatus, type Prisma } from "../../generated/prisma/client.js";
+import { modelBody, readGlb } from "../../lib/model-file.js";
 import { prisma } from "../../lib/prisma.js";
 import { withLiveStock } from "../../lib/stock.js";
 import { recordSlugChange } from "../../lib/redirects.js";
@@ -144,9 +145,30 @@ adminCatalogRouter.get("/products", async (req, res) => {
 adminCatalogRouter.get("/products/:id", async (req, res) => {
   const data = await prisma.product.findUniqueOrThrow({
     where: { id: req.params.id },
-    include: { images: { orderBy: { position: "asc" } } },
+    include: { images: { orderBy: { position: "asc" } }, modelFile: modelInfo },
   });
   res.json({ data: (await withLiveStock(prisma, [data]))[0] });
+});
+
+// ---- File 3D .glb của sản phẩm. Thông tin file đi kèm GET /products/:id, nội dung đọc riêng
+const modelInfo = { select: { fileName: true, size: true, updatedAt: true } } as const;
+
+adminCatalogRouter.get("/products/:id/model", async (req, res) => {
+  const model = await prisma.productModel.findUnique({ where: { productId: req.params.id } });
+  if (!model) throw new HttpError(404, "Sản phẩm chưa có file 3D.", "NOT_FOUND");
+  res.type("model/gltf-binary").setHeader("cache-control", "private, no-cache").send(Buffer.from(model.data));
+});
+
+adminCatalogRouter.put("/products/:id/model", modelBody, async (req, res) => {
+  const product = await prisma.product.findUniqueOrThrow({ where: { id: String(req.params.id) }, select: { id: true } });
+  const file = readGlb(req.body, req.query.name, "san-pham.glb");
+  const saved = await prisma.productModel.upsert({ where: { productId: product.id }, update: file, create: { productId: product.id, ...file }, ...modelInfo });
+  res.json({ data: saved });
+});
+
+adminCatalogRouter.delete("/products/:id/model", async (req, res) => {
+  await prisma.productModel.deleteMany({ where: { productId: req.params.id } });
+  res.status(204).end();
 });
 
 adminCatalogRouter.post("/products", async (req, res) => {

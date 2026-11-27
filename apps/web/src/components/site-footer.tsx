@@ -1,5 +1,6 @@
 import Link from "next/link";
-import type { Store } from "@/lib/api";
+import type { ContentPageLink, Store } from "@/lib/api";
+import { contentPageHref } from "@/lib/links";
 import { footerNav } from "@/lib/nav";
 import { site } from "@/lib/site";
 import { BrandLogo } from "./brand-mark";
@@ -7,7 +8,9 @@ import { MarketplaceLinks } from "./marketplace-links";
 import { PageFrame } from "./ui/layout";
 
 // minimal: giỏ và thanh toán không có link dẫn ra ngoài theo anchi-growth luật 4
-export function SiteFooter({ store, minimal }: { store: Store | null; minimal?: boolean }) {
+// pages: trang tự soạn bật "Hiện ở cuối trang" trong CMS, nối sau các link cố định
+export function SiteFooter({ store, pages = [], minimal }: { store: Store | null; pages?: Pick<ContentPageLink, "title" | "slug">[]; minimal?: boolean }) {
+  const links = [...footerNav, ...pages.map((page) => ({ href: contentPageHref(page.slug), label: page.title }))];
   return (
     <footer className="mt-24 pb-[max(24px,env(safe-area-inset-bottom))] text-sm">
       <PageFrame>
@@ -34,7 +37,7 @@ export function SiteFooter({ store, minimal }: { store: Store | null; minimal?: 
           </div>
           <nav aria-label="Liên kết cuối trang">
             <ul className="flex flex-col">
-              {footerNav.map((item) => (
+              {links.map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className="inline-flex min-h-11 items-center hover:text-wood">
                     {item.label}

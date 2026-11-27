@@ -14,6 +14,8 @@ const published = { status: PublishStatus.PUBLISHED };
 export const productInclude = {
   category: { select: { id: true, name: true, slug: true } },
   images: { orderBy: { position: "asc" } },
+  // Chỉ mốc cập nhật làm phiên bản cho link file, không đọc cả file
+  modelFile: { select: { updatedAt: true } },
 } as const satisfies Prisma.ProductInclude;
 
 catalogRouter.get("/categories", async (_req, res) => {
@@ -79,4 +81,11 @@ catalogRouter.get("/products/:slug", async (req, res) => {
   });
   if (!data) throw new HttpError(404, "Không tìm thấy sản phẩm");
   res.json({ data: (await withLiveStock(prisma, [data]))[0] });
+});
+
+// File .glb của sản phẩm đang bán. Web gọi kèm ?v=<mốc cập nhật> nên cache được lâu dài
+catalogRouter.get("/products/:slug/model", async (req, res) => {
+  const product = await prisma.product.findFirst({ where: { slug: req.params.slug, ...sellable }, select: { modelFile: { select: { data: true } } } });
+  if (!product?.modelFile) throw new HttpError(404, "Sản phẩm chưa có file 3D");
+  res.type("model/gltf-binary").setHeader("cache-control", "public, max-age=31536000, immutable").send(Buffer.from(product.modelFile.data));
 });

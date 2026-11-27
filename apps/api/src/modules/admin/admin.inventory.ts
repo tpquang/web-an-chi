@@ -1,4 +1,4 @@
-import express, { Router } from "express";
+import { Router } from "express";
 import { z } from "zod";
 import { MaterialGroup, MaterialKind, MovementType, ProductType, type Prisma } from "../../generated/prisma/client.js";
 import { movingAverage } from "../../lib/inventory.js";
@@ -6,6 +6,7 @@ import { customBraceletPrice } from "../../lib/pricing.js";
 import { prisma } from "../../lib/prisma.js";
 import { optionalText, pageQuery } from "../../lib/text.js";
 import { HttpError } from "../../middleware/errors.js";
+import { modelBody, readGlb } from "../../lib/model-file.js";
 
 export const adminInventoryRouter = Router();
 
@@ -35,8 +36,6 @@ const materialInput = z
     beadMaterial: value.kind === MaterialKind.BEAD ? value.beadMaterial : null,
   }));
 
-// File 3D charm: .glb, bắt đầu bằng chữ "glTF"
-export const MODEL_SPEC = { maxBytes: 15_000_000 } as const;
 const modelInfo = { select: { fileName: true, size: true, updatedAt: true } } as const;
 
 adminInventoryRouter.get("/materials", async (_req, res) => {
@@ -74,19 +73,15 @@ adminInventoryRouter.get("/materials/:id/model", async (req, res) => {
 
 adminInventoryRouter.put(
   "/materials/:id/model",
-  express.raw({ type: ["model/gltf-binary", "application/octet-stream"], limit: MODEL_SPEC.maxBytes }),
+  modelBody,
   async (req, res) => {
     const material = await prisma.material.findUniqueOrThrow({ where: { id: String(req.params.id) }, select: { id: true, kind: true } });
     if (material.kind !== MaterialKind.CHARM) throw new HttpError(400, "Chỉ charm mới tải được file 3D.", "NOT_CHARM");
-    if (!Buffer.isBuffer(req.body) || req.body.length < 12 || req.body.toString("ascii", 0, 4) !== "glTF") {
-      throw new HttpError(400, "File không phải .glb hợp lệ. Xuất file từ Blender bằng glTF Binary (.glb).", "BAD_MODEL");
-    }
-    const fileName = String(req.query.name ?? "charm.glb").slice(0, 120);
-    const data = new Uint8Array(req.body);
+    const file = readGlb(req.body, req.query.name, "charm.glb");
     const saved = await prisma.materialModel.upsert({
       where: { materialId: material.id },
-      update: { data, fileName, size: data.length },
-      create: { materialId: material.id, data, fileName, size: data.length },
+      update: file,
+      create: { materialId: material.id, ...file },
       ...modelInfo,
     });
     res.json({ data: saved });

@@ -35,6 +35,8 @@ type SampleData = {
   postCategories: { name: string; slug: string; description?: string; position?: number }[];
   posts: { title: string; slug: string; featured?: boolean; category: string; authorName: string; publishedAt: string; excerpt?: string; metaDescription?: string; content: string }[];
   batches: { name: string; supplier?: string; orderedAt?: string; note?: string; receive?: boolean; lines: { material: string; quantity: number; totalCostVnd: number }[] }[];
+  // Trang tự soạn: chỉ tạo khi chưa có, không ghi đè nội dung shop đã sửa. Để nháp vì số liệu còn [ô trống]
+  pages: { title: string; slug: string; position: number; showInFooter: boolean; summary?: string; ctaLabel?: string; ctaHref?: string; metaDescription?: string; content: string }[];
   beads: { name: string; slug: string; kind: "BEAD" | "CHARM"; material: string; sizeMm: number; priceVnd: number; color: string; finish: string; note?: string; position: number; active?: boolean; stockItem: string }[];
 };
 
@@ -117,6 +119,10 @@ async function main() {
     await prisma.post.upsert({ where: { slug: post.slug }, update: data, create: data });
   }
 
+  for (const page of sample.pages) {
+    await prisma.page.upsert({ where: { slug: page.slug }, update: {}, create: { ...page, status: PublishStatus.DRAFT } });
+  }
+
   // Hạt không có tồn kho riêng: tồn kho là của nguyên liệu gắn kèm
   for (const { stockItem, ...rest } of sample.beads) {
     const bead = { ...rest, materialId: materialIds.get(stockItem) ?? null };
@@ -152,7 +158,7 @@ async function main() {
 
   console.log(
     `Seed xong: ${sample.materials.length} nguyên liệu, ${sample.products.length} sản phẩm, ${sample.beads.length} loại hạt và charm, ${sample.batches.length} đợt nhập, ` +
-      `${sample.categories.length} danh mục, ${sample.postCategories.length} chủ đề, ${sample.posts.length} bài viết.`,
+      `${sample.categories.length} danh mục, ${sample.postCategories.length} chủ đề, ${sample.posts.length} bài viết, ${sample.pages.length} trang nội dung (nháp).`,
   );
 }
 

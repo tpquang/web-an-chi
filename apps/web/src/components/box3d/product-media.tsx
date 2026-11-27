@@ -20,11 +20,15 @@ const views: Record<Product3DModel, { id: SceneModel; label: string; alt: string
 const segment =
   "inline-flex min-h-11 items-center justify-center rounded-full px-4 text-sm font-medium whitespace-nowrap text-ink-2 transition-colors duration-(--d-fast) hover:text-ink aria-pressed:bg-wood aria-pressed:text-on-wood";
 
-// Ảnh sản phẩm kèm nút xem 3D. Ảnh vẫn dựng ở server, khung 3D chỉ có khi khách bấm
-export function ProductMedia({ model, name, children }: { model: Product3DModel; name: string; children: ReactNode }) {
+type Props = { model: Product3DModel | null; glbUrl: string | null; name: string; children: ReactNode };
+
+// Ảnh sản phẩm kèm nút xem 3D: mẫu dựng sẵn (model) và/hoặc file .glb tải lên từ CMS (glbUrl).
+// Ảnh vẫn dựng ở server, khung 3D chỉ có khi khách bấm
+export function ProductMedia({ model, glbUrl, name, children }: Props) {
   const [view, setView] = useState<"image" | SceneModel>("image");
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const current = views[model].find((v) => v.id === view);
+  const available = [...(model ? views[model] : []), ...(glbUrl ? [{ id: "glb" as const, label: model ? "Mẫu 3D" : "Xem 3D", alt: name }] : [])];
+  const current = available.find((v) => v.id === view);
 
   function show(next: "image" | SceneModel) {
     if (next === view) return;
@@ -43,7 +47,7 @@ export function ProductMedia({ model, name, children }: { model: Product3DModel;
               Chưa tải được hình 3D. Bạn thử lại sau hoặc xem ảnh sản phẩm.
             </p>
           ) : (
-            <ModelScene key={current.id} model={current.id} label={`${current.alt}, ${name}, hình 3D xoay được`} onReady={() => setStatus("ready")} onError={() => setStatus("error")} />
+            <ModelScene key={current.id} model={current.id} glbUrl={glbUrl ?? undefined} label={`${current.alt}, ${name}, hình 3D xoay được`} onReady={() => setStatus("ready")} onError={() => setStatus("error")} />
           )}
           {status === "ready" && (
             <p aria-hidden className="pointer-events-none absolute top-3 left-3 rounded-full bg-surface/90 px-3 py-1 text-xs text-ink-2 shadow-e1">
@@ -59,7 +63,7 @@ export function ProductMedia({ model, name, children }: { model: Product3DModel;
         <button type="button" aria-pressed={view === "image"} onClick={() => show("image")} className={segment}>
           Ảnh
         </button>
-        {views[model].map((v) => (
+        {available.map((v) => (
           <button key={v.id} type="button" aria-pressed={view === v.id} onClick={() => show(v.id)} className={segment}>
             {v.label}
           </button>

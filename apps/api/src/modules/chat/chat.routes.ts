@@ -57,7 +57,7 @@ chatRouter.post("/start", async (req, res) => {
   let conversation = await prisma.conversation.findUnique({ where: { visitorKeyHash: hash } });
   if (!conversation) {
     // Gắn với khách đã có: ưu tiên tài khoản đang đăng nhập, sau đó theo số điện thoại
-    const accountId = customerIdFrom(req);
+    const accountId = await customerIdFrom(req);
     const byPhone = !accountId && input.phone ? await prisma.customer.findUnique({ where: { phone: input.phone }, select: { id: true } }) : null;
     conversation = await prisma.conversation.create({
       data: { visitorKeyHash: hash, name: input.name, phone: input.phone, pageUrl: input.pageUrl, customerId: accountId ?? byPhone?.id ?? null },

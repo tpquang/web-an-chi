@@ -48,6 +48,8 @@ export type Product = {
   // Hàng đặt làm, giá trị cao: đơn có sản phẩm này cần đặt cọc (khi bật cọc theo sản phẩm)
   requiresDeposit: boolean;
   model3d: import("./labels").Product3DModel | null;
+  // File .glb tải lên, chỉ có ở GET /products/:id. Lưu riêng qua /products/:id/model, không đi cùng form
+  modelFile?: { fileName: string; size: number; updatedAt: string } | null;
   shopeeUrl: string | null;
   tiktokUrl: string | null;
   status: PublishStatus;
@@ -99,10 +101,34 @@ export type Post = {
   productIds: string[];
 };
 
+// Trang tự soạn (bảo hành, đại lý...), hiện ở /<slug> trên web
+export type ContentPage = {
+  id: string;
+  title: string;
+  slug: string;
+  summary: string | null;
+  content: string;
+  status: PublishStatus;
+  showInFooter: boolean;
+  position: number;
+  // "#chat": nút mở khung chat với shop
+  ctaLabel: string | null;
+  ctaHref: string | null;
+  focusKeyword: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  noindex: boolean;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImageUrl: string | null;
+};
+export type ContentPageRow = Pick<ContentPage, "id" | "title" | "slug" | "status" | "showInFooter" | "position" | "noindex"> & { updatedAt: string };
+
 export type CustomerRow = {
   id: string;
   name: string;
-  phone: string;
+  // null: khách tạo tài khoản bằng Google, chưa có số
+  phone: string | null;
   email: string | null;
   address: string | null;
   marketingConsent: boolean;
@@ -173,7 +199,8 @@ export type Order = OrderRow & {
   customerHistory: Partial<Record<OrderStatus, number>>;
 };
 
-export type Customer = Omit<CustomerRow, "spentVnd" | "lastOrderAt" | "_count"> & { orders: OrderRow[] };
+// hasPassword: khách đã tạo tài khoản đăng nhập web
+export type Customer = Omit<CustomerRow, "spentVnd" | "lastOrderAt" | "_count"> & { orders: OrderRow[]; hasPassword: boolean; google: boolean };
 
 export type HomeLink = { label: string; href: string };
 export type HomeBanner = { eyebrow: string; title: string; text: string; imageId: string | null; imageAlt: string; primary: HomeLink; secondary: HomeLink | null };

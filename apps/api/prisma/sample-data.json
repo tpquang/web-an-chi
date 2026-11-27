@@ -812,5 +812,38 @@
       "stockItem": "Charm bạc",
       "active": false
     }
+  ],
+  "pages": [
+    {
+      "title": "Chính sách bảo hành",
+      "slug": "bao-hanh",
+      "position": 1,
+      "showInFooter": true,
+      "summary": "Áp dụng cho vòng tay trầm hương và vòng tự thiết kế mua trên website hoặc nhắn trực tiếp với shop.",
+      "metaDescription": "Phạm vi, thời hạn và cách gửi yêu cầu bảo hành vòng tay trầm hương tại An Chi Trầm Hương.",
+      "content": "## Phạm vi bảo hành\n\n- Đứt dây, lỏng dây, rơi hạt do lỗi xâu.\n- Hạt nứt, vỡ trong 7 ngày đầu khi chưa va đập.\n\n## Thời hạn\n\n- Xâu lại dây miễn phí trong [số] tháng kể từ ngày nhận hàng.\n- Sau thời hạn, shop xâu lại theo phí ghi khi bạn gửi yêu cầu.\n\n## Trường hợp không bảo hành\n\n- Hạt mất mùi theo thời gian: trầm tự nhiên nhạt hương khi đeo lâu, đây không phải lỗi.\n- Hạt nứt do va đập, ngâm nước, hoá chất, nước hoa.\n- Vòng đã sửa ở nơi khác.\n\n## Cách gửi yêu cầu\n\n- Nhắn shop qua khung chat trên website, gửi mã đơn và ảnh chụp vòng.\n- Shop trả lời trong giờ làm việc và báo cách gửi vòng về.\n- Phí gửi vòng về shop: [ai trả]. Phí gửi trả lại bạn: shop trả."
+    },
+    {
+      "title": "Chính sách đại lý",
+      "slug": "chinh-sach-dai-ly",
+      "position": 2,
+      "showInFooter": true,
+      "summary": "Dành cho cửa hàng, spa, quầy đồ thờ muốn nhập nhang, nụ trầm và vòng trầm An Chi để bán lại.",
+      "ctaLabel": "Nhắn shop để đăng ký đại lý",
+      "ctaHref": "#chat",
+      "metaDescription": "Điều kiện, mức chiết khấu, cách đặt hàng và đối soát khi làm đại lý trầm hương An Chi.",
+      "content": "## Điều kiện\n\n- Có điểm bán hoặc kênh bán online đang hoạt động.\n- Đơn nhập đầu tiên từ [số tiền].\n\n## Mức chiết khấu\n\n- Nhang và nụ trầm: [phần trăm] trên giá bán lẻ.\n- Vòng tay: [phần trăm] trên giá bán lẻ.\n\n## Đặt hàng và thanh toán\n\n- Đặt qua tin nhắn với shop, gửi danh sách và số lượng.\n- Thanh toán chuyển khoản trước khi giao. Phí giao: [ai trả].\n\n## Đối soát và đổi trả\n\n- Hàng lỗi do sản xuất đổi trong [số] ngày kể từ khi nhận.\n- Đại lý giữ đúng giá bán lẻ shop niêm yết trên website."
+    },
+    {
+      "title": "Cộng tác viên bán hàng",
+      "slug": "cong-tac-vien",
+      "position": 3,
+      "showInFooter": true,
+      "summary": "Dành cho người giới thiệu khách mua hàng mà không cần nhập hàng, không cần vốn.",
+      "ctaLabel": "Nhắn shop để làm cộng tác viên",
+      "ctaHref": "#chat",
+      "metaDescription": "Cách làm cộng tác viên trầm hương An Chi: hoa hồng, cách ghi nhận đơn và thời gian thanh toán.",
+      "content": "## Cách làm\n\n- Đăng ký với shop để nhận mã giới thiệu.\n- Khách đặt hàng ghi mã của bạn ở phần ghi chú, hoặc bạn gửi thông tin khách cho shop đặt hộ.\n\n## Hoa hồng\n\n- [phần trăm] trên tiền hàng của đơn đã giao thành công, không tính phí giao.\n- Đơn bị huỷ hoặc trả hàng không tính hoa hồng.\n\n## Thanh toán hoa hồng\n\n- Shop đối soát và chuyển khoản vào ngày [ngày] hằng tháng.\n\n## Lưu ý khi giới thiệu\n\n- Dùng ảnh và thông tin trên website, không nói quá công dụng của trầm hương."
+    }
   ]
 }

@@ -178,6 +178,13 @@ export const DocIcon = (p: P) => (
     <path d="M13 3.5V9h5.5M8.5 13h7M8.5 16.5h5" />
   </Icon>
 );
+// Trang tĩnh tự soạn: khung trang có dải tiêu đề
+export const PageIcon = (p: P) => (
+  <Icon {...p}>
+    <rect x="4.5" y="3.5" width="15" height="17" rx="1.5" />
+    <path d="M4.5 8h15M8 12h8M8 15.5h5" />
+  </Icon>
+);
 export const FolderIcon = (p: P) => (
   <Icon {...p}>
     <path d="M3.5 7A1.5 1.5 0 0 1 5 5.5h4l2 2h8A1.5 1.5 0 0 1 20.5 9v9a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 18z" />

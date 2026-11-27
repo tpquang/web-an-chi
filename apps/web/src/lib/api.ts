@@ -41,6 +41,8 @@ export type Product = {
   origin: string | null;
   featured: boolean;
   model3d: Product3DModel | null;
+  // File .glb tải lên từ CMS; updatedAt làm phiên bản trong link (productModelHref)
+  modelFile: { updatedAt: string } | null;
   shopeeUrl: string | null;
   tiktokUrl: string | null;
   metaTitle: string | null;
@@ -205,6 +207,33 @@ export async function getPost(slug: string) {
   return (await get<{ data: Post }>(`/posts/${encodeURIComponent(slug)}`))?.data ?? null;
 }
 
+// Trang tự soạn ở CMS. Danh sách chỉ có trang đã đăng
+export type ContentPageLink = { title: string; slug: string; showInFooter: boolean; noindex: boolean; updatedAt: string };
+export type ContentPage = {
+  title: string;
+  slug: string;
+  summary: string | null;
+  content: string;
+  // "#chat" là mở khung chat với shop
+  ctaLabel: string | null;
+  ctaHref: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  noindex: boolean;
+  ogTitle: string | null;
+  ogDescription: string | null;
+  ogImageUrl: string | null;
+  updatedAt: string;
+};
+
+export async function getContentPages() {
+  return (await must<{ data: ContentPageLink[] }>("/pages")).data;
+}
+
+export async function getContentPage(slug: string) {
+  return (await get<{ data: ContentPage }>(`/pages/${encodeURIComponent(slug)}`))?.data ?? null;
+}
+
 export async function getPostCategories() {
   return (await must<{ data: PostCategory[] }>("/post-categories")).data;
 }
@@ -254,10 +283,15 @@ export async function getOrder(code: string) {
 
 export type Account = {
   name: string;
-  phone: string;
+  // null: tài khoản tạo qua Google, chưa có số điện thoại
+  phone: string | null;
   email: string | null;
   address: string | null;
   marketingConsent: boolean;
+  // false: tài khoản tạo qua Google, chưa đặt mật khẩu
+  hasPassword: boolean;
+  // Đã liên kết đăng nhập Google
+  google: boolean;
   orders: (Pick<OrderSummary, "code" | "createdAt" | "status" | "paymentMethod" | "paymentStatus" | "totalVnd"> & {
     items: { productName: string; quantity: number }[];
   })[];
@@ -274,6 +308,16 @@ export async function getAccount(token: string | null) {
   if (res.status === 401) return null;
   if (!res.ok) throw new Error(`API /account/me responded ${res.status}`);
   return ((await res.json()) as { data: Account }).data;
+}
+
+// Client id OAuth của Google do API giữ (một chỗ cấu hình). null: shop chưa bật đăng nhập Google, ẩn nút.
+// API lỗi cũng coi như chưa bật để trang đăng nhập bằng số điện thoại vẫn dùng được
+export async function getGoogleClientId() {
+  try {
+    return (await get<{ data: { clientId: string } }>("/account/google"))?.data.clientId ?? null;
+  } catch {
+    return null;
+  }
 }
 
 // Route handler của web chuyển tiếp request của trình duyệt tới API, kèm token khách nếu có

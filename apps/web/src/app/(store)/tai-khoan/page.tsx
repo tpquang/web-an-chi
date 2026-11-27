@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { GoogleButton } from "@/components/account/google-button";
 import { LogoutButton } from "@/components/account/logout-button";
+import { PasswordForm } from "@/components/account/password-form";
 import { ProfileForm } from "@/components/account/profile-form";
 import { Button } from "@/components/ui/button";
 import { PageFrame, PageHeader } from "@/components/ui/layout";
 import { EmptyState } from "@/components/ui/states";
 import { Tag } from "@/components/ui/tag";
-import { getAccount } from "@/lib/api";
+import { getAccount, getGoogleClientId } from "@/lib/api";
 import { accountHref, loginHref, orderHref, productsHref } from "@/lib/links";
 import { orderStatusLabel, paymentStatusLabel } from "@/lib/order";
 import { privateMeta } from "@/lib/seo";
@@ -16,13 +18,16 @@ import { formatDate, formatVnd } from "@/lib/site";
 
 export const metadata: Metadata = { title: "Tài khoản", ...privateMeta };
 
-export default async function AccountPage() {
-  const account = await getAccount(await sessionToken());
+type Props = { searchParams: Promise<{ loi?: string }> };
+
+export default async function AccountPage({ searchParams }: Props) {
+  const [account, googleClientId, { loi }] = await Promise.all([getAccount(await sessionToken()), getGoogleClientId(), searchParams]);
   if (!account) redirect(`${loginHref}?tiep=${encodeURIComponent(accountHref)}`);
+  const login = [account.phone && `số điện thoại ${account.phone}`, account.google && "Google"].filter(Boolean).join(" hoặc ");
 
   return (
     <PageFrame>
-      <PageHeader title={`Chào ${account.name}`} desc={`Số điện thoại đăng nhập: ${account.phone}`} actions={<LogoutButton />} />
+      <PageHeader title={`Chào ${account.name}`} desc={`Đăng nhập bằng ${login}.`} actions={<LogoutButton />} />
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-6">
         <section aria-labelledby="don-cua-ban" className="lg:col-span-7">
           <h2 id="don-cua-ban" className="mb-4 font-serif text-2xl leading-tight">
@@ -56,8 +61,27 @@ export default async function AccountPage() {
             </ul>
           )}
         </section>
-        <div className="lg:col-span-5">
+        <div className="flex flex-col gap-6 lg:col-span-5">
           <ProfileForm account={account} />
+          <PasswordForm hasPassword={account.hasPassword} hasPhone={Boolean(account.phone)} />
+          {(loi === "google-da-gan" || (googleClientId && !account.google)) && (
+            <section aria-labelledby="lien-ket-google" className="flex flex-col gap-3 rounded-3xl border border-edge bg-surface p-5 md:p-6">
+              <h2 id="lien-ket-google" className="font-serif text-2xl leading-tight">
+                Đăng nhập bằng Google
+              </h2>
+              {loi === "google-da-gan" && (
+                <p role="alert" className="text-sm text-err">
+                  Tài khoản Google bạn chọn đã gắn với một tài khoản khác ở shop. Bạn chọn tài khoản Google khác, hoặc nhắn shop để gộp.
+                </p>
+              )}
+              {googleClientId && !account.google && (
+                <>
+                  <p className="text-sm text-ink-2">Liên kết để lần sau đăng nhập bằng một lần bấm, không cần nhập mật khẩu.</p>
+                  <GoogleButton next={accountHref} label="Liên kết tài khoản Google" />
+                </>
+              )}
+            </section>
+          )}
         </div>
       </div>
     </PageFrame>

@@ -68,7 +68,7 @@ export function CustomerSide({ conversation, staff, onUpdated }: Props) {
         {c ? (
           <>
             <Link to={`/customers/${c.id}`} className="font-medium hover:text-wood">{c.name}</Link>
-            <a href={`tel:${c.phone}`} className="text-ink-2 hover:text-wood">{c.phone}</a>
+            {c.phone && <a href={`tel:${c.phone}`} className="text-ink-2 hover:text-wood">{c.phone}</a>}
             {c.email && <span className="text-ink-2">{c.email}</span>}
             {c.address && <span className="text-ink-2">{c.address}</span>}
             <span className="text-ink-3">{c.marketingConsent ? "Đồng ý nhận tin" : "Chưa đồng ý nhận tin tiếp thị"}</span>

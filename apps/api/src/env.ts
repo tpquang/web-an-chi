@@ -15,6 +15,9 @@ const schema = z.object({
   AUTH_SECRET: z.string().min(32),
   // Đăng nhập CMS không cần mật khẩu để test giao diện. Luôn tắt ở production
   DEV_LOGIN: z.enum(["on", "off"]).default("off"),
+  // Đăng nhập Google cho khách (OAuth client loại Web application). Thiếu một trong hai thì tính năng tự tắt
+  GOOGLE_CLIENT_ID: z.string().trim().optional().transform((v) => v || undefined),
+  GOOGLE_CLIENT_SECRET: z.string().trim().optional().transform((v) => v || undefined),
 });
 
 export const env = schema.parse(process.env);

@@ -19,19 +19,23 @@
 
 ## P0
 
+Kế hoạch đang làm: [2026-11-hoan-thien-goal.md](../plans/2026-11-hoan-thien-goal.md).
+
 - [ ] Thông báo đơn mới cho shop (Zalo, email hoặc Telegram)
-- [ ] Rate limit cho `POST /orders` và `orders/lookup`
-- [ ] Trang chính sách và giới thiệu, link ở footer
+- [x] Rate limit cho `POST /orders`, `orders/lookup`, huỷ đơn
+- [x] Trang chính sách và giới thiệu, link ở footer
+- [x] Đổi mật khẩu tài khoản khách
+- [x] Trang bảo hành, chính sách đại lý, cộng tác viên (soạn ở CMS)
+- [x] Đăng nhập Google (cần shop tạo OAuth client, xem `docs/setup.md`)
+- [x] Xem mô hình 3D `.glb` của sản phẩm
 
 ## P1
 
 - [ ] Nối Facebook Page, Zalo OA vào Hộp thư (cần duyệt ứng dụng Meta, OA đã xác minh, tên miền HTTPS)
 - [ ] Thông báo tin chat mới cho nhân viên khi không mở CMS (Zalo, email hoặc thông báo trình duyệt)
 - [ ] Gửi ảnh trong chat
-
-- [ ] Quên mật khẩu, đổi mật khẩu cho tài khoản khách
-
-- [ ] Ảnh OG mặc định và theo trang
+- [ ] Quên mật khẩu (cần kênh OTP)
+- [ ] Hiện charm `.glb` trên vòng tự thiết kế (CMS đã tải được, web chưa dùng)
 - [ ] Đo phễu theo `anchi-growth` mục 7
 - [ ] Gợi ý dùng kèm trong bảng giỏ hàng sau khi thêm vào giỏ (bậc 3 của `anchi-growth`)
 - [ ] CI chạy typecheck, build, kiểm tra màu viết cứng; ESLint, test tự động; Dockerfile

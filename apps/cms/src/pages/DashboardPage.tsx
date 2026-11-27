@@ -5,7 +5,7 @@ import { Select } from "../components/ui/Select";
 import { ErrorState, Skeleton, Tag } from "../components/ui/States";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
-import { addMonths, loadProfit, monthLabel, monthOf, monthOptions, pct, type ProfitReport } from "../lib/finance";
+import { addMonths, loadProfit, monthLabel, monthOf, monthOptions, pct, type BreakEven, type ProfitReport } from "../lib/finance";
 import { formatDateTime, formatVnd } from "../lib/format";
 import { options, orderStatus, salesChannel, type OrderStatus, type SalesChannel } from "../lib/labels";
 import { useLoad } from "../lib/use-load";
@@ -108,6 +108,8 @@ function ProfitBody({ data }: { data: ProfitReport }) {
         </p>
       )}
 
+      {total.breakEven && <BreakEvenPanel be={total.breakEven} revenueVnd={total.revenueVnd} months={months.length} />}
+
       <Panel title="Theo tháng">
         <MonthChart months={months} />
         <div className="mt-4">
@@ -121,6 +123,7 @@ function ProfitBody({ data }: { data: ProfitReport }) {
                 <th className={`${th} text-right`}>Phí sàn</th>
                 <th className={`${th} text-right`}>Chi phí</th>
                 <th className={`${th} text-right`}>Lợi nhuận ròng</th>
+                {data.includesSharedCosts && <th className={`${th} text-right`}>Doanh thu hoà vốn</th>}
               </tr>
             }
           >
@@ -133,6 +136,15 @@ function ProfitBody({ data }: { data: ProfitReport }) {
                 <td className={tdMoney}>{formatVnd(m.platformFeeVnd)}</td>
                 <td className={tdMoney}>{formatVnd(m.expensesVnd + m.batchOtherVnd)}</td>
                 <td className={`${tdMoney} font-medium ${m.netProfitVnd < 0 ? "text-err" : ""}`}>{formatVnd(m.netProfitVnd)}</td>
+                {data.includesSharedCosts && (
+                  <td className={tdMoney}>
+                    {/* Tháng chưa có chi phí cố định hoặc lãi góp âm thì không có điểm hoà vốn */}
+                    {m.breakEven?.breakEvenRevenueVnd ? formatVnd(m.breakEven.breakEvenRevenueVnd) : "–"}
+                    {m.breakEven?.progressPct != null && m.breakEven.breakEvenRevenueVnd ? (
+                      <span className={`block text-[13px] ${m.breakEven.progressPct >= 100 ? "text-ok" : "text-ink-3"}`}>đạt {pct(m.breakEven.progressPct)}</span>
+                    ) : null}
+                  </td>
+                )}
               </tr>
             ))}
           </DataTable>
@@ -187,6 +199,46 @@ function ProfitBody({ data }: { data: ProfitReport }) {
 function change(now: number, before: number) {
   if (before === 0) return now === 0 ? 0 : null;
   return Math.round(((now - before) / Math.abs(before)) * 1000) / 10;
+}
+
+// Doanh thu cần có để lãi góp bù đủ chi phí cố định của kỳ đang xem (công thức ở apps/api/src/lib/break-even.ts)
+function BreakEvenPanel({ be, revenueVnd, months }: { be: BreakEven; revenueVnd: number; months: number }) {
+  const reached = be.revenueGapVnd === 0;
+  const progress = Math.min(100, be.progressPct ?? 0);
+  return (
+    <Panel title="Điểm hoà vốn">
+      {be.fixedCostVnd === 0 ? (
+        <p className="text-sm text-ink-2">
+          Chưa có chi phí cố định nào trong khoảng này nên chưa tính được điểm hoà vốn. Nhập mặt bằng, lương, quảng cáo, khấu hao ở mục <Link to="/expenses" className="text-wood hover:underline">Chi phí</Link>.
+        </p>
+      ) : be.breakEvenRevenueVnd === null ? (
+        <p className="text-sm text-ink-2">
+          {revenueVnd === 0 ? "Chưa có doanh thu trong khoảng này nên chưa tính được điểm hoà vốn." : "Lãi góp đang âm: tiền hàng chưa bù được giá vốn và phí sàn, bán thêm chỉ lỗ thêm. Xem lại giá bán hoặc giá vốn trước."}
+        </p>
+      ) : (
+        <div className="flex flex-col gap-4 text-sm">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div><p className="text-xs text-ink-2">Chi phí cố định{months > 1 ? ` ${months} tháng` : ""}</p><p className="mt-1 text-lg font-semibold tabular-nums">{formatVnd(be.fixedCostVnd)}</p></div>
+            <div><p className="text-xs text-ink-2">Tỉ lệ lãi góp</p><p className="mt-1 text-lg font-semibold tabular-nums">{pct(be.contributionPct)}</p></div>
+            <div><p className="text-xs text-ink-2">Doanh thu hoà vốn</p><p className="mt-1 text-lg font-semibold tabular-nums">{formatVnd(be.breakEvenRevenueVnd)}</p></div>
+          </div>
+          <div>
+            <div className="h-2 overflow-hidden rounded-full bg-paper-2" role="progressbar" aria-label="Tiến độ tới điểm hoà vốn" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)}>
+              <div className={`h-full rounded-full ${reached ? "bg-ok" : "bg-wood"}`} style={{ width: `${progress}%` }} />
+            </div>
+            <p className={`mt-2 ${reached ? "text-ok" : "text-ink"}`}>
+              {reached
+                ? `Đã qua điểm hoà vốn, doanh thu đạt ${pct(be.progressPct)} mức cần.`
+                : `Cần thêm ${formatVnd(be.revenueGapVnd ?? 0)} doanh thu tiền hàng để hoà vốn (đang đạt ${pct(be.progressPct)}).`}
+            </p>
+          </div>
+          <p className="text-[13px] text-ink-3">
+            Lãi góp là tiền hàng trừ giá vốn, phí sàn và chênh lệch ship. Chi phí cố định gồm chi phí phát sinh và chi phí khác của đợt nhập không chia vào giá vốn. Tính theo cơ cấu hàng đã bán trong khoảng này.
+          </p>
+        </div>
+      )}
+    </Panel>
+  );
 }
 
 function Stat({ label, value, delta, hint, tone }: { label: string; value: string; delta?: number | null; hint?: string; tone?: "err" }) {

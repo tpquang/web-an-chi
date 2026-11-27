@@ -4,17 +4,19 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { buildGlb } from "./glb";
 import { buildIncenseBox } from "./incense-box";
 import { buildBox, buildCones, type Built, type Loader } from "./models";
 
-export type SceneModel = "box" | "cone" | "incense";
+// glb: file tải lên từ CMS, cần thêm glbUrl
+export type SceneModel = "box" | "cone" | "incense" | "glb";
 
-const builders: Record<SceneModel, (load: Loader) => Promise<Built>> = { box: buildBox, cone: () => buildCones(), incense: buildIncenseBox };
+const builders: Record<Exclude<SceneModel, "glb">, (load: Loader) => Promise<Built>> = { box: buildBox, cone: () => buildCones(), incense: buildIncenseBox };
 
-type Props = { model: SceneModel; label: string; onReady(): void; onError(): void };
+type Props = { model: SceneModel; glbUrl?: string; label: string; onReady(): void; onError(): void };
 
 // Khung xem 3D dùng chung: ánh sáng, xoay, phóng to, bóng đổ. Hình dáng từng mô hình ở models.ts
-export function ModelScene({ model, label, onReady, onError }: Props) {
+export function ModelScene({ model, glbUrl, label, onReady, onError }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const turn = useRef<THREE.Group | null>(null);
 
@@ -66,7 +68,7 @@ export function ModelScene({ model, label, onReady, onError }: Props) {
     };
 
     let live = true;
-    builders[model](load)
+    (model === "glb" ? buildGlb(glbUrl ?? "") : builders[model](load))
       .then((built) => {
         if (!live) return;
         // Gốc mô hình ở đáy, dời xuống nửa chiều cao để nằm giữa khung
@@ -101,11 +103,11 @@ export function ModelScene({ model, label, onReady, onError }: Props) {
       root?.traverse((object) => {
         const mesh = object as THREE.Mesh;
         mesh.geometry?.dispose();
-        const material = mesh.material as THREE.MeshStandardMaterial | undefined;
-        material?.map?.dispose();
-        material?.bumpMap?.dispose();
-        material?.alphaMap?.dispose();
-        material?.dispose();
+        // File .glb có thể có nhiều vật liệu và đủ loại ảnh (normal, roughness...): giải phóng mọi texture
+        for (const material of ([] as THREE.Material[]).concat(mesh.material ?? [])) {
+          for (const value of Object.values(material)) if (value instanceof THREE.Texture) value.dispose();
+          material.dispose();
+        }
       });
       controls.dispose();
       pmrem.dispose();
@@ -113,7 +115,7 @@ export function ModelScene({ model, label, onReady, onError }: Props) {
       renderer.domElement.remove();
       turn.current = null;
     };
-  }, [model]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [model, glbUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Bàn phím: mũi tên trái phải để xoay
   function onKey(event: React.KeyboardEvent) {

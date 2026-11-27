@@ -94,3 +94,18 @@ Breadcrumb, tiêu đề trang và mọi khối nội dung dùng chung một mép
 ## Kiểm tra
 
 Xem tối thiểu ở 320, 390, 768, 1024, 1366 và 1920. Thêm 2560 khi trang có nền tràn viền. Không được có cuộn ngang ở bất kỳ độ rộng nào.
+
+Trang bán hàng (sản phẩm, giỏ, thanh toán, thiết kế vòng) và trang mới làm xem đủ bảng sau, cả sáng lẫn tối:
+
+| Nhóm | Độ rộng CSS | Ghi chú |
+|---|---|---|
+| Mobile | 320, 360, 390, 430 | iPhone SE, Android phổ thông, iPhone thường, Pro Max |
+| Tablet, iPad dọc | 744, 768, 820, 834 | iPad mini, iPad, iPad Air, iPad Pro 11" |
+| iPad ngang | 1024, 1180, 1194, 1366 | **1180 nằm đúng mốc `xl`**: xem kỹ chỗ đổi bố cục |
+| Laptop 13" | 1280, 1366, 1440 | MacBook Air 13" mặc định 1440×900 (một số máy 1470) |
+| Laptop 14" | 1512 | MacBook Pro 14" |
+| Laptop 15–16" | 1536, 1728 | Windows 15.6" scale 125%, MacBook Pro 16" |
+| HD, Full HD | 1366, 1920 | |
+| 2K | 2560 | Nội dung vẫn dừng ở 1180, kiểm lề hai bên và nền tràn viền |
+
+Cũng xem chiều cao thấp (laptop 1366×650 sau thanh trình duyệt, điện thoại ngang 390 cao): khối mua dính, drawer, modal không bị che nút chính.

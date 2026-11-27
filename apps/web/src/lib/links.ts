@@ -22,7 +22,10 @@ export const productHref = (slug: string) => `/san-pham/${slug}`;
 export const categoryHref = (slug: string) => `/danh-muc/${slug}`;
 export const postHref = (slug: string) => `/bai-viet/${slug}`;
 export const topicHref = (slug: string) => `/chu-de/${slug}`;
+// Trang tự soạn ở CMS (bảo hành, đại lý...) nằm ngay dưới gốc
+export const contentPageHref = (slug: string) => `/${slug}`;
 export const orderHref = (code: string) => `/don-hang/${code}`;
+export const productModelHref = (slug: string, updatedAt: string) => `/api/models/${slug}?v=${new Date(updatedAt).getTime()}`;
 
 // Trang 1 không có ?trang để không tạo hai URL cho cùng nội dung
 export function pagedHref(base: string, page: number) {

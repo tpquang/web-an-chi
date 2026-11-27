@@ -32,7 +32,7 @@ Tình trạng hiện tại của website ghi ở [docs/web/seo/checklist.md](../
 
 - Mỗi URL một cụm chính, hai URL không nhắm cùng cụm. Ghi trong [bản đồ từ khoá](../../../docs/web/seo/keyword-map.md) và đối chiếu số liệu trước khi đổi title.
 - URL ngắn, không dấu, gạch ngang. Trang theo mùa không gắn năm để tích luỹ thứ hạng.
-- Cấu trúc cố định: `/san-pham`, `/san-pham/<slug>`, `/danh-muc/<slug>`, `/bai-viet`, `/bai-viet/<slug>`, `/chu-de/<slug>` (chủ đề bài viết). Trang tin cậy: `/gioi-thieu`, `/chinh-sach` (giao hàng, đổi trả, thanh toán, bảo mật). Trang riêng tư (noindex): `/gio-hang`, `/thanh-toan`, `/don-hang/<mã>`, `/tra-cuu-don-hang`, `/dang-nhap`, `/dang-ky`, `/tai-khoan`.
+- Cấu trúc cố định: `/san-pham`, `/san-pham/<slug>`, `/danh-muc/<slug>`, `/bai-viet`, `/bai-viet/<slug>`, `/chu-de/<slug>` (chủ đề bài viết). Trang tin cậy: `/gioi-thieu`, `/chinh-sach` (giao hàng, đổi trả, thanh toán, bảo mật). Trang tự soạn ở CMS: `/<slug>` như `/bao-hanh`, `/chinh-sach-dai-ly`, `/cong-tac-vien` (xem `page-blueprints.md`). Trang riêng tư (noindex): `/gio-hang`, `/thanh-toan`, `/don-hang/<mã>`, `/tra-cuu-don-hang`, `/dang-nhap`, `/dang-ky`, `/tai-khoan`.
 - Chủ đề bài viết không lồng dưới `/bai-viet/` để không tranh slug với bài.
 - Đổi URL phải kèm 308 một bước. Không làm vào mùa cao điểm như rằm tháng Giêng, Vu Lan, Tết.
 - Đổi slug trên CMS thì API tự ghi redirect (`apps/api/src/lib/redirects.ts`). Trang slug gọi `notFoundOrRedirect` (`apps/web/src/lib/redirect.ts`, chỉ server) thay cho `notFound()`. Tiền tố đường dẫn trong `PATH_PREFIX` phải khớp `lib/links.ts`.

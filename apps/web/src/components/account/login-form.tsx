@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 import { announceSession } from "@/lib/account-client";
+import { openChatFromCart } from "@/lib/cart-drawer";
 import { normalizePhone } from "@/lib/checkout";
 import { postJson } from "@/lib/client-api";
 import { registerHref } from "@/lib/links";
@@ -77,6 +78,13 @@ export function LoginForm({ next }: { next: string }) {
             </Link>
           </p>
         </div>
+        <p className="text-sm text-ink-3">
+          Quên mật khẩu?{" "}
+          <button type="button" onClick={openChatFromCart} className="font-medium text-wood underline-offset-4 hover:underline">
+            Nhắn shop
+          </button>{" "}
+          để được đặt lại sau khi xác nhận số điện thoại.
+        </p>
       </form>
       {process.env.NODE_ENV === "development" && <DevAccountLogin onDone={finish} disabled={submitting} />}
     </div>

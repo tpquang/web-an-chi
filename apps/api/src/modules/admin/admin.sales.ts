@@ -3,6 +3,7 @@ import { z } from "zod";
 import { OrderEventType, OrderStatus, PaymentMethod, PaymentStatus, ProductType, SalesChannel, type Prisma } from "../../generated/prisma/client.js";
 import type { StaffContext } from "../../lib/auth.js";
 import { applyStock, stockNeeds, unitCosts, withLiveStock } from "../../lib/stock.js";
+import { hashPassword } from "../../lib/password.js";
 import { optionalText } from "../../lib/text.js";
 import { HttpError } from "../../middleware/errors.js";
 import { prisma } from "../../lib/prisma.js";
@@ -44,18 +45,33 @@ adminSalesRouter.get("/customers", async (req, res) => {
 });
 
 adminSalesRouter.get("/customers/:id", async (req, res) => {
-  const data = await prisma.customer.findUniqueOrThrow({
+  const { passwordHash, googleSub, ...data } = await prisma.customer.findUniqueOrThrow({
     where: { id: req.params.id },
     include: { orders: { orderBy: { createdAt: "desc" }, include: { _count: { select: { items: true } } } } },
+    omit: { passwordHash: false },
   });
-  res.json({ data });
+  // Chỉ báo khách đã tạo tài khoản đăng nhập hay chưa, không trả hash
+  res.json({ data: { ...data, hasPassword: Boolean(passwordHash), google: Boolean(googleSub) } });
+});
+
+// Đặt lại mật khẩu khi khách quên (chưa có OTP). Nhân viên báo mật khẩu tạm qua điện thoại, không gửi qua chat.
+// Mọi phiên đăng nhập cũ của khách hết hiệu lực
+adminSalesRouter.post("/customers/:id/password", async (req, res) => {
+  const { password } = z.object({ password: z.string().min(8, "Mật khẩu tạm cần ít nhất 8 ký tự.").max(100) }).parse(req.body);
+  await prisma.customer.update({
+    where: { id: req.params.id },
+    data: { passwordHash: await hashPassword(password), sessionVersion: { increment: 1 } },
+    select: { id: true },
+  });
+  res.json({ data: { ok: true } });
 });
 
 // Sửa hồ sơ khách. Không sửa "nhận tin tiếp thị": đồng ý phải do chính khách chọn.
 // Đơn cũ giữ thông tin giao hàng lúc đặt nên không đổi theo
 const customerInput = z.object({
   name: z.string().trim().min(2, "Nhập tên khách").max(120),
-  phone: phoneField,
+  // Khách tạo qua Google có thể chưa có số. Bỏ trống thì giữ nguyên số đang có
+  phone: z.union([z.literal(""), phoneField]).transform((v) => v || undefined),
   email: z
     .string()
     .trim()

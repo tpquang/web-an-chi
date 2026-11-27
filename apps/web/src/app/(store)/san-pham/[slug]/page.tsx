@@ -14,7 +14,7 @@ import { TrackViewItem } from "@/components/track-view-item";
 import { getProduct, getProducts, getStore } from "@/lib/api";
 import { paragraphs } from "@/lib/content";
 import { isPreLaunch, launchAtOf, launchIso } from "@/lib/launch";
-import { categoryHref, policyHref, postHref, productHref } from "@/lib/links";
+import { categoryHref, policyHref, postHref, productHref, productModelHref } from "@/lib/links";
 import { notFoundOrRedirect } from "@/lib/redirect";
 import { absoluteImage, absoluteUrl, pageMeta, parseDayRange, safeJsonLd } from "@/lib/seo";
 import { formatDate, formatVnd, site } from "@/lib/site";
@@ -139,8 +139,8 @@ export default async function ProductPage({ params }: Props) {
 
       <div className="grid gap-8 lg:grid-cols-12 lg:gap-6">
         <div className="lg:col-span-7">
-          {product.model3d ? (
-            <ProductMedia model={product.model3d} name={product.name}>
+          {product.model3d || product.modelFile ? (
+            <ProductMedia model={product.model3d} glbUrl={product.modelFile ? productModelHref(product.slug, product.modelFile.updatedAt) : null} name={product.name}>
               <ProductImage image={product.images[0]} alt={product.name} sizes="(min-width: 960px) 680px, 100vw" priority />
             </ProductMedia>
           ) : (

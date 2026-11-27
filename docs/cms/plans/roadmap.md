@@ -1,8 +1,8 @@
 # Lộ trình CMS
 
-1. **Đăng nhập (đã xong bản đầu):** một tài khoản quản trị trong biến môi trường.
-2. **Catalog và nội dung (đã xong):** CRUD sản phẩm, danh mục, bài viết, chủ đề; trường SEO cơ bản.
-3. **Đơn hàng, khách hàng (đã xong bản đầu):** danh sách, lọc, đổi trạng thái, huỷ đơn trả tồn kho.
-4. **Tiếp theo:** upload ảnh, nhiều tài khoản và phân quyền, nhật ký thao tác, thông báo đơn mới.
-5. **SEO nâng cao:** cấu hình toàn site, bảng redirect, xem trước snippet, webhook xoá cache.
-6. **Số liệu:** biểu đồ doanh thu, sản phẩm bán chạy.
+1. **Đăng nhập (đã xong):** nhiều nhân viên, quyền theo ma trận, tài khoản trong `.env` là chủ shop.
+2. **Catalog và nội dung (đã xong):** CRUD sản phẩm, danh mục, bài viết, chủ đề; trường SEO, OG, noindex; tự redirect khi đổi slug; tải ảnh có nén.
+3. **Đơn hàng, khách hàng (đã xong):** vòng đời đơn, thanh toán, cọc, hoàn tiền, đơn nhập tay đa kênh, đóng gói.
+4. **Kho và vốn (đã xong):** nguyên liệu, đợt nhập, nhà cung cấp, công thức, kiểm kho, chi phí, lợi nhuận theo tháng.
+5. **Đã xong (11/2026):** trang nội dung tự soạn, `.glb` cho sản phẩm, điểm hoà vốn, đặt lại mật khẩu khách. Xem [kế hoạch](../../web/plans/2026-11-hoan-thien-goal.md).
+6. **Tiếp theo:** nối Facebook, Zalo vào Hộp thư; webhook xoá cache; nhật ký thao tác; lưu file ngoài database.

@@ -40,7 +40,7 @@ export function CustomersPage() {
               <tr key={customer.id} className="hover:bg-paper">
                 <td className={td}>
                   <Link to={`/customers/${customer.id}`} className="font-medium hover:text-wood">{customer.name}</Link>
-                  <span className="block text-[13px] text-ink-3">{customer.phone}</span>
+                  <span className="block text-[13px] text-ink-3">{customer.phone ?? "Chưa có số điện thoại"}</span>
                 </td>
                 <td className={tdMoney}>{customer._count.orders}</td>
                 <td className={tdMoney}>{formatVnd(customer.spentVnd)}</td>
@@ -72,6 +72,7 @@ export function CustomerDetailPage() {
   const navigate = useNavigate();
   const { state, slow, reload } = useLoad(() => api.get<Customer>(`/customers/${id}`), [id]);
   const [editing, setEditing] = useState<Editing | null>(null);
+  const [resetting, setResetting] = useState<string | null>(null);
   const { submitting, errors, run } = useSubmit();
   if (state.status === "error") return <ErrorState title="Chưa tải được khách hàng" desc={state.error} onRetry={reload} />;
   if (state.status === "loading") return <Skeleton className={`h-64 ${slow ? "" : "invisible"}`} />;
@@ -88,6 +89,17 @@ export function CustomerDetailPage() {
     }, "Chưa lưu được thông tin khách");
   }
 
+  // Khách quên mật khẩu: nhân viên gọi xác nhận đúng chủ số rồi báo mật khẩu tạm qua điện thoại
+  function submitPassword(e: FormEvent) {
+    e.preventDefault();
+    run(async () => {
+      await api.post(`/customers/${id}/password`, { password: resetting });
+      showToast("Đã đặt mật khẩu mới.", { desc: "Khách bị đăng xuất khỏi mọi thiết bị. Nhắc khách đổi mật khẩu sau khi đăng nhập." });
+      setResetting(null);
+      reload();
+    }, "Chưa đặt được mật khẩu");
+  }
+
   async function remove() {
     if (await confirmDelete({ what: "khách hàng", name: customer.name, desc: deleteDesc(customer.name), path: `/customers/${id}` })) navigate("/customers");
   }
@@ -99,8 +111,11 @@ export function CustomerDetailPage() {
         back={{ to: "/customers", label: "Danh sách khách hàng" }}
         actions={
           <>
-            <Button variant="outline" onClick={() => setEditing({ name: customer.name, phone: customer.phone, email: customer.email ?? "", address: customer.address ?? "" })}>
+            <Button variant="outline" onClick={() => setEditing({ name: customer.name, phone: customer.phone ?? "", email: customer.email ?? "", address: customer.address ?? "" })}>
               Sửa thông tin
+            </Button>
+            <Button variant="outline" onClick={() => setResetting("")}>
+              {customer.hasPassword ? "Đặt lại mật khẩu" : "Tạo mật khẩu"}
             </Button>
             <Button variant="text" className="text-err" onClick={remove}>
               Xoá khách hàng
@@ -118,20 +133,39 @@ export function CustomerDetailPage() {
         {editing && (
           <form id="customer-form" onSubmit={submit} noValidate className="flex flex-col gap-4">
             <div data-field="name"><Field label="Tên" error={errors.name}><Input value={editing.name} onChange={(e) => set("name", e.target.value)} disabled={submitting} /></Field></div>
-            <div data-field="phone"><Field label="Số điện thoại" error={errors.phone}><Input value={editing.phone} inputMode="tel" onChange={(e) => set("phone", e.target.value)} disabled={submitting} /></Field></div>
+            <div data-field="phone"><Field label="Số điện thoại" optional={!customer.phone} error={errors.phone}><Input value={editing.phone} inputMode="tel" onChange={(e) => set("phone", e.target.value)} disabled={submitting} /></Field></div>
             <div data-field="email"><Field label="Email" optional error={errors.email}><Input value={editing.email} type="email" onChange={(e) => set("email", e.target.value)} disabled={submitting} /></Field></div>
             <Field label="Địa chỉ" optional hint="Đơn cũ giữ địa chỉ lúc đặt, không đổi theo."><Textarea value={editing.address} onChange={(e) => set("address", e.target.value)} disabled={submitting} /></Field>
             <p className="text-sm text-ink-3">Mục nhận tin tiếp thị không sửa ở đây. Chỉ khách tự đồng ý hoặc huỷ.</p>
           </form>
         )}
       </Modal>
+      <Modal
+        open={resetting !== null}
+        onClose={() => setResetting(null)}
+        locked={submitting}
+        title={customer.hasPassword ? "Đặt lại mật khẩu" : "Tạo mật khẩu đăng nhập web"}
+        footer={<><Button variant="secondary" onClick={() => setResetting(null)} disabled={submitting}>Huỷ</Button><Button type="submit" form="password-form" loading={submitting}>Lưu mật khẩu</Button></>}
+      >
+        <form id="password-form" onSubmit={submitPassword} noValidate className="flex flex-col gap-4">
+          <p className="text-sm text-ink-2">
+            {customer.phone ? `Gọi đúng số ${customer.phone} để xác nhận chủ tài khoản, rồi đọc mật khẩu tạm cho khách.` : "Khách chưa có số điện thoại nên chưa đăng nhập bằng mật khẩu được. Thêm số ở Sửa thông tin trước."} Không gửi mật khẩu qua chat.
+          </p>
+          <div data-field="password">
+            <Field label="Mật khẩu tạm" hint="Ít nhất 8 ký tự. Khách bị đăng xuất khỏi mọi thiết bị." error={errors.password}>
+              <Input value={resetting ?? ""} autoComplete="off" onChange={(e) => setResetting(e.target.value)} disabled={submitting} />
+            </Field>
+          </div>
+        </form>
+      </Modal>
       <div className="grid gap-6 xl:grid-cols-12 [&>*]:min-w-0">
         <div className="xl:col-span-4">
           <Panel title="Liên hệ">
             <dl className="grid gap-y-3 text-sm">
-              <div><dt className="text-ink-3">Điện thoại</dt><dd><a href={`tel:${customer.phone}`} className="hover:text-wood">{customer.phone}</a></dd></div>
+              <div><dt className="text-ink-3">Điện thoại</dt><dd>{customer.phone ? <a href={`tel:${customer.phone}`} className="hover:text-wood">{customer.phone}</a> : "Chưa có"}</dd></div>
               {customer.email && <div><dt className="text-ink-3">Email</dt><dd>{customer.email}</dd></div>}
               {customer.address && <div><dt className="text-ink-3">Địa chỉ gần nhất</dt><dd>{customer.address}</dd></div>}
+              <div><dt className="text-ink-3">Tài khoản web</dt><dd>{[customer.hasPassword && "Đăng nhập bằng số điện thoại", customer.google && "Đăng nhập bằng Google"].filter(Boolean).join(", ") || "Chưa tạo"}</dd></div>
               <div><dt className="text-ink-3">Nhận tin tiếp thị</dt><dd>{customer.marketingConsent ? "Đã đồng ý" : "Chưa đồng ý, không gửi tin"}</dd></div>
               <div><dt className="text-ink-3">Lần đầu đặt</dt><dd>{formatDate(customer.createdAt)}</dd></div>
             </dl>
